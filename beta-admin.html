@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI CENTRAL // BETA ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white min-h-screen">
+    
+    <!-- AUTH GATE -->
+    <div id="authGate" class="fixed inset-0 bg-black/95 backdrop-blur-lg z-50 flex items-center justify-center">
+        <div class="bg-gray-800 border-2 border-purple-500 rounded-xl p-8 max-w-md w-full">
+            <div class="text-center mb-6">
+                <div class="bg-purple-500 w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-shield-halved text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-purple-400">BETA ADMIN ACCESS</h2>
+                <p class="text-gray-400 text-sm mt-2">Troy Walker Only</p>
+            </div>
+            <input type="password" id="adminPassword" placeholder="Enter Master Password" 
+                class="w-full bg-gray-900 border border-gray-700 text-white p-3 rounded mb-4"
+                onkeypress="if(event.key==='Enter') authenticate()">
+            <button onclick="authenticate()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded">
+                <i class="fas fa-unlock mr-2"></i> ACCESS
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboard" class="hidden">
+        <header class="bg-black/50 border-b border-purple-500 p-4">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-500 p-2 rounded font-bold">PA</div>
+                    <div>
+                        <h1 class="text-xl font-bold">BETA TESTER ADMIN</h1>
+                        <p class="text-xs text-gray-400">Family & Friends License Manager</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="index.html" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded text-sm">
+                        <i class="fas fa-rocket mr-2"></i> SHIP
+                    </a>
+                    <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">
+                        <i class="fas fa-sign-out mr-2"></i> LOGOUT
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto p-8">
+            
+            <!-- STATS -->
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl">
+                    <i class="fas fa-users text-3xl mb-2"></i>
+                    <div class="text-3xl font-bold" id="totalTesters">0</div>
+                    <div class="text-sm opacity-80">Beta Testers</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl">
+                    <i class="fas fa-check-circle text-3xl mb-2"></i>
+                    <div class="text-3xl font-bold" id="activeLicenses">0</div>
+                    <div class="text-sm opacity-80">Active Licenses</div>
+                </div>
+                <div class="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl">
+                    <i class="fas fa-star text-3xl mb-2"></i>
+                    <div class="text-3xl font-bold" id="feedbackCount">0</div>
+                    <div class="text-sm opacity-80">Feedback Received</div>
+                </div>
+                <div class="bg-gradient-to-br from-amber-600 to-amber-800 p-6 rounded-xl">
+                    <i class="fas fa-clock text-3xl mb-2"></i>
+                    <div class="text-3xl font-bold" id="avgUsage">0</div>
+                    <div class="text-sm opacity-80">Avg Days Active</div>
+                </div>
+            </div>
+
+            <!-- SHARE NEW LICENSE -->
+            <div class="bg-gray-800 border border-purple-500 rounded-xl p-6 mb-8">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-gift text-purple-400"></i> SHARE BETA ACCESS
+                </h2>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <input type="text" id="testerName" placeholder="Full Name" class="bg-gray-900 border border-gray-700 p-3 rounded">
+                    <input type="email" id="testerEmail" placeholder="Email Address" class="bg-gray-900 border border-gray-700 p-3 rounded">
+                    <input type="tel" id="testerPhone" placeholder="Phone Number" class="bg-gray-900 border border-gray-700 p-3 rounded">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <select id="appSelect" class="bg-gray-900 border border-gray-700 p-3 rounded">
+                        <option value="">-- Select App --</option>
+                        <option value="papi">AI Pro ($49.99 value)</option>
+                        <option value="automation">Automation Hub ($29.99 value)</option>
+                        <option value="aegis">Aegis Guard ($9.99 value)</option>
+                        <option value="callsentry">Call Sentry ($14.99 value)</option>
+                        <option value="nk">No Knowledge Kit ($50 value)</option>
+                        <option value="bundle">FULL BUNDLE ($154.96 value)</option>
+                    </select>
+                    <input type="number" id="daysValid" value="30" placeholder="Days Valid" class="bg-gray-900 border border-gray-700 p-3 rounded">
+                </div>
+                <button onclick="shareLicense()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded">
+                    <i class="fas fa-paper-plane mr-2"></i> GENERATE & SHARE LICENSE
+                </button>
+            </div>
+
+            <!-- ACTIVE TESTERS -->
+            <div class="bg-gray-800 border border-purple-500 rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-list text-purple-400"></i> ACTIVE BETA TESTERS
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-900 border-b border-gray-700">
+                            <tr>
+                                <th class="p-3 text-left">Name</th>
+                                <th class="p-3 text-left">Contact</th>
+                                <th class="p-3 text-left">App</th>
+                                <th class="p-3 text-left">Shared Date</th>
+                                <th class="p-3 text-left">Expires</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testersTable" class="divide-y divide-gray-700">
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No beta testers yet. Share your first license above!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const MASTER_PASSWORD = "TROY_WALKER_2026"; // Change this to your secure password
+        let testers = JSON.parse(localStorage.getItem('beta_testers') || '[]');
+
+        function authenticate() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === MASTER_PASSWORD) {
+                document.getElementById('authGate').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadDashboard();
+            } else {
+                alert('Access Denied');
+            }
+        }
+
+        function logout() {
+            document.getElementById('authGate').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function loadDashboard() {
+            updateStats();
+            renderTable();
+        }
+
+        function updateStats() {
+            document.getElementById('totalTesters').innerText = testers.length;
+            document.getElementById('activeLicenses').innerText = testers.filter(t => t.status === 'active').length;
+            document.getElementById('feedbackCount').innerText = testers.filter(t => t.feedback).length;
+            
+            const avgDays = testers.length > 0 
+                ? Math.round(testers.reduce((sum, t) => sum + (t.daysActive || 0), 0) / testers.length) 
+                : 0;
+            document.getElementById('avgUsage').innerText = avgDays;
+        }
+
+        function shareLicense() {
+            const name = document.getElementById('testerName').value.trim();
+            const email = document.getElementById('testerEmail').value.trim();
+            const phone = document.getElementById('testerPhone').value.trim();
+            const app = document.getElementById('appSelect').value;
+            const days = parseInt(document.getElementById('daysValid').value);
+
+            if (!name || !email || !phone || !app) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Check if already exists
+            if (testers.some(t => t.email === email || t.phone === phone)) {
+                alert('This person already has a beta license! Check the table below.');
+                return;
+            }
+
+            const licenseKey = generateLicenseKey();
+            const sharedDate = new Date().toISOString();
+            const expiresDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+            const tester = {
+                id: Date.now(),
+                name,
+                email,
+                phone,
+                app,
+                licenseKey,
+                sharedDate,
+                expiresDate,
+                daysValid: days,
+                status: 'active',
+                daysActive: 0,
+                feedback: null,
+                sharedBy: 'Troy Walker'
+            };
+
+            testers.push(tester);
+            localStorage.setItem('beta_testers', JSON.stringify(testers));
+
+            // Generate shareable link
+            const shareLink = generateShareLink(tester);
+            
+            // Clear form
+            document.getElementById('testerName').value = '';
+            document.getElementById('testerEmail').value = '';
+            document.getElementById('testerPhone').value = '';
+            
+            loadDashboard();
+            
+            alert(`✅ LICENSE CREATED!\n\nSend this to ${name}:\n\n${shareLink}\n\n📋 Copied to clipboard!`);
+            navigator.clipboard.writeText(shareLink);
+        }
+
+        function generateLicenseKey() {
+            return 'BETA-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+        }
+
+        function generateShareLink(tester) {
+            const baseUrl = window.location.origin + window.location.pathname.replace('beta-admin.html', '');
+            const params = new URLSearchParams({
+                key: tester.licenseKey,
+                app: tester.app,
+                name: tester.name
+            });
+            return `${baseUrl}beta-activate.html?${params.toString()}`;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('testersTable');
+            
+            if (testers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="p-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2"></i>
+                            <p>No beta testers yet. Share your first license above!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = testers.map(t => {
+                const isExpired = new Date(t.expiresDate) < new Date();
+                const statusColor = isExpired ? 'text-red-400' : t.status === 'active' ? 'text-green-400' : 'text-gray-400';
+                const statusText = isExpired ? 'EXPIRED' : t.status.toUpperCase();
+                
+                return `
+                    <tr class="hover:bg-gray-700/50">
+                        <td class="p-3">${t.name}</td>
+                        <td class="p-3 text-sm">
+                            <div>${t.email}</div>
+                            <div class="text-gray-500">${t.phone}</div>
+                        </td>
+                        <td class="p-3">
+                            <span class="bg-purple-600 px-2 py-1 rounded text-xs">${getAppName(t.app)}</span>
+                        </td>
+                        <td class="p-3 text-sm">${new Date(t.sharedDate).toLocaleDateString()}</td>
+                        <td class="p-3 text-sm">${new Date(t.expiresDate).toLocaleDateString()}</td>
+                        <td class="p-3 ${statusColor} font-bold text-sm">${statusText}</td>
+                        <td class="p-3">
+                            <button onclick="copyLink(${t.id})" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs mr-2">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="revoke(${t.id})" class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getAppName(app) {
+            const names = {
+                'papi': 'AI Pro',
+                'automation': 'Automation',
+                'aegis': 'Aegis Guard',
+                'callsentry': 'Call Sentry',
+                'nk': 'No Knowledge Kit',
+                'bundle': 'FULL BUNDLE'
+            };
+            return names[app] || app;
+        }
+
+        function copyLink(id) {
+            const tester = testers.find(t => t.id === id);
+            if (tester) {
+                const link = generateShareLink(tester);
+                navigator.clipboard.writeText(link);
+                alert('✅ Share link copied to clipboard!');
+            }
+        }
+
+        function revoke(id) {
+            if (!confirm('Revoke this beta license?')) return;
+            testers = testers.filter(t => t.id !== id);
+            localStorage.setItem('beta_testers', JSON.stringify(testers));
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>

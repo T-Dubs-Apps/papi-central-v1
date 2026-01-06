@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI 5.0 | OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+        :root {
+            --fresh-mint: #00f2ea;
+            --fresh-blue: #0080ff;
+            --fresh-purple: #d946ef; /* Learning Color */
+            --bg-deep: #050a14;
+            --glass: rgba(13, 17, 23, 0.6); 
+            --border: rgba(255, 255, 255, 0.1);
+            --alien-skin: #a8d5ba;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: #eef2f6;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5, 10, 20, 0.65);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .mono { font-family: 'Space Mono', monospace; }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-panel:hover {
+            border-color: rgba(0, 242, 234, 0.4);
+            transform: translateY(-2px);
+            background: rgba(13, 17, 23, 0.8);
+        }
+
+        .nav-btn {
+            position: relative;
+            color: #94a3b8;
+            transition: all 0.3s;
+        }
+        .nav-btn.active {
+            color: var(--fresh-mint);
+            background: rgba(0, 242, 234, 0.1);
+            text-shadow: 0 0 10px rgba(0, 242, 234, 0.5);
+        }
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 15%;
+            height: 70%;
+            width: 3px;
+            background: var(--fresh-mint);
+            border-radius: 4px 0 0 4px;
+            box-shadow: 0 0 15px var(--fresh-mint);
+        }
+
+        .fade-enter { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--fresh-mint); }
+
+        .text-glow { text-shadow: 0 0 15px rgba(0, 242, 234, 0.3); }
+
+        .bubble-ai { background: rgba(0, 128, 255, 0.2); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 16px 16px 16px 4px; backdrop-filter: blur(4px); }
+        .bubble-user { background: rgba(0, 242, 234, 0.2); border: 1px solid rgba(0, 242, 234, 0.3); border-radius: 16px 16px 4px 16px; backdrop-filter: blur(4px); }
+
+        .mic-active { color: #ff4757; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { text-shadow: 0 0 0 rgba(255, 71, 87, 0.4); } 50% { text-shadow: 0 0 20px rgba(255, 71, 87, 0.8); } 100% { text-shadow: 0 0 0 rgba(255, 71, 87, 0.4); } }
+        
+        .reveal-hover { filter: blur(4px); transition: filter 0.3s; }
+        .group:hover .reveal-hover { filter: blur(0); }
+
+        /* --- Sidebar Auto-Hide Logic (Alien Mode) --- */
+        aside { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease; z-index: 50; }
+        body.alien-mode aside { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(calc(-100% + 15px)); opacity: 0.4; border-right: 2px solid var(--fresh-mint); box-shadow: 5px 0 20px rgba(0, 242, 234, 0.3); background: rgba(5, 10, 20, 0.95); }
+        body.alien-mode aside:hover { transform: translateX(0); opacity: 1; box-shadow: 10px 0 50px rgba(0, 0, 0, 0.8); }
+        body.alien-mode main { width: 100vw; }
+
+        /* --- 3D Spaceship & Carousel CSS --- */
+        .scene {
+            perspective: 1500px;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            padding-bottom: 80px; 
+            position: relative; 
+        }
+
+        #lightning-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 40; 
+        }
+
+        .spaceship-container {
+            width: 900px; height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: hoverShip 8s ease-in-out infinite;
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        @keyframes hoverShip {
+            0%, 100% { transform: translateY(-20px) rotateZ(0.2deg); }
+            50% { transform: translateY(-50px) rotateZ(-0.2deg); }
+        }
+
+        .shake-ship { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite !important; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0) rotateZ(-1deg); }
+            20%, 80% { transform: translate3d(4px, 0, 0) rotateZ(2deg); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0) rotateZ(-2deg); }
+            40%, 60% { transform: translate3d(8px, 0, 0) rotateZ(2deg); }
+        }
+
+        /* Ship Parts */
+        .saucer-core {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotateX(80deg);
+            width: 800px; height: 800px; 
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #1e293b, #334155, #64748b, #334155, #1e293b);
+            border: 4px solid rgba(0, 242, 234, 0.4);
+            box-shadow: 0 0 50px rgba(0, 242, 234, 0.2);
+            z-index: 5;
+            transition: border-color 0.5s, box-shadow 0.5s;
+        }
+
+        /* Learning Mode (Purple) */
+        .learning .saucer-core {
+            border-color: var(--fresh-purple);
+            box-shadow: 0 0 80px rgba(217, 70, 239, 0.4);
+        }
+
+        .saucer-dome-top {
+            position: absolute; bottom: 50%; left: 50%;
+            transform: translateX(-50%);
+            width: 500px; height: 140px; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0, 242, 234, 0.05) 50%, transparent 100%);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; 
+            border-top: 1px solid rgba(255,255,255,0.4);
+            border-left: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(1px);
+            z-index: 20; /* High index to contain alien */
+            box-shadow: inset 0 20px 40px rgba(255,255,255,0.1);
+            overflow: visible;
+            /* Mask bottom so nothing peeks out */
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        
+        /* Glass Reflection Overlay for "Inside" feel */
+        .saucer-dome-top::after {
+            content: '';
+            position: absolute;
+            top: 10px; right: 20px;
+            width: 60px; height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: rotate(-20deg);
+            filter: blur(5px);
+            z-index: 25; /* On top of alien */
+            pointer-events: none;
+        }
+
+        .saucer-dome-bottom {
+            position: absolute; top: 50%; left: 50%;
+            transform: translateX(-50%);
+            width: 500px; height: 140px; 
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, #1e293b 100%);
+            border-radius: 0 0 50% 50% / 0 0 100% 100%; 
+            border-bottom: 2px solid rgba(0, 242, 234, 0.3);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            z-index: 4;
+        }
+
+        .saucer-engine {
+            position: absolute; top: 50%; left: 50%;
+            width: 100px; height: 20px;
+            background: #00f2ea;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotateX(80deg);
+            box-shadow: 0 0 50px #00f2ea;
+            z-index: 6;
+            animation: pulseEngine 2s infinite;
+        }
+        @keyframes pulseEngine { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        
+        /* Rapid Pulse for Learning */
+        .learning .saucer-engine {
+            animation: pulseEngine 0.2s infinite;
+            background: var(--fresh-purple);
+            box-shadow: 0 0 80px var(--fresh-purple);
+        }
+
+        /* Carousel */
+        /* Carousel CSS Removed - Apps now in dropdown menu */
+
+        @keyframes rotateCarousel { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+        /* --- Alien Styling --- */
+        .alien-pilot {
+            position: absolute;
+            top: -90px; /* Sitting inside dome */
+            left: 50%;
+            transform: translateX(-50%) translateZ(50px);
+            width: 60px; height: 110px;
+            z-index: 18;
+            transition: all 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0; /* Hidden by default */
+        }
+        
+        .alien-pilot.visible { opacity: 1; }
+
+        .alien-head {
+            width: 45px; /* Slender */
+            height: 65px;
+            background: radial-gradient(circle at 30% 30%, #d4eadd, var(--alien-skin)); 
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; /* Inverted Pear */
+            position: relative;
+            z-index: 2;
+            box-shadow: inset -3px -3px 8px rgba(0,0,0,0.2);
+        }
+
+        .alien-eye {
+            position: absolute;
+            top: 28px;
+            width: 18px; height: 4px; /* Cat-like slit */
+            background: black;
+            border-radius: 50%;
+            transition: all 0.5s ease-out;
+            box-shadow: 0 0 2px rgba(255,255,255,0.5);
+            animation: blinkEyes 4s infinite; /* Blink */
+        }
+        .alien-eye.left { left: 3px; transform: rotate(25deg); }
+        .alien-eye.right { right: 3px; transform: rotate(-25deg); }
+
+        /* Learning Eyes (Purple Glow) */
+        .learning .alien-eye {
+            background: var(--fresh-purple);
+            box-shadow: 0 0 10px var(--fresh-purple);
+            height: 12px; /* Wider open */
+        }
+
+        @keyframes blinkEyes {
+            0%, 96% { height: 4px; }
+            98% { height: 0px; }
+            100% { height: 4px; }
+        }
+
+        /* Expanded Eyes on Delivery */
+        .delivering .alien-eye {
+            height: 24px; /* Open Wide Black Void */
+            width: 22px;
+            top: 22px;
+            animation: none; /* Stop blinking when staring */
+        }
+
+        .alien-neck {
+            width: 10px; height: 15px; /* Slender */
+            background: var(--alien-skin);
+            margin-top: -5px;
+            z-index: 1;
+        }
+
+        .alien-torso {
+            width: 30px; height: 45px; /* Slender */
+            background: radial-gradient(circle at 50% 0%, #4a5568, #2d3748);
+            border-radius: 10px 10px 0 0;
+            z-index: 1;
+            position: relative;
+        }
+
+        .alien-arm {
+            position: absolute;
+            top: 10px;
+            width: 6px; height: 35px;
+            background: var(--alien-skin);
+            border-radius: 4px;
+        }
+        .alien-arm.right { right: -4px; transform: rotate(-20deg); }
+        .alien-arm.left { left: -4px; transform: rotate(20deg); }
+
+        .control-stick {
+            position: absolute;
+            bottom: 5px; right: -15px;
+            width: 3px; height: 40px;
+            background: silver;
+            transform: rotate(15deg);
+            transform-origin: bottom center;
+        }
+        .control-stick::after {
+            content: ''; position: absolute; top: -5px; left: -3px;
+            width: 8px; height: 8px; background: red; border-radius: 50%;
+            box-shadow: 0 0 5px red;
+        }
+
+        /* Delivery Animation Class */
+        .delivering .alien-pilot {
+            top: 250px; /* Slide down */
+            transform: translateX(-50%) translateZ(600px) scale(6); /* Come to face */
+            z-index: 100; /* Pop through dome */
+        }
+
+        /* Laser Ladder */
+        .laser-ladder {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translateX(-50%);
+            width: 40px; height: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 242, 234, 0.1),
+                rgba(0, 242, 234, 0.1) 10px,
+                rgba(0, 242, 234, 0.8) 10px,
+                rgba(0, 242, 234, 0.8) 12px
+            );
+            box-shadow: 0 0 20px #00f2ea;
+            transition: height 0.5s ease-out;
+            z-index: 15;
+        }
+        .delivering .laser-ladder {
+            height: 350px;
+        }
+
+        /* Speech Bubble */
+        .alien-speech {
+            position: absolute;
+            top: -60px; left: 100%;
+            background: white; color: black;
+            padding: 10px; border-radius: 10px;
+            font-family: monospace; font-weight: bold;
+            font-size: 4px; 
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .alien-speech::after {
+            content: ''; position: absolute; top: 100%; left: 0;
+            border: 5px solid transparent; border-top-color: white;
+        }
+        .delivering .alien-speech {
+            opacity: 1;
+            font-size: 12px; 
+        }
+
+        #readme-panel {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 240px; 
+            background: rgba(5, 10, 20, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid var(--fresh-mint);
+            border-radius: 8px; padding: 15px;
+            backdrop-filter: blur(12px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 50;
+        }
+        #readme-panel.active { opacity: 1; pointer-events: auto; }
+        
+    </style>
+</head>
+<body class="flex h-screen w-full">
+
+    <!-- Sidebar -->
+    <aside class="w-20 md:w-64 flex-shrink-0 border-r border-white/10 flex flex-col justify-between bg-black/60 backdrop-blur-xl z-20">
+        <div>
+            <!-- Brand -->
+            <div class="h-20 flex items-center justify-center md:justify-start md:px-6 gap-3 border-b border-white/10">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <span class="font-bold text-white text-lg">P</span>
+                </div>
+                <div class="hidden md:block">
+                    <h1 class="font-bold text-lg tracking-wide text-white">PAPI <span class="text-cyan-400 font-light">5.0</span></h1>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="mt-8 space-y-2 px-2">
+                <button onclick="nav('home')" id="btn-home" class="nav-btn active w-full p-3 rounded-xl flex items-center justify-center md:justify-start gap-4">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                    <span class="hidden md:block font-medium">Overview</span>
+                </button>
+                <button onclick="nav('security')" id="btn-security" class="nav-btn w-full p-3 rounded-xl flex items-center justify-center md:justify-start gap-4">
+                    <i class="fa-solid fa-fingerprint text-lg"></i>
+                    <span class="hidden md:block font-medium">Security</span>
+                </button>
+                <button onclick="nav('rf')" id="btn-rf" class="nav-btn w-full p-3 rounded-xl flex items-center justify-center md:justify-start gap-4">
+                    <i class="fa-solid fa-wifi text-lg"></i>
+                    <span class="hidden md:block font-medium">RF Power</span>
+                </button>
+                <button onclick="nav('dev')" id="btn-dev" class="nav-btn w-full p-3 rounded-xl flex items-center justify-center md:justify-start gap-4">
+                    <i class="fa-solid fa-terminal text-lg"></i>
+                    <span class="hidden md:block font-medium">Dev Console</span>
+                </button>
+                <!-- Alien AI Button -->
+                <button onclick="nav('alien')" id="btn-alien" class="nav-btn w-full p-3 rounded-xl flex items-center justify-center md:justify-start gap-4">
+                    <i class="fa-solid fa-meteor text-lg"></i>
+                    <span class="hidden md:block font-medium">Alien AI</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- System Status -->
+        <div class="p-4 border-t border-white/10">
+            <div class="glass-panel p-3 flex flex-col items-center md:items-start gap-2 bg-black/40">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]"></div>
+                    <span class="hidden md:block text-xs font-mono text-emerald-400">ONLINE</span>
+                </div>
+                <button id="voice-toggle" onclick="toggleVoice()" class="text-xs text-slate-400 hover:text-white transition-colors w-full text-left flex items-center gap-2">
+                    <i class="fa-solid fa-volume-xmark" id="voice-icon"></i>
+                    <span class="hidden md:block" id="voice-text">Voice Off</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col relative overflow-hidden">
+        
+        <!-- Header -->
+        <header class="h-20 flex items-center justify-between px-8 border-b border-white/10 z-10 bg-black/20 backdrop-blur-sm">
+            <div class="flex items-center gap-6">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-bold text-white drop-shadow-md">Alien AI Assistant</h2>
+                    <p id="page-subtitle" class="text-xs text-slate-300 mono">System Status: Optimal</p>
+                </div>
+                <!-- APPS DROPDOWN -->
+                <div class="relative">
+                    <button onclick="toggleAppsMenu()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600/20 border border-cyan-500/30 hover:bg-cyan-600/30 transition-all">
+                        <i class="fa-solid fa-th text-cyan-400"></i>
+                        <span class="text-sm font-bold text-cyan-400">Apps</span>
+                        <i class="fa-solid fa-chevron-down text-cyan-400 text-xs"></i>
+                    </button>
+                    <div id="appsMenu" class="hidden absolute top-full left-0 mt-2 w-72 bg-gray-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-xl shadow-2xl z-50">
+                        <div class="p-3 border-b border-gray-700">
+                            <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Available Apps</div>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            <!-- Aegis Guard -->
+                            <a href="aegis-guard.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-shield-halved text-2xl text-emerald-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Aegis Guard</div>
+                                    <div class="text-xs text-gray-400">Security Scanner</div>
+                                </div>
+                                <div class="text-xs font-bold text-emerald-400">$9.99</div>
+                            </a>
+                            <!-- Aegis Government -->
+                            <a href="aegis-government.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-shield text-2xl text-green-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Aegis Government</div>
+                                    <div class="text-xs text-gray-400">🔒 CLASSIFIED</div>
+                                </div>
+                                <div class="text-xs font-bold text-green-400">$99.99</div>
+                            </a>
+                            <!-- Code Cargo -->
+                            <a href="code-cargo.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-box-archive text-2xl text-purple-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Code Cargo</div>
+                                    <div class="text-xs text-gray-400">File Manager</div>
+                                </div>
+                                <div class="text-xs font-bold text-purple-400">FREE</div>
+                            </a>
+                            <!-- Automation Hub -->
+                            <a href="automation-hub.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-gears text-2xl text-orange-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Automation Hub</div>
+                                    <div class="text-xs text-gray-400">Deploy System</div>
+                                </div>
+                                <div class="text-xs font-bold text-orange-400">$29.99</div>
+                            </a>
+                            <!-- No Knowledge Kit -->
+                            <a href="no-knowledge-kit.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-user-tie text-2xl text-amber-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">No Knowledge Kit</div>
+                                    <div class="text-xs text-gray-400">App Builder</div>
+                                </div>
+                                <div class="text-xs font-bold text-amber-400">$50</div>
+                            </a>
+                            <!-- Call Sentry -->
+                            <a href="call-sentry.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-phone-slash text-2xl text-red-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Call Sentry</div>
+                                    <div class="text-xs text-gray-400">Call Blocker</div>
+                                </div>
+                                <div class="text-xs font-bold text-red-400">$14.99</div>
+                            </a>
+                            <!-- Key Generator -->
+                            <a href="key-generator.html" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all border-b border-gray-800">
+                                <i class="fa-solid fa-key text-2xl text-green-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">Key Generator</div>
+                                    <div class="text-xs text-gray-400">API Key Creator</div>
+                                </div>
+                                <div class="text-xs font-bold text-green-400">FREE</div>
+                            </a>
+                            <!-- PAPI Central -->
+                            <a href="PAPI Central.htm" class="flex items-center gap-3 p-3 hover:bg-cyan-600/10 transition-all">
+                                <i class="fa-solid fa-credit-card text-2xl text-blue-400"></i>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-white">PAPI Central</div>
+                                    <div class="text-xs text-gray-400">Get License</div>
+                                </div>
+                                <div class="text-xs font-bold text-blue-400">STORE</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:block text-right">
+                    <div id="clock" class="text-sm font-mono text-cyan-400 drop-shadow-sm">00:00:00</div>
+                    <div class="text-[10px] text-slate-400">LOCAL TIME</div>
+                </div>
+                
+                <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center text-slate-400 hover:text-cyan-400 hover:bg-slate-700 transition-all" title="API Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+
+                <button onclick="actions.detachWindow()" class="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all" title="Detach Window">
+                    <i class="fa-solid fa-up-right-from-square"></i>
+                </button>
+
+                <div class="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-user-astronaut text-slate-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- SETTINGS MODAL -->
+        <div id="settingsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-gray-900 border-2 border-cyan-500 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-4 flex justify-between items-center flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-gear text-2xl text-white"></i>
+                        <div>
+                            <h2 class="text-xl font-bold text-white">API Settings</h2>
+                            <p class="text-cyan-100 text-xs">Configure Your AI Providers</p>
+                        </div>
+                    </div>
+                    <button onclick="closeSettings()" class="text-white hover:text-cyan-200 text-xl">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Body (Scrollable) -->
+                <div class="p-4 space-y-4 overflow-y-auto flex-grow">
+                    <!-- Current Provider -->
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2">Active AI Provider</label>
+                        <select id="aiProvider" onchange="updateProvider()" class="w-full bg-gray-900 border border-gray-600 text-white p-2 rounded-lg text-sm">
+                            <option value="demo">Demo Mode (No API Required)</option>
+                            <option value="openai">OpenAI GPT-4</option>
+                            <option value="claude">Claude 3.5 Sonnet</option>
+                            <option value="gemini">Google Gemini</option>
+                        </select>
+                    </div>
+
+                    <!-- OpenAI Multi-Key System -->
+                    <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-2 border-blue-500/50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-blue-400 text-sm"></i>
+                                <label class="text-xs font-bold text-blue-400">OpenAI Multi-Key System</label>
+                            </div>
+                            <span id="openai-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400">0/4 Keys</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <!-- Key 1 -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="text" id="openaiKey1" placeholder="sk-proj-..." 
+                                        class="flex-1 bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs"
+                                        oninput="maskAPIKey(this)" data-full-key="">
+                                    <span id="key1-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-500">—</span>
+                                </div>
+                                <input type="text" id="key1-label" placeholder="Label: Code Automation" 
+                                    class="w-full bg-gray-900/50 border border-gray-700 text-gray-300 p-1 rounded text-xs">
+                            </div>
+                            
+                            <!-- Key 2 -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="text" id="openaiKey2" placeholder="sk-proj-..." 
+                                        class="flex-1 bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs"
+                                        oninput="maskAPIKey(this)" data-full-key="">
+                                    <span id="key2-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-500">—</span>
+                                </div>
+                                <input type="text" id="key2-label" placeholder="Label: Chat/Conversation" 
+                                    class="w-full bg-gray-900/50 border border-gray-700 text-gray-300 p-1 rounded text-xs">
+                            </div>
+                            
+                            <!-- Key 3 -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="text" id="openaiKey3" placeholder="sk-proj-..." 
+                                        class="flex-1 bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs"
+                                        oninput="maskAPIKey(this)" data-full-key="">
+                                    <span id="key3-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-500">—</span>
+                                </div>
+                                <input type="text" id="key3-label" placeholder="Label: Security Analysis" 
+                                    class="w-full bg-gray-900/50 border border-gray-700 text-gray-300 p-1 rounded text-xs">
+                            </div>
+                            
+                            <!-- Key 4 -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="text" id="openaiKey4" placeholder="sk-proj-..." 
+                                        class="flex-1 bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs"
+                                        oninput="maskAPIKey(this)" data-full-key="">
+                                    <span id="key4-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-500">—</span>
+                                </div>
+                                <input type="text" id="key4-label" placeholder="Label: General Tasks" 
+                                    class="w-full bg-gray-900/50 border border-gray-700 text-gray-300 p-1 rounded text-xs">
+                            </div>
+                        </div>
+                        
+                        <p class="text-[10px] text-gray-400 mt-2">Keys display as: sk-proj-...last8chars • <a href="https://platform.openai.com/api-keys" target="_blank" class="text-cyan-400 hover:underline">Get keys</a></p>
+                        
+                        <!-- App Assignments -->
+                        <div class="mt-3 pt-3 border-t border-gray-700">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fa-solid fa-link text-cyan-400 text-xs"></i>
+                                <label class="text-[10px] font-bold text-cyan-400">App Assignments</label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                <div>
+                                    <label class="text-gray-400 block mb-1">Alien AI</label>
+                                    <select id="assign-alien" class="w-full bg-gray-900 border border-gray-600 text-white p-1 rounded text-xs">
+                                        <option value="auto">Auto-Rotate</option>
+                                        <option value="key1">Key 1</option>
+                                        <option value="key2">Key 2</option>
+                                        <option value="key3">Key 3</option>
+                                        <option value="key4">Key 4</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-gray-400 block mb-1">Code Cargo</label>
+                                    <select id="assign-code" class="w-full bg-gray-900 border border-gray-600 text-white p-1 rounded text-xs">
+                                        <option value="key1" selected>Key 1</option>
+                                        <option value="key2">Key 2</option>
+                                        <option value="key3">Key 3</option>
+                                        <option value="key4">Key 4</option>
+                                        <option value="auto">Auto-Rotate</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-gray-400 block mb-1">Aegis Guard</label>
+                                    <select id="assign-aegis" class="w-full bg-gray-900 border border-gray-600 text-white p-1 rounded text-xs">
+                                        <option value="key3" selected>Key 3</option>
+                                        <option value="key1">Key 1</option>
+                                        <option value="key2">Key 2</option>
+                                        <option value="key4">Key 4</option>
+                                        <option value="auto">Auto-Rotate</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-gray-400 block mb-1">Automation</label>
+                                    <select id="assign-automation" class="w-full bg-gray-900 border border-gray-600 text-white p-1 rounded text-xs">
+                                        <option value="key1" selected>Key 1</option>
+                                        <option value="key2">Key 2</option>
+                                        <option value="key3">Key 3</option>
+                                        <option value="key4">Key 4</option>
+                                        <option value="auto">Auto-Rotate</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Usage Stats -->
+                        <div class="mt-2 p-2 bg-gray-900/50 rounded text-[10px]">
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span>🔄 <span id="rotation-mode" class="text-cyan-400">Round-Robin</span></span>
+                                <span>📊 Calls: <span id="total-calls" class="text-cyan-400">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claude -->
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-purple-400">Claude 3.5 Sonnet</label>
+                            <span id="claude-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400">Not Configured</span>
+                        </div>
+                        <input type="password" id="claudeKey" placeholder="sk-ant-..." 
+                            class="w-full bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs">
+                    </div>
+
+                    <!-- Gemini -->
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-green-400">Google Gemini</label>
+                            <span id="gemini-status" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400">Not Configured</span>
+                        </div>
+                        <input type="password" id="geminiKey" placeholder="AIzaSy..." 
+                            class="w-full bg-gray-900 border border-gray-600 text-white p-2 rounded-lg font-mono text-xs">
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-3 flex gap-2">
+                        <i class="fa-solid fa-shield-halved text-cyan-400 text-sm"></i>
+                        <div class="text-[10px] text-gray-300">
+                            <strong class="text-cyan-400">Secure:</strong> Keys stored locally only, never sent to any server except official AI APIs.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer (Always Visible) -->
+                <div class="bg-gray-800 p-4 flex gap-3 border-t border-gray-700 flex-shrink-0">
+                    <button onclick="testAllKeys()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-vial text-green-400 mr-2"></i> Test Keys
+                    </button>
+                    <button onclick="saveSettings()" class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-save mr-2"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Viewport -->
+        <div class="flex-grow p-6 md:p-8 overflow-y-auto pb-32 relative">
+            
+            <!-- VIEW: HOME -->
+            <div id="view-home" class="fade-enter grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Welcome Card -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 glass-panel p-8 bg-gradient-to-r from-blue-900/40 to-cyan-900/40 border-cyan-500/30">
+                    <h1 class="text-3xl font-bold text-white mb-2 drop-shadow-lg">Welcome to PAPI <span class="text-cyan-400">5.0</span></h1>
+                    <p class="text-slate-200 max-w-2xl drop-shadow-md">Your Personal Automated Protection Interface. I am ready to generate keys, analyze frequencies, and execute commands.</p>
+                </div>
+
+                <!-- ALIEN APPS WIDGET -->
+                <div class="glass-panel p-6 flex flex-col justify-between h-48 group cursor-pointer hover:bg-purple-900/20 border-purple-500/20" onclick="nav('alien')">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 rounded-xl bg-purple-500/20 text-purple-400"><i class="fa-solid fa-rocket"></i></div>
+                        <span class="text-xs font-mono text-slate-400">MARKETPLACE</span>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Alien Apps</div>
+                        <div class="font-bold text-white text-lg group-hover:text-purple-300 transition-colors">Browse Store &nbsp;<i class="fa-solid fa-arrow-right text-xs"></i></div>
+                        <div class="text-[10px] text-slate-500 mt-1">3 New Arrivals</div>
+                    </div>
+                </div>
+
+                <!-- Live Key Widget -->
+                <div class="glass-panel p-6 flex flex-col justify-between h-48 group cursor-pointer hover:bg-black/60" onclick="nav('security')">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 rounded-xl bg-emerald-500/20 text-emerald-400"><i class="fa-solid fa-key"></i></div>
+                        <span class="text-xs font-mono text-slate-400">AUTO-ROTATING</span>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                             <div class="text-xs text-slate-400 uppercase tracking-wider">Current Session Key</div>
+                             <div class="text-[10px] text-emerald-400 font-mono"><i class="fa-solid fa-lock"></i> MASKED</div>
+                        </div>
+                        <div id="widget-key" class="font-mono text-xl text-white truncate group-hover:text-cyan-400 transition-colors drop-shadow-md">••••-••••-••••-••••</div>
+                    </div>
+                </div>
+
+                <!-- RF Power Widget -->
+                <div class="glass-panel p-6 flex flex-col justify-between h-48 group cursor-pointer hover:bg-black/60" onclick="nav('rf')">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 rounded-xl bg-blue-500/20 text-blue-400"><i class="fa-solid fa-bolt"></i></div>
+                        <span class="text-xs font-mono text-slate-400">ATMOSPHERIC</span>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Energy Potential</div>
+                        <div class="flex items-end gap-2">
+                            <span id="widget-rf" class="text-3xl font-bold text-white drop-shadow-md">0.0</span>
+                            <span class="text-sm text-slate-400 mb-1">µW</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SECURITY -->
+            <div id="view-security" class="hidden fade-enter h-full flex flex-col justify-center items-center max-w-4xl mx-auto">
+                <div class="glass-panel p-10 w-full text-center relative overflow-hidden bg-black/60">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500"></div>
+                    <div class="w-20 h-20 mx-auto bg-slate-800/80 rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-[0_0_30px_rgba(0,242,234,0.3)]">
+                        <i class="fa-solid fa-shield-halved text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-slate-400 text-sm uppercase tracking-widest mb-2">Secure Session Token</h3>
+                    <div id="sec-key-display" class="font-mono text-4xl md:text-5xl font-bold text-white mb-8 select-all cursor-pointer hover:text-cyan-300 transition-colors drop-shadow-lg" onclick="actions.copyKey()">---</div>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="actions.genKey()" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-cyan-900/40 flex items-center gap-2"><i class="fa-solid fa-rotate"></i> Generate</button>
+                        <button onclick="actions.copyKey()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium transition-all flex items-center gap-2"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: RF LAB -->
+            <div id="view-rf" class="hidden fade-enter grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 bg-black/50">
+                    <h3 class="text-lg font-bold text-white mb-6 border-b border-white/10 pb-2">Source Parameters</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-slate-400">Transmitter Power (Watts)</label>
+                            <input type="range" id="rf-tx" min="0.1" max="100" step="0.1" value="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-2 accent-cyan-400" oninput="actions.calcRF()">
+                            <div class="text-right text-xs text-cyan-400 font-mono mt-1"><span id="val-tx">0.1</span> W</div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Distance (Meters)</label>
+                            <input type="range" id="rf-dist" min="1" max="500" step="1" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-2 accent-cyan-400" oninput="actions.calcRF()">
+                            <div class="text-right text-xs text-cyan-400 font-mono mt-1"><span id="val-dist">5</span> m</div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Frequency (GHz)</label>
+                            <input type="range" id="rf-freq" min="0.1" max="5" step="0.1" value="2.4" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-2 accent-cyan-400" oninput="actions.calcRF()">
+                            <div class="text-right text-xs text-cyan-400 font-mono mt-1"><span id="val-freq">2.4</span> GHz</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 flex flex-col items-center justify-center text-center relative bg-black/50">
+                    <div class="absolute inset-0 bg-cyan-500/5 rounded-2xl"></div>
+                    <div class="relative z-10">
+                        <div class="text-sm text-slate-400 uppercase tracking-widest mb-2">Harvested Power</div>
+                        <div id="rf-main-res" class="text-6xl font-bold text-white font-mono text-glow mb-2 drop-shadow-xl">0.00</div>
+                        <div class="text-xl text-cyan-400 font-mono mb-6">microwatts (µW)</div>
+                        <div id="rf-dbm-res" class="text-xs text-slate-500 font-mono p-2 bg-slate-900/80 rounded border border-white/10 inline-block">Signal Strength: -00 dBm</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: DEV -->
+            <div id="view-dev" class="hidden fade-enter h-full flex flex-col">
+                <div class="glass-panel p-1 flex-grow flex flex-col overflow-hidden bg-black/40">
+                    <div class="bg-slate-900/60 p-2 flex justify-between items-center border-b border-white/10 px-4">
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-code mr-2"></i>Code Editor</span>
+                        <button onclick="actions.repairCode()" class="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded hover:bg-orange-500/30 transition-colors">Auto-Fix & Format</button>
+                    </div>
+                    <textarea id="code-editor" class="flex-grow bg-transparent text-slate-300 font-mono text-sm p-4 resize-none outline-none" placeholder="// Paste code here to repair..."></textarea>
+                </div>
+            </div>
+
+            <!-- VIEW: ALIEN AI (SPACESHIP MODE) -->
+            <div id="view-alien" class="hidden fade-enter h-full flex flex-col items-center justify-center relative">
+                
+                <!-- Hover/Click README Panel (Stable, Top Right) -->
+                <div id="readme-panel">
+                    <h3 id="read-title" class="text-sm font-bold text-cyan-400 mb-1">Select App</h3>
+                    <div id="read-desc" class="text-[10px] text-slate-300 mb-2 leading-tight">Hover over an app module.</div>
+                    <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Protocol:</div>
+                    <div id="read-use" class="text-[9px] font-mono text-emerald-400 bg-black/30 p-1 rounded border border-emerald-500/20">
+                        Waiting...
+                    </div>
+                    <!-- Buy Button -->
+                    <button onclick="actions.buyApp()" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] py-1 rounded font-bold transition-colors">ACQUIRE</button>
+                </div>
+
+                <div class="scene">
+                    <canvas id="lightning-canvas"></canvas>
+                    
+                    <div id="the-ship" class="spaceship-container">
+                        
+                        <!-- Top Slim Dome (1/3rd Round) -->
+                        <div class="saucer-dome-top">
+                            <!-- ALIEN PILOT (Starts Hidden) -->
+                            <div class="alien-pilot">
+                                <div class="alien-head">
+                                    <div class="alien-eye left"></div>
+                                    <div class="alien-eye right"></div>
+                                </div>
+                                <div class="alien-neck"></div>
+                                <div class="alien-torso">
+                                    <div class="alien-arm left"></div>
+                                    <div class="alien-arm right"></div>
+                                </div>
+                                <div class="alien-speech">Thank you earthling</div>
+                                <div class="control-stick"></div>
+                            </div>
+                        </div>
+
+                        <!-- Pure Spaceship Visual (No Carousel) -->
+
+                        <!-- Equator Core -->
+                        <div class="saucer-core"></div>
+                        <div id="ship-engine" class="saucer-engine"></div>
+                        <!-- Laser Ladder -->
+                        <div class="laser-ladder"></div>
+
+                        <!-- Bottom Slim Dome (Mirrored) -->
+                        <div class="saucer-dome-bottom"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Command Bar Overlay -->
+        <div class="absolute bottom-0 left-0 right-0 z-50 p-4 md:p-6 bg-gradient-to-t from-[#050a14] via-[#050a14]/80 to-transparent pointer-events-none">
+            <div id="chat-feed" class="w-full max-w-md ml-auto mb-4 h-32 overflow-y-auto flex flex-col justify-end pointer-events-auto space-y-2 px-2 overflow-x-hidden"></div>
+            <div class="w-full max-w-3xl mx-auto pointer-events-auto">
+                <div id="chat-bar" class="glass-panel p-2 flex items-center gap-2 bg-black/80 backdrop-blur-2xl border-cyan-500/30 shadow-lg shadow-cyan-900/40">
+                    <button onclick="actions.toggleMic()" id="mic-btn" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="text" id="cmd-input" class="flex-grow bg-transparent border-none text-white font-mono text-sm focus:ring-0 placeholder-slate-500" placeholder="Type command... (e.g. 'Generate Key', 'Scan RF')" autocomplete="off">
+                    <button onclick="actions.sendCmd()" class="w-10 h-10 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const state = { 
+            currentKey: null, 
+            voiceActive: false, 
+            recognition: null, 
+            audioCtx: null,
+            memory: JSON.parse(localStorage.getItem('papi_memory') || '{}')
+        };
+
+        // --- Memory & Learning Module ---
+        const MemoryModule = {
+            save: (trigger, action) => {
+                state.memory[trigger.toLowerCase()] = action;
+                localStorage.setItem('papi_memory', JSON.stringify(state.memory));
+            },
+            recall: (trigger) => {
+                return state.memory[trigger.toLowerCase()] || null;
+            },
+            
+            // Visual learning effect
+            indicateLearning: (isLearning) => {
+                const ship = document.getElementById('the-ship');
+                if(!ship) return;
+                
+                if(isLearning) {
+                    ship.classList.add('learning');
+                    // Reveal alien just for effect if hidden? Let's keep surprise unless bought
+                } else {
+                    setTimeout(() => ship.classList.remove('learning'), 2000);
+                }
+            }
+        };
+
+        // Audio System
+        function initAudio() {
+            if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type, intensity = 1) {
+            initAudio();
+            const ctx = state.audioCtx;
+            if(ctx.state === 'suspended') ctx.resume();
+
+            const t = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            if (type === 'rumble') {
+                // Low Rumble
+                const bufferSize = ctx.sampleRate * 2; 
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 100;
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                gain.gain.setValueAtTime(0.5 * intensity, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 1.5);
+                noise.start(t);
+            } else if (type === 'crack') {
+                // High Crack
+                const bufferSize = ctx.sampleRate * 0.2; 
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 1000;
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                gain.gain.setValueAtTime(0.8, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                noise.start(t);
+            } else if (type === 'thunder') {
+                // Big Crash
+                const bufferSize = ctx.sampleRate * 3; 
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                gain.gain.setValueAtTime(1.0 * intensity, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 2.5);
+                noise.start(t);
+            } else if (type === 'alien_speech') {
+                // Synthesized Alien chatter "BZZWEED..."
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, t);
+                osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                osc.frequency.linearRampToValueAtTime(600, t + 0.3);
+                osc.frequency.linearRampToValueAtTime(150, t + 0.5);
+                
+                // Modulation
+                const lfo = ctx.createOscillator();
+                lfo.type = 'square';
+                lfo.frequency.value = 50;
+                const lfoGain = ctx.createGain();
+                lfoGain.gain.value = 500;
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.linearRampToValueAtTime(0, t + 1.0);
+                
+                osc.start(t);
+                lfo.start(t);
+                osc.stop(t + 1.0);
+                lfo.stop(t + 1.0);
+            }
+        }
+
+        // Visual FX
+        // Sound effects for lightning
+        const thunderSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBVSs6PGsbRkLXrTp7qljGApZsOf0r2oXBV65+//HeiwFP5n/8pBRDA==');
+        const crackleSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+        
+        function playThunderSound() {
+            try {
+                const thunder = thunderSound.cloneNode();
+                thunder.volume = 0.3;
+                thunder.play().catch(() => {});
+            } catch (e) {}
+        }
+        
+        function playCrackleSound() {
+            try {
+                const crackle = crackleSound.cloneNode();
+                crackle.volume = 0.2;
+                crackle.play().catch(() => {});
+            } catch (e) {}
+        }
+
+        function drawLightning(intensity) {
+            const canvas = document.getElementById('lightning-canvas');
+            const ctx = canvas.getContext('2d');
+            const ship = document.getElementById('ship-engine').getBoundingClientRect();
+            const chat = document.getElementById('chat-bar').getBoundingClientRect();
+            const scene = document.querySelector('.scene').getBoundingClientRect();
+
+            canvas.width = scene.width;
+            canvas.height = scene.height;
+
+            const startX = scene.width / 2; 
+            const startY = (ship.bottom - scene.top) - 50; 
+            const endX = scene.width / 2;
+            const endY = (chat.top - scene.top);
+
+            // Play sounds
+            playThunderSound();
+            playCrackleSound();
+
+            // Draw main lightning bolt
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            
+            let currX = startX;
+            let currY = startY;
+            const segments = 25;
+            const dy = (endY - startY) / segments;
+            const spread = Math.min(120, intensity * 2.5);
+            
+            const mainPath = [{x: startX, y: startY}];
+
+            for (let i = 0; i < segments; i++) {
+                currY += dy;
+                currX += (Math.random() - 0.5) * spread; 
+                ctx.lineTo(currX, currY);
+                mainPath.push({x: currX, y: currY});
+            }
+            ctx.lineTo(endX, endY);
+            mainPath.push({x: endX, y: endY});
+
+            // Main bolt styling
+            ctx.strokeStyle = '#00f2ea';
+            ctx.lineWidth = 3 + (intensity / 8);
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00f2ea';
+            ctx.stroke();
+            
+            // Add glow layer
+            ctx.strokeStyle = 'rgba(0, 242, 234, 0.5)';
+            ctx.lineWidth = 8 + (intensity / 5);
+            ctx.shadowBlur = 30;
+            ctx.stroke();
+
+            // Draw branching bolts
+            ctx.restore();
+            const branchCount = 8 + Math.floor(intensity / 10);
+            for (let b = 0; b < branchCount; b++) {
+                const branchStart = mainPath[Math.floor(Math.random() * (mainPath.length - 5)) + 3];
+                const branchLength = 30 + Math.random() * 80;
+                const branchSegments = 5 + Math.floor(Math.random() * 8);
+                
+                ctx.beginPath();
+                ctx.moveTo(branchStart.x, branchStart.y);
+                
+                let bx = branchStart.x;
+                let by = branchStart.y;
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                
+                for (let i = 0; i < branchSegments; i++) {
+                    bx += (Math.random() - 0.3) * 40 * direction;
+                    by += branchLength / branchSegments;
+                    ctx.lineTo(bx, by);
+                }
+                
+                ctx.strokeStyle = `rgba(0, 242, 234, ${0.6 - (b / branchCount) * 0.4})`;
+                ctx.lineWidth = 1.5;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00f2ea';
+                ctx.stroke();
+            }
+
+            setTimeout(() => { ctx.clearRect(0,0, canvas.width, canvas.height); }, 180 + (intensity * 5));
+        }
+
+        const actions = {
+            detachWindow: () => {
+                const w = 1200, h = 800;
+                const left = (screen.width/2)-(w/2);
+                const top = (screen.height/2)-(h/2);
+                const newWin = window.open('', '_blank', `width=${w},height=${h},top=${top},left=${left}`);
+                if(newWin) {
+                    newWin.document.write(document.documentElement.outerHTML);
+                    newWin.document.close();
+                } else {
+                    alert("Pop-up blocked!");
+                }
+            },
+            nav: (view) => {
+                const body = document.body;
+                if (viewId === 'alien') body.classList.add('alien-mode');
+                else body.classList.remove('alien-mode');
+                nav(view);
+                addChat('ai', `Switched view to ${view.toUpperCase()}.`);
+            },
+            genKey: () => {
+                const array = new Uint32Array(8);
+                window.crypto.getRandomValues(array);
+                let hex = '';
+                array.forEach(val => hex += val.toString(16).padStart(8, '0'));
+                state.currentKey = hex.toUpperCase().match(/.{1,4}/g).join('-');
+                
+                const secEl = document.getElementById('sec-key-display');
+                if(secEl) secEl.innerText = state.currentKey;
+                const widEl = document.getElementById('widget-key');
+                if(widEl) {
+                    const last4 = state.currentKey.slice(-4);
+                    widEl.innerText = `••••-••••-••••-${last4}`;
+                }
+                return state.currentKey;
+            },
+            copyKey: () => { if(state.currentKey) navigator.clipboard.writeText(state.currentKey); },
+            calcRF: () => {
+                const pt = parseFloat(document.getElementById('rf-tx').value);
+                const d = parseFloat(document.getElementById('rf-dist').value);
+                const f = parseFloat(document.getElementById('rf-freq').value) * 1e9;
+                
+                document.getElementById('val-tx').innerText = pt;
+                document.getElementById('val-dist').innerText = d;
+                document.getElementById('val-freq').innerText = (f/1e9).toFixed(1);
+
+                const c = 3e8;
+                const lambda = c / f;
+                const pr = pt * Math.pow(lambda / (4 * Math.PI * d), 2);
+                const uW = pr * 1e6;
+                const dBm = 10 * Math.log10(pr * 1000);
+
+                document.getElementById('rf-main-res').innerText = uW.toFixed(2);
+                document.getElementById('widget-rf').innerText = uW.toFixed(1);
+                document.getElementById('rf-dbm-res').innerText = `Signal Strength: ${dBm.toFixed(1)} dBm`;
+                return uW;
+            },
+            repairCode: () => {
+                const area = document.getElementById('code-editor');
+                if(!area.value) return false;
+                area.value = area.value.replace(/^\s*[\r\n]/gm, '');
+                return true;
+            },
+            toggleMic: () => {
+                const btn = document.getElementById('mic-btn');
+                if(!state.recognition) initSpeech();
+                if(btn.classList.contains('mic-active')) {
+                    state.recognition.stop();
+                    btn.classList.remove('mic-active');
+                    btn.style.color = "#94a3b8";
+                } else {
+                    try { state.recognition.start(); } catch(e){}
+                    btn.classList.add('mic-active');
+                }
+            },
+            sendCmd: (cmdText) => {
+                const input = document.getElementById('cmd-input');
+                const txt = cmdText || input.value.trim();
+                if(!txt) return;
+                
+                // 1. Rock the ship based on input length
+                const ship = document.getElementById('the-ship');
+                if(ship) {
+                    const tilt = Math.min(10, txt.length / 5);
+                    ship.style.transform = `scale(0.9) rotateZ(${tilt}deg) translateY(10px)`;
+                    setTimeout(() => { ship.style.transform = ''; }, 300);
+                }
+
+                addChat('user', txt);
+                input.value = '';
+                processCommand(txt);
+            },
+            buyApp: () => {
+                const ship = document.getElementById('the-ship');
+                const alien = document.querySelector('.alien-pilot');
+                
+                // 1. Reveal Alien First
+                alien.classList.add('visible');
+                
+                // 2. Start Delivery Animation
+                setTimeout(() => {
+                    ship.classList.add('delivering');
+                    // Audio Sequence
+                    playSound('alien_speech');
+                }, 500); // Short delay to see him appear in dome first
+                
+                // Reset after animation
+                setTimeout(() => {
+                    ship.classList.remove('delivering');
+                    addChat('ai', "Purchase Complete. App installed.");
+                    // Note: Alien stays visible (class 'visible' remains)
+                }, 3500);
+            }
+        };
+
+        function nav(viewId) {
+            const body = document.body;
+            if (viewId === 'alien') body.classList.add('alien-mode');
+            else body.classList.remove('alien-mode');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${viewId}`).classList.add('active');
+            document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            const titles = {
+                'home': ['Overview', 'System Status: Optimal'],
+                'security': ['Security Nexus', 'Encryption Level: AES-256'],
+                'rf': ['RF Power Lab', 'Atmospheric Analysis'],
+                'dev': ['Developer Console', 'Repair & Debug'],
+                'alien': ['Alien AI Assistant', 'Extraterrestrial Marketplace']
+            };
+            document.getElementById('page-title').innerText = titles[viewId][0];
+            document.getElementById('page-subtitle').innerText = titles[viewId][1];
+        }
+
+        function addChat(role, text, chips = []) {
+            const feed = document.getElementById('chat-feed');
+            const wrap = document.createElement('div');
+            wrap.className = `flex w-full slide-up ${role === 'user' ? 'justify-end' : 'justify-end'}`;
+            const bub = document.createElement('div');
+            bub.className = `max-w-[90%] p-3 text-sm font-medium break-words ${role === 'user' ? 'bubble-user text-cyan-50' : 'bubble-ai text-blue-100'}`;
+            bub.innerText = text;
+            wrap.appendChild(bub);
+            feed.appendChild(wrap);
+            if(chips.length) {
+                const chipWrap = document.createElement('div');
+                chipWrap.className = "flex gap-2 mt-1 ml-2 slide-up";
+                chips.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.className = "px-2 py-1 text-[10px] bg-white/5 border border-white/10 rounded hover:bg-white/10 text-cyan-400 transition-colors";
+                    btn.innerText = c;
+                    btn.onclick = () => { document.getElementById('cmd-input').value = c; actions.sendCmd(); };
+                    chipWrap.appendChild(btn);
+                });
+                feed.appendChild(chipWrap);
+            }
+            feed.scrollTop = feed.scrollHeight;
+            if(role === 'ai') {
+                if(state.voiceActive) speak(text);
+                const ship = document.getElementById('the-ship');
+                if(ship && !document.getElementById('view-alien').classList.contains('hidden')) {
+                    const intensity = Math.min(2, text.length / 20); 
+                    ship.classList.add('shake-ship');
+                    playSound('rumble', intensity); 
+                    setTimeout(() => {
+                        playSound('crack'); 
+                        drawLightning(text.length); 
+                        setTimeout(() => {
+                            playSound('thunder', intensity); 
+                            ship.classList.remove('shake-ship');
+                        }, 150); 
+                    }, 400); 
+                }
+            }
+        }
+
+        // ============================================
+        // SETTINGS PANEL FUNCTIONS
+        // ============================================
+        function maskAPIKey(input) {
+            const value = input.value;
+            const fullKey = input.getAttribute('data-full-key');
+            
+            // If user is typing and key is longer than what's displayed
+            if (value.length > (fullKey ? fullKey.length : 0)) {
+                // User is adding characters - store full key
+                input.setAttribute('data-full-key', value);
+                
+                // Display masked version (show first 8 and last 8)
+                if (value.length > 16 && value.startsWith('sk-')) {
+                    const masked = value.substring(0, 8) + '...' + value.substring(value.length - 8);
+                    input.value = masked;
+                }
+            } else if (value.length < (fullKey ? fullKey.length : 0)) {
+                // User is deleting - clear stored key
+                input.setAttribute('data-full-key', value);
+            }
+        }
+        
+        function openSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            loadSettings();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            // Clear conversation history when closing settings so user gets fresh start
+            localStorage.removeItem('ai_history');
+            if (typeof AlienAI !== 'undefined') {
+                AlienAI.conversationHistory = [];
+            }
+        }
+
+        function loadSettings() {
+            // Migrate old single key to new multi-key system
+            const oldKey = localStorage.getItem('openai_api_key');
+            if (oldKey && !localStorage.getItem('openai_api_key1')) {
+                localStorage.setItem('openai_api_key1', oldKey);
+                localStorage.setItem('openai_key1_label', 'Primary Key');
+                localStorage.removeItem('openai_api_key'); // Clean up old format
+            }
+            
+            // Load current provider
+            const provider = localStorage.getItem('ai_provider') || 'demo';
+            document.getElementById('aiProvider').value = provider;
+
+            // Load OpenAI keys (4 keys)
+            for (let i = 1; i <= 4; i++) {
+                const key = localStorage.getItem(`openai_api_key${i}`) || '';
+                const label = localStorage.getItem(`openai_key${i}_label`) || '';
+                const input = document.getElementById(`openaiKey${i}`);
+                const labelInput = document.getElementById(`key${i}-label`);
+                
+                if (input) {
+                    // Store full key in data attribute
+                    input.setAttribute('data-full-key', key);
+                    // Display masked version
+                    if (key.length > 16 && key.startsWith('sk-')) {
+                        input.value = key.substring(0, 8) + '...' + key.substring(key.length - 8);
+                    } else {
+                        input.value = key;
+                    }
+                }
+                
+                if (labelInput) {
+                    labelInput.value = label;
+                }
+            }
+            
+            // Load other provider keys
+            document.getElementById('claudeKey').value = localStorage.getItem('claude_api_key') || '';
+            document.getElementById('geminiKey').value = localStorage.getItem('gemini_api_key') || '';
+            
+            // Load app assignments
+            document.getElementById('assign-alien').value = localStorage.getItem('assign-alien') || 'auto';
+            document.getElementById('assign-code').value = localStorage.getItem('assign-code') || 'key1';
+            document.getElementById('assign-aegis').value = localStorage.getItem('assign-aegis') || 'key3';
+            document.getElementById('assign-automation').value = localStorage.getItem('assign-automation') || 'key1';
+            
+            // Load usage stats
+            const totalCalls = localStorage.getItem('total_api_calls') || '0';
+            if (document.getElementById('total-calls')) {
+                document.getElementById('total-calls').textContent = totalCalls;
+            }
+
+            // Update status indicators
+            updateStatusIndicators();
+        }
+
+        function updateStatusIndicators() {
+            // Count configured OpenAI keys
+            let configuredKeys = 0;
+            for (let i = 1; i <= 4; i++) {
+                const key = localStorage.getItem(`openai_api_key${i}`);
+                const statusEl = document.getElementById(`key${i}-status`);
+                if (key && key.length > 10) {
+                    configuredKeys++;
+                    if (statusEl) {
+                        statusEl.textContent = '✓';
+                        statusEl.className = 'text-xs px-2 py-1 rounded bg-green-900/50 text-green-400';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.textContent = '—';
+                        statusEl.className = 'text-xs px-2 py-1 rounded bg-gray-700 text-gray-500';
+                    }
+                }
+            }
+            
+            // Update main OpenAI status
+            const openaiStatus = document.getElementById('openai-status');
+            if (openaiStatus) {
+                openaiStatus.textContent = `${configuredKeys}/4 Keys`;
+                if (configuredKeys > 0) {
+                    openaiStatus.className = 'text-xs px-2 py-1 rounded bg-green-900/50 text-green-400 border border-green-500/30';
+                } else {
+                    openaiStatus.className = 'text-xs px-2 py-1 rounded bg-gray-700 text-gray-400';
+                }
+            }
+            
+            // Update other providers
+            const claudeKey = localStorage.getItem('claude_api_key');
+            const geminiKey = localStorage.getItem('gemini_api_key');
+            updateStatus('claude', claudeKey);
+            updateStatus('gemini', geminiKey);
+        }
+
+        function updateStatus(provider, key) {
+            const statusEl = document.getElementById(`${provider}-status`);
+            if (key && key.length > 10) {
+                statusEl.textContent = '✓ Configured';
+                statusEl.className = 'text-xs px-2 py-1 rounded bg-green-900/50 text-green-400 border border-green-500/30';
+            } else {
+                statusEl.textContent = 'Not Configured';
+                statusEl.className = 'text-xs px-2 py-1 rounded bg-gray-700 text-gray-400';
+            }
+        }
+
+        function updateProvider() {
+            const provider = document.getElementById('aiProvider').value;
+            addChat('ai', `Switched to ${provider === 'demo' ? 'Demo Mode' : provider.toUpperCase()} provider.`);
+        }
+
+        function saveSettings() {
+            // Save provider
+            const provider = document.getElementById('aiProvider').value;
+            localStorage.setItem('ai_provider', provider);
+
+            // Save OpenAI keys (4 keys) - with validation
+            let keyCount = 0;
+            for (let i = 1; i <= 4; i++) {
+                const keyInput = document.getElementById(`openaiKey${i}`);
+                const labelInput = document.getElementById(`key${i}-label`);
+                
+                if (keyInput) {
+                    // Get full key from data attribute, or current value if just entered
+                    let key = keyInput.getAttribute('data-full-key') || keyInput.value.trim();
+                    
+                    // Only save if it looks like a valid API key (starts with sk-)
+                    if (key && key.startsWith('sk-') && !key.includes('...')) {
+                        localStorage.setItem(`openai_api_key${i}`, key);
+                        keyCount++;
+                        console.log(`Saved key ${i}: ${key.substring(0, 10)}...${key.substring(key.length - 4)}`);
+                    }
+                }
+                
+                if (labelInput && labelInput.value) {
+                    const label = labelInput.value.trim();
+                    if (label) {
+                        localStorage.setItem(`openai_key${i}_label`, label);
+                    }
+                }
+            }
+            
+            // Save other provider keys
+            const claudeInput = document.getElementById('claudeKey');
+            const geminiInput = document.getElementById('geminiKey');
+            
+            if (claudeInput && claudeInput.value) {
+                const claudeKey = claudeInput.value.trim();
+                if (claudeKey && claudeKey.startsWith('sk-ant-')) {
+                    localStorage.setItem('claude_api_key', claudeKey);
+                }
+            }
+            
+            if (geminiInput && geminiInput.value) {
+                const geminiKey = geminiInput.value.trim();
+                if (geminiKey) {
+                    localStorage.setItem('gemini_api_key', geminiKey);
+                }
+            }
+            
+            // Save app assignments
+            localStorage.setItem('assign-alien', document.getElementById('assign-alien').value);
+            localStorage.setItem('assign-code', document.getElementById('assign-code').value);
+            localStorage.setItem('assign-aegis', document.getElementById('assign-aegis').value);
+            localStorage.setItem('assign-automation', document.getElementById('assign-automation').value);
+
+            updateStatusIndicators();
+            
+            if (keyCount > 0) {
+                addChat('ai', `✓ Settings saved! ${keyCount} OpenAI keys configured with smart rotation enabled.`);
+            } else {
+                addChat('ai', '⚠️ No valid OpenAI keys detected. Make sure they start with "sk-"');
+            }
+            
+            closeSettings();
+
+            // Reload AlienAI config
+            if (typeof AlienAI !== 'undefined') {
+                AlienAI.config.provider = provider;
+            }
+        }
+
+        async function testAllKeys() {
+            const results = [];
+            
+            const openaiKey = document.getElementById('openaiKey').value.trim();
+            const claudeKey = document.getElementById('claudeKey').value.trim();
+            const geminiKey = document.getElementById('geminiKey').value.trim();
+
+            addChat('ai', '🧪 Testing API keys...');
+
+            if (openaiKey) {
+                const result = await testAPIKey('openai', openaiKey);
+                results.push(`OpenAI: ${result ? '✓ Valid' : '✗ Failed'}`);
+            }
+            if (claudeKey) {
+                const result = await testAPIKey('claude', claudeKey);
+                results.push(`Claude: ${result ? '✓ Valid' : '✗ Failed'}`);
+            }
+            if (geminiKey) {
+                const result = await testAPIKey('gemini', geminiKey);
+                results.push(`Gemini: ${result ? '✓ Valid' : '✗ Failed'}`);
+            }
+
+            if (results.length === 0) {
+                addChat('ai', 'No API keys to test. Please enter at least one key.');
+            } else {
+                addChat('ai', 'Test Results:\\n' + results.join('\\n'));
+            }
+        }
+
+        async function testAPIKey(provider, key) {
+            try {
+                if (provider === 'openai') {
+                    const response = await fetch('https://api.openai.com/v1/models', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    return response.ok;
+                } else if (provider === 'claude') {
+                    const response = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'x-api-key': key,
+                            'anthropic-version': '2023-06-01',
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: 'claude-3-5-sonnet-20241022',
+                            max_tokens: 1,
+                            messages: [{ role: 'user', content: 'test' }]
+                        })
+                    });
+                    return response.ok || response.status === 400; // 400 means auth worked
+                } else if (provider === 'gemini') {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                    return response.ok;
+                }
+            } catch (error) {
+                console.error(`${provider} test failed:`, error);
+                return false;
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('settingsModal');
+            if (e.target === modal) {
+                closeSettings();
+            }
+        });
+
+        // ============================================
+        // ALIEN AI BRAIN - Real AI Integration Module
+        // ============================================
+        const AlienAI = {
+            config: {
+                // User can configure their API choice and key
+                provider: localStorage.getItem('ai_provider') || 'demo', // 'openai', 'claude', 'gemini', or 'demo'
+                apiKey: localStorage.getItem('ai_api_key') || '',
+                model: 'gpt-4', // or 'claude-3-sonnet', 'gemini-pro'
+                temperature: 0.7,
+                maxTokens: 1000
+            },
+            
+            conversationHistory: JSON.parse(localStorage.getItem('ai_history') || '[]'),
+            userProfile: JSON.parse(localStorage.getItem('user_profile') || '{"projects": [], "preferences": {}, "expertise": "beginner"}'),
+            
+            // Check if user has valid API configuration
+            isPremium: () => {
+                // If they have any valid API key configured, consider them premium
+                const hasOpenAI = localStorage.getItem('openai_api_key1') || localStorage.getItem('openai_api_key2') || 
+                                  localStorage.getItem('openai_api_key3') || localStorage.getItem('openai_api_key4');
+                const hasClaude = localStorage.getItem('claude_api_key');
+                const hasGemini = localStorage.getItem('gemini_api_key');
+                const hasLicense = localStorage.getItem('papi_license') === 'active';
+                
+                return hasOpenAI || hasClaude || hasGemini || hasLicense;
+            },
+            
+            // Main AI call function
+            async ask(userMessage, context = {}) {
+                // Check if user has API keys or license
+                if (!AlienAI.isPremium() && AlienAI.conversationHistory.length >= 3) {
+                    return {
+                        response: "⚙️ Configure your API keys in settings (click the gear icon ⚙️) to unlock unlimited AI power! Or upgrade to PAPI AI Pro ($49.99/mo).",
+                        needsUpgrade: true
+                    };
+                }
+                
+                // Add to history
+                AlienAI.conversationHistory.push({role: 'user', content: userMessage, timestamp: Date.now()});
+                AlienAI.saveHistory();
+                
+                let response;
+                
+                if (AlienAI.config.provider === 'demo') {
+                    // Smart template-based responses
+                    response = await AlienAI.demoMode(userMessage, context);
+                } else {
+                    // Real API call
+                    response = await AlienAI.callAPI(userMessage, context);
+                }
+                
+                AlienAI.conversationHistory.push({role: 'assistant', content: response, timestamp: Date.now()});
+                AlienAI.saveHistory();
+                
+                // Learn from interaction
+                AlienAI.learn(userMessage, response);
+                
+                return {response, needsUpgrade: false};
+            },
+            
+            // Demo/Template mode (works without API)
+            async demoMode(message, context) {
+                const msg = message.toLowerCase();
+                
+                // Code generation requests
+                if (msg.includes('build') || msg.includes('create') || msg.includes('make')) {
+                    if (msg.includes('todo') || msg.includes('task')) {
+                        return AlienAI.templates.todoApp();
+                    } else if (msg.includes('calculator')) {
+                        return AlienAI.templates.calculator();
+                    } else if (msg.includes('form') || msg.includes('contact')) {
+                        return AlienAI.templates.contactForm();
+                    } else if (msg.includes('dashboard')) {
+                        return AlienAI.templates.dashboard();
+                    } else {
+                        return "I can help you build: Todo App, Calculator, Contact Form, or Dashboard. Which would you like? Or upgrade to AI Pro for unlimited custom code generation!";
+                    }
+                }
+                
+                // Learning/teaching
+                if (msg.includes('how to') || msg.includes('teach') || msg.includes('explain')) {
+                    return AlienAI.explainConcept(msg);
+                }
+                
+                // Project recommendations based on history
+                if (msg.includes('suggest') || msg.includes('recommend') || msg.includes('what should')) {
+                    return AlienAI.recommendProject();
+                }
+                
+                return "I'm in demo mode. Upgrade to AI Pro for full capabilities! I can help with code templates, explanations, and project suggestions.";
+            },
+            
+            // Real API integration with multi-key support
+            async callAPI(message, context) {
+                const provider = AlienAI.config.provider;
+                
+                // Get the correct API key based on provider
+                let apiKey = '';
+                if (provider === 'openai') {
+                    // Smart OpenAI key selection
+                    apiKey = AlienAI.getOpenAIKey(context.app || 'alien');
+                    if (!apiKey) {
+                        return `⚙️ Please configure at least one OpenAI API key in settings.`;
+                    }
+                } else if (provider === 'claude') {
+                    apiKey = localStorage.getItem('claude_api_key') || '';
+                } else if (provider === 'gemini') {
+                    apiKey = localStorage.getItem('gemini_api_key') || '';
+                }
+                
+                if (!apiKey) {
+                    return `⚙️ Please configure your ${provider.toUpperCase()} API key in settings to use this provider.`;
+                }
+                
+                try {
+                    if (provider === 'openai') {
+                        const result = await AlienAI.callOpenAI(message, apiKey);
+                        AlienAI.trackAPICall(apiKey); // Track usage
+                        return result;
+                    } else if (provider === 'claude') {
+                        return await AlienAI.callClaude(message, apiKey);
+                    } else if (provider === 'gemini') {
+                        return await AlienAI.callGemini(message, apiKey);
+                    }
+                } catch (error) {
+                    // If OpenAI fails and we have multiple keys, try fallback
+                    if (provider === 'openai' && error.message.includes('rate') || error.message.includes('429')) {
+                        console.log('Rate limit hit, trying fallback key...');
+                        const fallbackKey = AlienAI.getFallbackKey(apiKey);
+                        if (fallbackKey) {
+                            try {
+                                const result = await AlienAI.callOpenAI(message, fallbackKey);
+                                AlienAI.trackAPICall(fallbackKey);
+                                return result;
+                            } catch (fallbackError) {
+                                return `API Error: All keys exhausted. ${fallbackError.message}`;
+                            }
+                        }
+                    }
+                    return `API Error: ${error.message}. Check your API key and try again.`;
+                }
+            },
+            
+            // Smart key selection for OpenAI
+            getOpenAIKey(appName) {
+                // Get app assignment
+                const assignment = localStorage.getItem(`assign-${appName}`) || 'auto';
+                
+                // If specific key assigned, use it
+                if (assignment !== 'auto') {
+                    const keyNum = assignment.replace('key', '');
+                    const key = localStorage.getItem(`openai_api_key${keyNum}`);
+                    if (key) return key;
+                }
+                
+                // Auto-rotate: get next available key
+                const lastUsed = parseInt(localStorage.getItem('last_openai_key') || '0');
+                for (let i = 1; i <= 4; i++) {
+                    const keyIndex = ((lastUsed + i - 1) % 4) + 1;
+                    const key = localStorage.getItem(`openai_api_key${keyIndex}`);
+                    if (key) {
+                        localStorage.setItem('last_openai_key', keyIndex.toString());
+                        return key;
+                    }
+                }
+                
+                return null;
+            },
+            
+            // Get fallback key if primary fails
+            getFallbackKey(usedKey) {
+                for (let i = 1; i <= 4; i++) {
+                    const key = localStorage.getItem(`openai_api_key${i}`);
+                    if (key && key !== usedKey) {
+                        return key;
+                    }
+                }
+                return null;
+            },
+            
+            // Track API usage
+            trackAPICall(apiKey) {
+                const totalCalls = parseInt(localStorage.getItem('total_api_calls') || '0');
+                localStorage.setItem('total_api_calls', (totalCalls + 1).toString());
+                
+                // Track per-key usage
+                for (let i = 1; i <= 4; i++) {
+                    const key = localStorage.getItem(`openai_api_key${i}`);
+                    if (key === apiKey) {
+                        const keyUsage = parseInt(localStorage.getItem(`key${i}_usage`) || '0');
+                        localStorage.setItem(`key${i}_usage`, (keyUsage + 1).toString());
+                        break;
+                    }
+                }
+            },
+            
+            async callOpenAI(message, apiKey) {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: [
+                            {role: 'system', content: 'You are an expert code generator and programming assistant. Help users build apps, explain concepts, and write clean code.'},
+                            ...AlienAI.conversationHistory.slice(-5),
+                            {role: 'user', content: message}
+                        ],
+                        temperature: AlienAI.config.temperature,
+                        max_tokens: AlienAI.config.maxTokens
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Check for errors
+                if (!response.ok || data.error) {
+                    const errorMsg = data.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+                    throw new Error(errorMsg);
+                }
+                
+                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                    throw new Error('Invalid API response format');
+                }
+                
+                return data.choices[0].message.content;
+            },
+            
+            async callClaude(message, apiKey) {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-20241022',
+                        max_tokens: AlienAI.config.maxTokens,
+                        messages: [
+                            ...AlienAI.conversationHistory.slice(-5).map(m => ({role: m.role, content: m.content})),
+                            {role: 'user', content: message}
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Check for errors
+                if (!response.ok || data.error) {
+                    const errorMsg = data.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+                    throw new Error(errorMsg);
+                }
+                
+                if (!data.content || !data.content[0] || !data.content[0].text) {
+                    throw new Error('Invalid API response format');
+                }
+                
+                return data.content[0].text;
+            },
+            
+            async callGemini(message, apiKey) {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{parts: [{text: message}]}]
+                    })
+                });
+                
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            },
+            
+            // Code templates
+            templates: {
+                todoApp: () => {
+                    return "Here's a complete Todo App with HTML, CSS, and JavaScript. Upgrade to AI Pro for the full code!";
+                },
+                
+                calculator: () => {
+                    return "Here's a functional Calculator app. Upgrade to AI Pro for the complete code!";
+                },
+                
+                contactForm: () => {
+                    return "Here's a Contact Form with validation:\n\n```html\n[Contact form template with email validation]\n```\n\nUpgrade to AI Pro for fully custom forms!";
+                },
+                
+                dashboard: () => {
+                    return "Here's a Dashboard template:\n\n```html\n[Dashboard with charts and widgets]\n```\n\nUpgrade to AI Pro for custom dashboards!";
+                }
+            },
+            
+            explainConcept: (question) => {
+                if (question.includes('javascript')) {
+                    return "JavaScript is a programming language that runs in browsers. It makes websites interactive. Key concepts: variables, functions, events, DOM manipulation. Want a specific example?";
+                } else if (question.includes('html')) {
+                    return "HTML structures web pages using tags like <div>, <p>, <button>. Each tag has a purpose. HTML is the skeleton, CSS is the skin, JavaScript is the brain.";
+                } else if (question.includes('css')) {
+                    return "CSS styles your HTML. Use selectors to target elements and properties to change appearance. Example: 'button { background: blue; }' makes buttons blue.";
+                }
+                return "I can explain JavaScript, HTML, CSS, APIs, and more. Ask me about a specific topic!";
+            },
+            
+            recommendProject: () => {
+                const projects = AlienAI.userProfile.projects;
+                if (projects.length === 0) {
+                    return "For beginners, I recommend starting with: 1) Todo List, 2) Calculator, 3) Simple Form. Which interests you?";
+                } else {
+                    return `Based on your ${projects.length} past projects, try building: a Weather App, a Note-taking system, or a Portfolio website!`;
+                }
+            },
+            
+            // Learning system
+            learn: (userMsg, aiResponse) => {
+                // Track what user builds
+                if (userMsg.toLowerCase().includes('build') || userMsg.toLowerCase().includes('create')) {
+                    AlienAI.userProfile.projects.push({
+                        request: userMsg,
+                        timestamp: Date.now()
+                    });
+                    localStorage.setItem('user_profile', JSON.stringify(AlienAI.userProfile));
+                }
+            },
+            
+            saveHistory: () => {
+                // Keep last 20 messages
+                if (AlienAI.conversationHistory.length > 20) {
+                    AlienAI.conversationHistory = AlienAI.conversationHistory.slice(-20);
+                }
+                localStorage.setItem('ai_history', JSON.stringify(AlienAI.conversationHistory));
+            },
+            
+            clearHistory: () => {
+                AlienAI.conversationHistory = [];
+                localStorage.removeItem('ai_history');
+            },
+            
+            // Settings UI helper
+            showSettings: () => {
+                const currentProvider = AlienAI.config.provider;
+                const hasKey = AlienAI.config.apiKey ? '✓ Configured' : '✗ Not set';
+                
+                addChat('ai', `Current AI Mode: ${currentProvider.toUpperCase()}\nAPI Key: ${hasKey}\n\nTo configure, use commands:\n- "set api openai"\n- "set key YOUR_KEY_HERE"\n\nOr upgrade to AI Pro for managed AI!`);
+            }
+        };
+
+        async function processCommand(cmd) {
+            const c = cmd.toLowerCase();
+            
+            // AI Settings commands
+            if (c.startsWith('set api')) {
+                const provider = c.split(' ')[2];
+                if (['openai', 'claude', 'gemini', 'demo'].includes(provider)) {
+                    AlienAI.config.provider = provider;
+                    localStorage.setItem('ai_provider', provider);
+                    addChat('ai', `AI provider set to: ${provider.toUpperCase()}`);
+                } else {
+                    addChat('ai', 'Available providers: openai, claude, gemini, demo');
+                }
+                return;
+            }
+            
+            if (c.startsWith('set key')) {
+                const key = cmd.split(' ').slice(2).join(' ');
+                AlienAI.config.apiKey = key;
+                localStorage.setItem('ai_api_key', key);
+                addChat('ai', 'API key configured ✓');
+                return;
+            }
+            
+            if (c === 'ai settings' || c === 'settings') {
+                AlienAI.showSettings();
+                return;
+            }
+            
+            if (c === 'clear history') {
+                AlienAI.clearHistory();
+                addChat('ai', 'Conversation history cleared.');
+                return;
+            }
+            
+            // Check for LEARNING command first
+            if (c.startsWith("learn")) {
+                const parts = c.split(" as ");
+                if (parts.length === 2) {
+                    const trigger = parts[0].replace("learn", "").trim();
+                    const actionName = parts[1].trim();
+                    
+                    let mappedAction = null;
+                    if (actionName.includes("generate") || actionName.includes("key")) mappedAction = "genKey";
+                    else if (actionName.includes("rf") || actionName.includes("scan")) mappedAction = "calcRF";
+                    else if (actionName.includes("repair")) mappedAction = "repairCode";
+                    else if (actionName.includes("alien")) mappedAction = "navAlien";
+                    
+                    if (mappedAction) {
+                        MemoryModule.indicateLearning(true);
+                        MemoryModule.save(trigger, mappedAction);
+                        setTimeout(() => {
+                            addChat('ai', `Neural pathway established. I will now run '${actionName}' when you say '${trigger}'.`);
+                            MemoryModule.indicateLearning(false);
+                        }, 1500);
+                        return;
+                    }
+                }
+            }
+
+            // Check MEMORY for learned triggers
+            const learnedAction = MemoryModule.recall(c);
+            if (learnedAction) {
+                if (learnedAction === "genKey") { nav('security'); actions.genKey(); addChat('ai', "Executing learned protocol: Key Generated."); return; }
+                if (learnedAction === "calcRF") { nav('rf'); actions.calcRF(); addChat('ai', "Executing learned protocol: RF Scanned."); return; }
+                if (learnedAction === "repairCode") { nav('dev'); addChat('ai', "Executing learned protocol: Dev Console Ready."); return; }
+            }
+
+            // Standard Hardcoded Actions (Quick responses)
+            if(c.includes('generate') && c.includes('key')) { 
+                nav('security'); 
+                const k = actions.genKey(); 
+                addChat('ai', `Generated new key ending in ...${k.slice(-4)}`, ['Copy Key', 'Rotate Again']); 
+                return;
+            }
+            else if(c.includes('rf') || (c.includes('scan') && !c.includes('build') && !c.includes('create'))) { 
+                nav('rf'); 
+                const val = actions.calcRF(); 
+                addChat('ai', `RF Analysis: Potential yield is ${val.toFixed(2)} µW.`, ['Increase Distance', 'Max Power']); 
+                return;
+            }
+            else if(c.includes('repair') && c.includes('code')) { 
+                nav('dev'); 
+                addChat('ai', "Dev Console ready. Paste code to repair.", ['Clear Editor']); 
+                return;
+            }
+            else if(c.includes('home') || c.includes('dashboard')) { 
+                nav('home'); 
+                addChat('ai', "Welcome back to Overview."); 
+                return;
+            }
+            
+            // AI-Powered responses for everything else
+            addChat('ai', '🧠 Thinking...');
+            
+            try {
+                const result = await AlienAI.ask(cmd);
+                
+                // Remove "thinking" message
+                const feed = document.getElementById('chat-feed');
+                if (feed.lastChild) feed.removeChild(feed.lastChild);
+                
+                if (result.needsUpgrade) {
+                    addChat('ai', result.response, ['Upgrade Now', 'View Pricing']);
+                } else {
+                    addChat('ai', result.response);
+                }
+            } catch (error) {
+                addChat('ai', `Error: ${error.message}. Try: "Generate Key", "Scan RF", or ask me to build something!`);
+            }
+        }
+
+        function toggleVoice() {
+            state.voiceActive = !state.voiceActive;
+            const btn = document.getElementById('voice-toggle');
+            const icon = document.getElementById('voice-icon');
+            const txt = document.getElementById('voice-text');
+            if(state.voiceActive) {
+                icon.className = "fa-solid fa-volume-high text-cyan-400";
+                txt.innerText = "Voice On";
+                txt.className = "hidden md:block text-cyan-400";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+                txt.innerText = "Voice Off";
+                txt.className = "hidden md:block";
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            const v = voices.find(v => v.name.includes("Google") || v.name.includes("Samantha"));
+            if(v) u.voice = v;
+            u.pitch = 1;
+            u.rate = 1;
+            window.speechSynthesis.speak(u);
+        }
+
+        function initSpeech() {
+            if ('webkitSpeechRecognition' in window) {
+                const SR = window.webkitSpeechRecognition;
+                state.recognition = new SR();
+                state.recognition.continuous = false;
+                state.recognition.onresult = (e) => {
+                    const t = e.results[0][0].transcript;
+                    document.getElementById('cmd-input').value = t;
+                    actions.sendCmd();
+                    actions.toggleMic();
+                };
+                state.recognition.onend = () => { document.getElementById('mic-btn').classList.remove('mic-active'); };
+            }
+        }
+
+        // Setup Carousel Interaction
+        // Removed carousel hover listeners - apps now in dropdown menu
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+        actions.genKey();
+        actions.calcRF();
+        
+        document.getElementById('cmd-input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') actions.sendCmd();
+        });
+
+        // Apps menu toggle
+        function toggleAppsMenu() {
+            const menu = document.getElementById('appsMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('appsMenu');
+            const button = e.target.closest('button[onclick="toggleAppsMenu()"]');
+            if (!button && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+    </script>
+</body>
+</html>

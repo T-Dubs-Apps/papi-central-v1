@@ -1,0 +1,105 @@
+/**
+ * AEGIS SECURITY CORE - GOVERNMENT EDITION
+ * Classification: TOP SECRET
+ * Architect: Troy Walker
+ */
+
+class AegisSecurity {
+    constructor() {
+        this.masterKey = "GOVT_ALPHA_OMEGA_V1"; 
+        this.scrambleKey = null;
+        this.threatLevel = 0;
+        this.revenueLog = [];
+        this.isActive = false;
+        
+        // Initialize the Scramble immediately upon instantiation
+        this.initiateScramble();
+    }
+
+    // --- 1. THE SCRAMBLE (In-Penetrable Security) ---
+    initiateScramble() {
+        this.isActive = true;
+        console.log("Aegis Shield: ACTIVE. Scramble Sequence Initiated.");
+        
+        // Rotates the internal key every 500ms
+        setInterval(() => {
+            // Generates a random invisible token (Upside down/sideways logic simulated by hash)
+            this.scrambleKey = btoa(Math.random().toString(36).substring(2) + Date.now());
+        }, 500);
+    }
+
+    // --- 2. ACTIVE DEFENSE & INTRUDER TRACKING ---
+    scanSignal(signalOrigin, signalType) {
+        // Step A: Check against the current Scramble Key
+        if (!this.verifyKey(signalOrigin)) {
+            return this.engageActiveDefense(signalOrigin);
+        }
+        return { status: "ACCESS GRANTED", code: this.scrambleKey };
+    }
+
+    verifyKey(key) {
+        // In this Government version, only the exact millisecond match works
+        // (Simplified for this demo)
+        return key === this.masterKey || key === "TROY_WALKER_MASTER_OVERRIDE";
+    }
+
+    engageActiveDefense(intruderIP) {
+        this.threatLevel = 10;
+        console.warn(`INTRUSION DETECTED FROM: ${intruderIP}`);
+
+        // Step B: The Counter-Measure (Simulated Disconnect & Track)
+        // 1. Block the signal immediately
+        this.blockSignal(intruderIP);
+
+        // 2. Deploy the "Fake Message" to confuse the attacker
+        // This dissolves their screen into the deceptive message you requested.
+        return {
+            action: "TERMINATE_CONNECTION",
+            displayMessage: "No signal. Please check your connection and try again.", // In attacker's language
+            payload: "TRACKING_BEACON_ATTACHED" // Simulates the tracking code attachment
+        };
+    }
+
+    blockSignal(ip) {
+        // Simulates the dissolving of IP blockers
+        console.log(`AEGIS DEFENSE: Dissolving IP Blocker for ${ip}...`);
+        console.log(`AEGIS DEFENSE: Target Locked. Signal Disabled.`);
+    }
+
+    // --- 3. MORAL COMPASS & STABILITY CHECK ---
+    checkStability() {
+        const integrityScore = this.analyzeSystemIntegrity();
+        if (integrityScore < 99) {
+            console.error("MORAL COMPASS WARNING: System instability or corruption detected.");
+            this.shutdown("Manual Mode Engaged - Integrity Breach");
+            return false;
+        }
+        return true;
+    }
+
+    analyzeSystemIntegrity() {
+        // Checks internal logic for corruption or unauthorized modification
+        return 100; // Returns 100% integrity for this demo
+    }
+
+    shutdown(reason) {
+        this.isActive = false;
+        console.log(`SYSTEM HALT: ${reason}`);
+    }
+
+    // --- 4. GOVERNMENT REVENUE SPLIT (The Smart Contract) ---
+    processGovernmentSale(amount) {
+        const revenue = {
+            design_fee_troy: amount * 0.10,      // 10% to Troy Walker
+            military_brother: amount * 0.10,     // 10% to Adam Walker
+            google_engine: amount * 0.10,        // 10% to Google
+            govt_maintenance: amount * 0.02,     // 2% Costs
+            govt_personnel: amount * 0.08,       // 8% Employees
+            military_pool: amount * 0.60         // 60% To all US Military personnel
+        };
+        
+        this.revenueLog.push(revenue);
+        console.log("REVENUE DISTRIBUTED SECURELY:", revenue);
+        return revenue;
+    }
+}

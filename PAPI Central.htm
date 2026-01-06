@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI CENTRAL | License Store</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { 
+            --papi-blue: #38bdf8; 
+            --papi-bg: #020617; 
+            --papi-card: #0f172a; 
+            --papi-success: #22c55e;
+            --papi-orange: #f97316;
+            --papi-purple: #a855f7;
+            --papi-green: #22c55e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #020617 0%, #0a0e1a 100%);
+            color: #f8fafc; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        .header {
+            text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #1e293b;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid var(--papi-blue);
+            color: var(--papi-blue);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background: var(--papi-blue);
+            color: #000;
+        }
+        h1 { 
+            font-size: 3rem; 
+            color: var(--papi-blue); 
+            letter-spacing: 3px; 
+            margin-bottom: 15px;
+        }
+        .motto { 
+            color: #94a3b8; 
+            font-style: italic; 
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .product-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .product-card.ai { border-color: var(--papi-blue); }
+        .product-card.automation { border-color: var(--papi-orange); }
+        .product-card.security { border-color: var(--papi-green); }
+        .product-card.bundle { border-color: var(--papi-purple); }
+        
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .product-card.ai .product-icon { color: var(--papi-blue); }
+        .product-card.automation .product-icon { color: var(--papi-orange); }
+        .product-card.security .product-icon { color: var(--papi-green); }
+        .product-card.bundle .product-icon { color: var(--papi-purple); }
+        
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .product-desc {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+        
+        .features {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        
+        .features li::before {
+            content: '✓ ';
+            color: var(--papi-success);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .price-section {
+            border-top: 1px solid #1e293b;
+            padding-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--papi-success);
+        }
+        
+        .price-period {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .btn-purchase {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .btn-purchase.ai {
+            background: var(--papi-blue);
+            color: #000;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        .btn-purchase.ai:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+        }
+        
+        .btn-purchase.automation {
+            background: var(--papi-orange);
+            color: #000;
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+        }
+        .btn-purchase.automation:hover {
+            background: #fb923c;
+            transform: translateY(-2px);
+        }
+        
+        .btn-purchase.security {
+            background: var(--papi-green);
+            color: #000;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        .btn-purchase.security:hover {
+            background: #4ade80;
+            transform: translateY(-2px);
+        }
+        
+        .btn-purchase.bundle {
+            background: linear-gradient(135deg, var(--papi-purple), #c026d3);
+            color: white;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+        }
+        .btn-purchase.bundle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+        }
+        
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--papi-success);
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        .status-bar { 
+            text-align: center;
+            margin-top: 40px; 
+            font-size: 0.8rem; 
+            color: #475569; 
+            border-top: 1px solid #1e293b; 
+            padding-top: 20px;
+        }
+        
+        @media (max-width: 768px) { 
+            .products-grid { 
+                grid-template-columns: 1fr; 
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                <i class="fa-solid fa-rocket"></i> Return to Ship
+            </a>
+            <a href="beta-admin.html" style="position: absolute; top: 20px; right: 20px; background: rgba(168, 85, 247, 0.2); border: 1px solid var(--papi-purple); color: var(--papi-purple); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--papi-purple)'; this.style.color='#000'" onmouseout="this.style.background='rgba(168, 85, 247, 0.2)'; this.style.color='var(--papi-purple)'">
+                <i class="fa-solid fa-users"></i> Beta Admin
+            </a>
+            <h1>PAPI CENTRAL</h1>
+            <p class="motto">"One of the most important things that a human can have is self control."</p>
+        </div>
+
+        <div class="products-grid">
+            <!-- AI Assistant Pro -->
+            <div class="product-card ai">
+                <span class="badge">BEST SELLER</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h2 class="product-name">AI Assistant Pro</h2>
+                <p class="product-desc">Ultra-smart code generation AI with real-time learning capabilities</p>
+                <ul class="features">
+                    <li>Unlimited AI Conversations</li>
+                    <li>Full Code Generation</li>
+                    <li>Learning System Enabled</li>
+                    <li>API Integration (GPT-4, Claude)</li>
+                    <li>Project Memory & Templates</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$49.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase ai" onclick="purchase('ai_pro', 49.99, 'monthly')">
+                    <i class="fa-solid fa-rocket"></i> Subscribe Now
+                </button>
+            </div>
+
+            <!-- Automation Hub -->
+            <div class="product-card automation">
+                <div class="product-icon">
+                    <i class="fa-solid fa-gears"></i>
+                </div>
+                <h2 class="product-name">Automation Hub</h2>
+                <p class="product-desc">One-click project deployment and build automation system</p>
+                <ul class="features">
+                    <li>6+ Pre-Configured Projects</li>
+                    <li>Auto-Compile & Deploy</li>
+                    <li>File Structure Scanner</li>
+                    <li>Terminal-Style Logging</li>
+                    <li>Progress Tracking</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$29.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase automation" onclick="purchase('automation', 29.99, 'monthly')">
+                    <i class="fa-solid fa-bolt"></i> Activate License
+                </button>
+            </div>
+
+            <!-- Aegis Guard -->
+            <div class="product-card security">
+                <div class="product-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h2 class="product-name">Aegis Guard</h2>
+                <p class="product-desc">Military-grade security scanner for browser and system protection</p>
+                <ul class="features">
+                    <li>Real-Time Threat Detection</li>
+                    <li>7+ Security Checks</li>
+                    <li>Cookie & Storage Analysis</li>
+                    <li>DevTools Detection</li>
+                    <li>Automated Reporting</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$9.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase security" onclick="purchase('aegis', 9.99, 'monthly')">
+                    <i class="fa-solid fa-lock"></i> Get Protected
+                </button>
+            </div>
+
+            <!-- Aegis Government -->
+            <div class="product-card security">
+                <span class="badge">🔒 CLASSIFIED</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-shield"></i>
+                </div>
+                <h2 class="product-name">Aegis Government</h2>
+                <p class="product-desc">Military-grade security with dynamic key scrambling and active defense systems</p>
+                <ul class="features">
+                    <li>Crypto-Grade Key Rotation (500ms)</li>
+                    <li>Active Defense & Tracking</li>
+                    <li>Intrusion Detection System</li>
+                    <li>Revenue Smart Contracts</li>
+                    <li>Moral Compass Integrity Check</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$99.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase security" onclick="purchase('aegis_gov', 99.99, 'monthly')">
+                    <i class="fa-solid fa-shield-halved"></i> Request Clearance
+                </button>
+            </div>
+
+            <!-- CallSentry AI -->
+            <div class="product-card security">
+                <div class="product-icon">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </div>
+                <h2 class="product-name">CallSentry AI</h2>
+                <p class="product-desc">Intelligent call protection that auto-blocks unknown callers with SMS auto-reply</p>
+                <ul class="features">
+                    <li>Automatic Unknown Call Blocking</li>
+                    <li>SMS Auto-Reply System</li>
+                    <li>Real-Time Call Analytics</li>
+                    <li>Complete Call Log History</li>
+                    <li>Daily/Weekly/Monthly Reports</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$14.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase security" onclick="purchase('callsentry', 14.99, 'monthly')">
+                    <i class="fa-solid fa-shield-halved"></i> Activate Protection
+                </button>
+            </div>
+
+            <!-- No Knowledge Kit -->
+            <div class="product-card bundle">
+                <span class="badge">🔥 HOT</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h2 class="product-name">No Knowledge Kit</h2>
+                <p class="product-desc">Build complete apps without ANY coding knowledge! District Manager + Code Automation working together.</p>
+                <ul class="features">
+                    <li>District Manager AI Director</li>
+                    <li>Code Automation System</li>
+                    <li>Full App Generation (HTML/CSS/JS)</li>
+                    <li>Automatic File Packaging</li>
+                    <li>Deployment Guides Included</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$50<span class="price-period">/mo</span></div>
+                    <div style="color: #64748b;">District Manager + Code Automation</div>
+                </div>
+                <button class="btn-purchase bundle" onclick="purchase('nk', 50, 'monthly')">
+                    <i class="fa-solid fa-magic"></i> Build Without Code
+                </button>
+            </div>
+
+            <!-- Key Generator Pro -->
+            <div class="product-card security">
+                <span class="badge">FREE</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h2 class="product-name">Key Generator Pro</h2>
+                <p class="product-desc">Quantum-grade security key generation for all platforms</p>
+                <ul class="features">
+                    <li>OpenAI API Keys</li>
+                    <li>Claude API Keys</li>
+                    <li>Google Gemini Keys</li>
+                    <li>License Key Generation</li>
+                    <li>Military-Grade Encryption</li>
+                    <li>Google Verified ✓</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">FREE<span class="price-period">/forever</span></div>
+                </div>
+                <button class="btn-purchase security" onclick="window.location.href='key-generator.html'">
+                    <i class="fa-solid fa-rocket"></i> Launch Generator
+                </button>
+            </div>
+
+            <!-- Complete Bundle -->
+            <div class="product-card bundle">
+                <span class="badge">SAVE 40%</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <h2 class="product-name">Complete Bundle</h2>
+                <p class="product-desc">All apps + premium features at a massive discount</p>
+                <ul class="features">
+                    <li>AI Assistant Pro (Unlimited)</li>
+                    <li>Automation Hub (Full Access)</li>
+                    <li>Aegis Guard (Protected)</li>
+                    <li>CallSentry AI (Premium)</li>
+                    <li>No Knowledge Kit (Included!)</li>
+                    <li>Priority Support</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$49.99<span class="price-period">/mo</span></div>
+                    <div style="color: #64748b; text-decoration: line-through;">Regular: $154.96/mo</div>
+                </div>
+                <button class="btn-purchase bundle" onclick="purchase('bundle', 49.99, 'monthly')">
+                    <i class="fa-solid fa-crown"></i> Get Everything
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span>SECURE PAYMENTS: <span style="color:var(--papi-success)">STRIPE PROTECTED</span></span> | 
+            <span>INSTANT ACTIVATION: <span style="color:var(--papi-blue)">AUTOMATIC</span></span> |
+            <span>CANCEL ANYTIME: <span style="color:var(--papi-success)">NO COMMITMENT</span></span>
+        </div>
+    </div>
+
+    <script>
+        // Stripe Public Key - Replace with your actual key
+        const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_KEY_HERE'; // TODO: Replace with real key
+        
+        // Product IDs mapped to Stripe Price IDs
+        const STRIPE_PRICES = {
+            'ai_pro': 'price_YOUR_AI_PRO_PRICE_ID',
+            'automation': 'price_YOUR_AUTOMATION_PRICE_ID',
+            'callsentry': 'price_YOUR_CALLSENTRY_PRICE_ID',
+            'aegis': 'price_YOUR_AEGIS_PRICE_ID',
+            'aegis_gov': 'price_YOUR_AEGIS_GOV_PRICE_ID',
+            'nk': 'price_YOUR_NO_KNOWLEDGE_KIT_PRICE_ID',
+            'bundle': 'price_YOUR_BUNDLE_PRICE_ID'
+        };
+        
+        async function purchase(productId, amount, billingType) {
+            // Check if already has license
+            const licenseKey = productId === 'ai_pro' ? 'papi_license' : 
+                              productId === 'automation' ? 'automation_license' :
+                              productId === 'aegis' ? 'aegis_license' : 'bundle_license';
+            
+            if (localStorage.getItem(licenseKey) === 'active') {
+                alert('You already have an active license for this product!');
+                return;
+            }
+            
+            // Show loading state
+            const btn = event.target;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+            
+            try {
+                // For demo purposes, simulate payment
+                // In production, redirect to Stripe Checkout
+                
+                if (STRIPE_PUBLIC_KEY.includes('YOUR_KEY')) {
+                    // Demo mode - instant activation
+                    setTimeout(() => {
+                        activateLicense(productId, billingType);
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Activated!';
+                        
+                        setTimeout(() => {
+                            alert(`✅ ${getProductName(productId)} activated successfully!\n\nYour license is now active. Return to the main app to use your new features.`);
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    }, 2000);
+                } else {
+                    // Production mode - Stripe Checkout
+                    const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                    const priceId = STRIPE_PRICES[productId];
+                    
+                    const { error } = await stripe.redirectToCheckout({
+                        lineItems: [{price: priceId, quantity: 1}],
+                        mode: billingType === 'monthly' ? 'subscription' : 'payment',
+                        successUrl: `${window.location.origin}/success.html?product=${productId}`,
+                        cancelUrl: window.location.href,
+                        clientReferenceId: generateLicenseKey(productId)
+                    });
+                    
+                    if (error) {
+                        throw error;
+                    }
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                alert('Payment failed. Please try again or contact support.');
+            }
+        }
+        
+        function activateLicense(productId, billingType) {
+            const licenseData = {
+                product: productId,
+                activatedAt: Date.now(),
+                expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days
+                billingType: billingType,
+                status: 'active',
+                licenseKey: generateLicenseKey(productId)
+            };
+            
+            // Set specific license flags
+            if (productId === 'ai_pro') {
+                localStorage.setItem('papi_license', 'active');
+                localStorage.setItem('papi_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'automation') {
+                localStorage.setItem('automation_license', 'active');
+                localStorage.setItem('automation_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'aegis') {
+                localStorage.setItem('aegis_license', 'active');
+                localStorage.setItem('aegis_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'aegis_gov') {
+                localStorage.setItem('aegis_gov_license', 'active');
+                localStorage.setItem('aegis_gov_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'nk') {
+                localStorage.setItem('nk_license', 'active');
+                localStorage.setItem('nk_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'callsentry') {
+                localStorage.setItem('callsentry_license', 'active');
+                localStorage.setItem('callsentry_license_data', JSON.stringify(licenseData));
+            } else if (productId === 'bundle') {
+                // Activate all licenses
+                localStorage.setItem('papi_license', 'active');
+                localStorage.setItem('automation_license', 'active');
+                localStorage.setItem('aegis_license', 'active');
+                localStorage.setItem('nk_license', 'active');
+                localStorage.setItem('callsentry_license', 'active');
+                localStorage.setItem('bundle_license', 'active');
+                localStorage.setItem('bundle_license_data', JSON.stringify(licenseData));
+            }
+            
+            // Track purchase
+            trackPurchase(productId, licenseData.licenseKey);
+        }
+        
+        function generateLicenseKey(productId) {
+            const prefix = productId.toUpperCase().substring(0, 4);
+            const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+            const timestamp = Date.now().toString(36).toUpperCase();
+            return `${prefix}-${random}-${timestamp}`;
+        }
+        function getProductName(productId) {
+            const names = {
+                'ai_pro': 'AI Assistant Pro',
+                'automation': 'Automation Hub',
+                'aegis': 'Aegis Guard',
+                'aegis_gov': 'Aegis Government Security',
+                'callsentry': 'CallSentry AI',
+                'nk': 'No Knowledge Kit',
+                'bundle': 'Complete Bundle'
+            };
+            return names[productId] || productId;
+        }
+        
+        function trackPurchase(productId, licenseKey) {
+            const purchases = JSON.parse(localStorage.getItem('purchase_history') || '[]');
+            purchases.push({
+                product: productId,
+                licenseKey: licenseKey,
+                purchasedAt: Date.now()callsentry', 'nk', 'bundle'];
+            products.forEach(productId 
+            });
+            localStorage.setItem('purchase_history', JSON.stringify(purchases));
+        }
+        
+        // Check for existing licenses and update UI
+        window.addEventListener('DOMContentLoaded', () => {
+            const products = ['ai_pro', 'automation', 'aegis', 'callsentry', 'nk', 'bundle'];
+            products.forEach(productId => {
+                const licenseKey = productId === 'ai_pro' ? 'papi_license' : 
+                                  productId === 'automation' ? 'automation_license' :
+                                  productId === 'aegis' ? 'aegis_license' :
+                                  productId === 'callsentry' ? 'callsentryse' : 'bundle_license';
+                
+                if (localStorage.getItem(licenseKey) === 'active') {
+                    const btn = document.querySelector(`.btn-purchase.${productId === 'ai_pro' ? 'ai' : productId === 'bundle' ? 'bundle' : productId}`);
+                    if (btn) {
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Active License';
+                        btn.style.opacity = '0.6';
+                        btn.disabled = true;
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

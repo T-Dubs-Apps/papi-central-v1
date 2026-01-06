@@ -1,0 +1,39 @@
+<style>
+  body { background-color: #000; color: #0f0; font-family: 'Courier New', monospace; }
+  
+  /* The Brains: Hovering Spaceship */
+  .spaceship-container {
+    position: relative;
+    width: 200px;
+    margin: 50px auto;
+    animation: hoverEffect 3s infinite ease-in-out;
+    cursor: pointer;
+    z-index: 100; /* On top of everything */
+  }
+
+  .spaceship-img {
+    width: 100%;
+    filter: drop-shadow(0 0 15px #00ff00); /* Alien Glow */
+  }
+
+  @keyframes hoverEffect {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* The Hidden Code Automation Engine (Initially Hidden) */
+  #automation-engine {
+    display: none; /* Protected by Aegis */
+    border: 2px solid #0f0;
+    padding: 20px;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="spaceship-container" onclick="activateAegisCheck()">
+  <img src="https://img.icons8.com/color/96/ufo.png" alt="Alien AI Brain" class="spaceship-img">
+  <div style="text-align:center; margin-top:10px;">ALIEN AI BRAIN</div>
+</div>
+
+<div id="status-display" style="text-align:center; margin-top:20px;">SYSTEM SECURE. WAITING FOR COMMAND.</div>

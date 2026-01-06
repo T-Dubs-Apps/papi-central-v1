@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NO KNOWLEDGE KIT // DISTRICT MANAGER + CODE AUTOMATION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-manager: #f59e0b;
+            --accent-assistant: #3b82f6;
+            --accent-clerk: #10b981;
+            --accent-shipping: #8b5cf6;
+            --text-primary: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+        
+        .panel.active-agent {
+            border-color: currentColor;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid currentColor;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .agent-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            color: #1e293b;
+            font-weight: bold;
+        }
+
+        /* License Gate Overlay */
+        .license-gate {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- LICENSE GATE -->
+    <div id="licenseGate" class="license-gate hidden">
+        <div class="bg-gray-900 border-2 border-amber-500 rounded-2xl p-8 max-w-md text-center shadow-2xl">
+            <div class="bg-amber-500 text-black w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fas fa-lock text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-amber-500">NO KNOWLEDGE KIT</h2>
+            <p class="text-gray-400 mb-1">PREMIUM LICENSE REQUIRED</p>
+            <p class="text-3xl font-bold text-white mb-6">$50<span class="text-sm text-gray-400">/month</span></p>
+            <p class="text-sm text-gray-300 mb-6">
+                Includes District Manager + Code Automation working together.
+                Build complete apps with zero coding knowledge!
+            </p>
+            <div class="space-y-3">
+                <a href="PAPI Central.htm" class="block bg-amber-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-amber-400 transition">
+                    <i class="fas fa-shopping-cart mr-2"></i> GET LICENSE
+                </a>
+                <a href="index.html" class="block text-gray-400 hover:text-white transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Return to Ship
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER: District Manager Interface -->
+    <header class="bg-[#1e293b] border-b border-gray-700 p-4 shadow-lg z-20">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-amber-500 to-purple-600 text-white p-2 rounded font-bold tracking-widest">NK</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider">NO KNOWLEDGE KIT</h1>
+                    <p class="text-xs text-gray-400">DISTRICT MANAGER + CODE AUTOMATION // BUILD APPS WITHOUT CODING</p>
+                </div>
+                <span class="bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded">PREMIUM $50/mo</span>
+            </div>
+
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="password" id="apiKey" placeholder="Enter Gemini API Key (AIza...)" 
+                    class="bg-gray-800 border border-gray-600 text-white text-xs p-2 rounded w-full md:w-64 focus:border-blue-500 focus:outline-none transition-colors">
+                <button onclick="saveKey()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs transition-colors">
+                    SAVE
+                </button>
+                <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-xs transition-colors">
+                    <i class="fas fa-arrow-left mr-1"></i> SHIP
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 overflow-hidden relative">
+        <div class="absolute inset-0 p-4 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto">
+            
+            <!-- INPUT SECTION -->
+            <div class="flex gap-0 shadow-2xl z-10">
+                <div class="bg-gray-800 p-4 flex items-center border-l border-t border-b border-gray-600 rounded-l-lg">
+                    <span class="text-gray-400 text-sm">REQUEST:</span>
+                </div>
+                <input type="text" id="userRequest" placeholder="Describe the app you want to build (e.g., 'A personal finance tracker for Android and Web')..." 
+                    class="flex-1 bg-gray-900 border-t border-b border-gray-600 text-white p-4 focus:outline-none font-mono">
+                <button onclick="startAutomation()" id="startBtn" 
+                    class="bg-white text-black font-bold px-8 py-4 border-t border-b border-r border-white rounded-r-lg hover:bg-gray-200 transition-colors tracking-wider">
+                    INITIALIZE
+                </button>
+            </div>
+
+            <!-- AGENT GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-h-0">
+                
+                <!-- 1. THE MANAGER -->
+                <div id="panel-manager" class="panel rounded-xl flex flex-col overflow-hidden text-[#f59e0b]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#f59e0b]"><i class="fas fa-brain"></i></div>
+                            <div>
+                                <h3 class="font-bold text-sm">DISTRICT MGR</h3>
+                                <p class="text-[10px] opacity-70">STRATEGY & OVERSIGHT</p>
+                            </div>
+                        </div>
+                        <div id="status-manager" class="hidden loader"></div>
+                    </div>
+                    <div id="log-manager" class="p-4 overflow-y-auto text-xs space-y-2 flex-1 font-mono leading-relaxed text-gray-300">
+                        <p class="opacity-50">Waiting for input...</p>
+                    </div>
+                </div>
+
+                <!-- 2. ASSISTANT MANAGER -->
+                <div id="panel-assistant" class="panel rounded-xl flex flex-col overflow-hidden text-[#3b82f6]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#3b82f6]"><i class="fas fa-code"></i></div>
+                            <div>
+                                <h3 class="font-bold text-sm">ASSISTANT MGR</h3>
+                                <p class="text-[10px] opacity-70">CODE GENERATION</p>
+                            </div>
+                        </div>
+                        <div id="status-assistant" class="hidden loader"></div>
+                    </div>
+                    <div id="log-assistant" class="p-4 overflow-y-auto text-xs space-y-2 flex-1 font-mono leading-relaxed text-gray-300">
+                        <p class="opacity-50">Waiting for specs...</p>
+                    </div>
+                </div>
+
+                <!-- 3. THE CLERK -->
+                <div id="panel-clerk" class="panel rounded-xl flex flex-col overflow-hidden text-[#10b981]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#10b981]"><i class="fas fa-file-code"></i></div>
+                            <div>
+                                <h3 class="font-bold text-sm">THE CLERK</h3>
+                                <p class="text-[10px] opacity-70">FILE PARSING & QA</p>
+                            </div>
+                        </div>
+                        <div id="status-clerk" class="hidden loader"></div>
+                    </div>
+                    <div id="log-clerk" class="p-4 overflow-y-auto text-xs space-y-2 flex-1 font-mono leading-relaxed text-gray-300">
+                        <p class="opacity-50">Waiting for raw code...</p>
+                    </div>
+                </div>
+
+                <!-- 4. SHIPPING & RECEIVING -->
+                <div id="panel-shipping" class="panel rounded-xl flex flex-col overflow-hidden text-[#8b5cf6]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#8b5cf6]"><i class="fas fa-boxes"></i></div>
+                            <div>
+                                <h3 class="font-bold text-sm">SHIPPING</h3>
+                                <p class="text-[10px] opacity-70">PACKAGING & DEPLOY</p>
+                            </div>
+                        </div>
+                        <div id="status-shipping" class="hidden loader"></div>
+                    </div>
+                    <div id="log-shipping" class="p-4 overflow-y-auto text-xs space-y-2 flex-1 font-mono leading-relaxed text-gray-300">
+                        <p class="opacity-50">Waiting for files...</p>
+                    </div>
+                    <div id="download-area" class="p-4 border-t border-gray-700 hidden bg-gray-800">
+                        <button onclick="downloadPackage()" class="w-full bg-[#8b5cf6] text-white font-bold py-2 rounded hover:bg-[#7c3aed] transition shadow-lg animate-pulse">
+                            <i class="fas fa-download mr-2"></i> DOWNLOAD APP PACKAGE
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- STATUS FOOTER -->
+    <footer class="bg-black border-t border-gray-800 p-2 text-[10px] flex justify-between items-center text-gray-500 font-mono">
+        <div id="global-status">SYSTEM READY</div>
+        <div>NO KNOWLEDGE KIT v1.0 // DISTRICT MANAGER + CODE AUTOMATION // POWERED BY GEMINI</div>
+    </footer>
+
+    <script>
+        // --- LICENSE CHECK ---
+        function checkLicense() {
+            const hasLicense = localStorage.getItem('nk_license') === 'active' || 
+                             localStorage.getItem('bundle_license') === 'active';
+            
+            if (!hasLicense) {
+                document.getElementById('licenseGate').classList.remove('hidden');
+                return false;
+            }
+            return true;
+        }
+
+        // Run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLicense();
+        });
+
+        // --- STATE MANAGEMENT ---
+        let apiKey = localStorage.getItem("code_auto_key") || "";
+        let projectData = {
+            idea: "",
+            spec: "",
+            rawCode: "",
+            files: [],
+            zipBlob: null
+        };
+
+        // --- INIT ---
+        if(apiKey) {
+            document.getElementById("apiKey").value = apiKey;
+            document.getElementById("apiKey").classList.add("border-green-500");
+        }
+
+        function saveKey() {
+            apiKey = document.getElementById("apiKey").value.trim();
+            localStorage.setItem("code_auto_key", apiKey);
+            alert("API Key Saved.");
+        }
+
+        function log(agent, message, type="info") {
+            const el = document.getElementById(`log-${agent}`);
+            const p = document.createElement("div");
+            
+            if (type === "error") p.className = "text-red-400 font-bold border-l-2 border-red-500 pl-2";
+            else if (type === "success") p.className = "text-green-400 font-bold border-l-2 border-green-500 pl-2";
+            else p.className = "border-l-2 border-gray-700 pl-2";
+
+            p.innerHTML = `<span class="opacity-50">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+            el.appendChild(p);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function setStatus(agent, active) {
+            const panel = document.getElementById(`panel-${agent}`);
+            const loader = document.getElementById(`status-${agent}`);
+            
+            if(active) {
+                panel.classList.add("active-agent");
+                loader.classList.remove("hidden");
+                document.getElementById("global-status").innerText = `AGENT ACTIVE: ${agent.toUpperCase()}`;
+            } else {
+                panel.classList.remove("active-agent");
+                loader.classList.add("hidden");
+            }
+        }
+
+        // --- AGENT 1: THE DISTRICT MANAGER ---
+        async function startAutomation() {
+            if(!checkLicense()) return;
+            if(!apiKey) return alert("Please enter a Google Gemini API Key first.");
+            
+            const idea = document.getElementById("userRequest").value;
+            if(!idea) return alert("Please enter an app idea.");
+
+            // Reset UI
+            ["manager", "assistant", "clerk", "shipping"].forEach(a => {
+                document.getElementById(`log-${a}`).innerHTML = "";
+            });
+            document.getElementById("download-area").classList.add("hidden");
+            document.getElementById("startBtn").disabled = true;
+            document.getElementById("startBtn").innerText = "PROCESSING...";
+
+            projectData.idea = idea;
+
+            // --- PHASE 1: DISTRICT MANAGER ---
+            setStatus("manager", true);
+            log("manager", "Analyzing request: " + idea);
+            
+            try {
+                const prompt = `
+                    You are "The District Manager", an expert Product Manager and Solutions Architect.
+                    User Request: "${idea}"
+                    
+                    Task: Create a concise but complete technical specification for this app.
+                    Requirements:
+                    1. Define the Core Features.
+                    2. Define the File Structure required (HTML, CSS, JS, etc.).
+                    3. Ensure it is cross-platform compatible (Responsive Web App format).
+                    4. Outline a Testing Strategy.
+                    
+                    Output format: Plain text, structured with markdown headers.
+                `;
+
+                const spec = await callGemini(prompt);
+                projectData.spec = spec;
+                log("manager", "Spec generated successfully.", "success");
+                log("manager", "Handing off to Assistant Manager...");
+                setStatus("manager", false);
+
+                // --- PHASE 2: ASSISTANT ---
+                runAssistant();
+
+            } catch (e) {
+                log("manager", "Critical Failure: " + e.message, "error");
+                setStatus("manager", false);
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("startBtn").innerText = "INITIALIZE";
+            }
+        }
+
+        // --- AGENT 2: ASSISTANT MANAGER ---
+        async function runAssistant() {
+            setStatus("assistant", true);
+            log("assistant", "Received specs from District Manager.");
+            log("assistant", "Generating code files...");
+
+            try {
+                const prompt = `
+                    You are "The Assistant Manager", a Lead Developer.
+                    Refer to this Spec: 
+                    ${projectData.spec}
+
+                    Task: Write the COMPLETE code for this application.
+                    
+                    CRITICAL OUTPUT RULES:
+                    1. You must output multiple files.
+                    2. For each file, start with a line containing ONLY: "### filename.extension"
+                    3. Then write the code.
+                    4. End the file with a line containing ONLY: "###"
+                    5. Include 'index.html', 'style.css', 'app.js', 'README.md', and 'deployment_guide.txt'.
+                    6. The 'deployment_guide.txt' should explain how to deploy to Render/GitHub/Netlify.
+                    7. Do not use markdown code blocks (backticks), just raw text separated by the ### markers.
+                `;
+
+                const rawCode = await callGemini(prompt);
+                projectData.rawCode = rawCode;
+                
+                log("assistant", "Code generation complete.", "success");
+                log("assistant", "Transmitting to Clerk for parsing...");
+                setStatus("assistant", false);
+
+                // --- PHASE 3: CLERK ---
+                runClerk();
+
+            } catch (e) {
+                log("assistant", "Generation failed: " + e.message, "error");
+                setStatus("assistant", false);
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("startBtn").innerText = "INITIALIZE";
+            }
+        }
+
+        // --- AGENT 3: THE CLERK ---
+        function runClerk() {
+            setStatus("clerk", true);
+            log("clerk", "Parsing raw data stream...");
+
+            try {
+                const files = [];
+                const lines = projectData.rawCode.split('\n');
+                let currentFile = null;
+                let currentContent = [];
+
+                for (let line of lines) {
+                    if (line.trim().startsWith("###") && line.trim() !== "###") {
+                        // Start new file
+                        if (currentFile) {
+                            files.push({ name: currentFile, content: currentContent.join('\n') });
+                            log("clerk", `Filed: ${currentFile}`, "success");
+                        }
+                        currentFile = line.trim().replace("###", "").trim();
+                        currentContent = [];
+                    } else if (line.trim() === "###") {
+                        // End current file
+                        if (currentFile) {
+                            files.push({ name: currentFile, content: currentContent.join('\n') });
+                            log("clerk", `Filed: ${currentFile}`, "success");
+                            currentFile = null;
+                            currentContent = [];
+                        }
+                    } else {
+                        if (currentFile) currentContent.push(line);
+                    }
+                }
+                
+                // Catch last file if loop ends
+                if (currentFile && currentContent.length > 0) {
+                    files.push({ name: currentFile, content: currentContent.join('\n') });
+                }
+
+                if (files.length === 0) {
+                    throw new Error("No files parsed. AI output format might be wrong.");
+                }
+
+                projectData.files = files;
+                log("clerk", `Processing complete. ${files.length} files prepared.`);
+                setStatus("clerk", false);
+
+                // --- PHASE 4: SHIPPING ---
+                runShipping();
+
+            } catch (e) {
+                log("clerk", "Parsing Error: " + e.message, "error");
+                setStatus("clerk", false);
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("startBtn").innerText = "INITIALIZE";
+            }
+        }
+
+        // --- AGENT 4: SHIPPING & RECEIVING ---
+        async function runShipping() {
+            setStatus("shipping", true);
+            log("shipping", "Initializing packaging protocol...");
+            
+            try {
+                const zip = new JSZip();
+                const folderName = "My_New_App";
+                const root = zip.folder(folderName);
+
+                projectData.files.forEach(file => {
+                    root.file(file.name, file.content);
+                    log("shipping", `Packed: ${file.name}`);
+                });
+
+                // Add spec for reference
+                root.file("technical_spec.md", projectData.spec);
+                log("shipping", "Packed: technical_spec.md");
+
+                // Generate Blob
+                const content = await zip.generateAsync({type: "blob"});
+                projectData.zipBlob = content;
+
+                log("shipping", "Package sealed successfully.", "success");
+                document.getElementById("download-area").classList.remove("hidden");
+                
+                document.getElementById("global-status").innerText = "PROJECT COMPLETE - READY FOR DEPLOYMENT";
+                document.getElementById("startBtn").innerText = "INITIALIZE";
+                document.getElementById("startBtn").disabled = false;
+                setStatus("shipping", false);
+
+            } catch (e) {
+                log("shipping", "Packaging Error: " + e.message, "error");
+                setStatus("shipping", false);
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("startBtn").innerText = "INITIALIZE";
+            }
+        }
+
+        function downloadPackage() {
+            if(projectData.zipBlob) {
+                saveAs(projectData.zipBlob, "CodeAutomation_Project.zip");
+                log("shipping", "Package delivered to District Manager (user).");
+            }
+        }
+
+        // --- GEMINI API UTILITY ---
+        async function callGemini(prompt) {
+            const model = "gemini-1.5-flash";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || "API connection failed");
+            }
+
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+    </script>
+</body>
+</html>

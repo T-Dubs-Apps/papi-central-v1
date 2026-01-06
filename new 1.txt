@@ -1,0 +1,107 @@
+package com.example.aegisguard
+
+import android.os.Bundle
+import android.provider.Settings
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import java.io.File
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var statusTextView: TextView
+    private lateinit var scanButton: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        statusTextView = findViewById(R.id.statusTextView)
+        scanButton = findViewById(R.id.scanButton)
+
+        scanButton.setOnClickListener {
+            performSecurityScan()
+        }
+    }
+
+    private fun performSecurityScan() {
+        val report = StringBuilder()
+        var threatsFound = 0
+
+        // Check 1: Root Detection
+        // If a device is rooted, 'cloning' software can easily hide itself.
+        if (isDeviceRooted()) {
+            report.append("⚠️ CRITICAL: Device appears to be Rooted. System integrity compromised.\n")
+            threatsFound++
+        } else {
+            report.append("✅ Root Check Passed.\n")
+        }
+
+        // Check 2: USB Debugging
+        // Attackers use ADB to copy data off a device physically.
+        if (isAdbEnabled()) {
+            report.append("⚠️ WARNING: USB Debugging is enabled. This allows external data extraction.\n")
+            threatsFound++
+        } else {
+            report.append("✅ USB Debugging is disabled.\n")
+        }
+
+        // Check 3: Non-Market Apps
+        // Checks if "Install from Unknown Sources" is ON (common vector for spyware).
+        if (areUnknownSourcesEnabled()) {
+            report.append("⚠️ WARNING: Installation from Unknown Sources is allowed.\n")
+            threatsFound++
+        } else {
+            report.append("✅ Unknown Sources restricted.\n")
+        }
+
+        statusTextView.text = if (threatsFound > 0) {
+            "Scan Complete. $threatsFound Potential Threats Found:\n\n$report"
+        } else {
+            "Scan Complete. Device System Integrity appears normal.\n\n$report"
+        }
+    }
+
+    // --- Helper Functions ---
+
+    private fun isDeviceRooted(): Boolean {
+        val buildTags = android.os.Build.TAGS
+        if (buildTags != null && buildTags.contains("test-keys")) return true
+
+        val paths = arrayOf(
+            "/system/app/Superuser.apk",
+            "/sbin/su",
+            "/system/bin/su",
+            "/system/xbin/su",
+            "/data/local/xbin/su",
+            "/data/local/bin/su",
+            "/system/sd/xbin/su",
+            "/system/bin/failsafe/su",
+            "/data/local/su"
+        )
+        for (path in paths) {
+            if (File(path).exists()) return true
+        }
+        return false
+    }
+
+    private fun isAdbEnabled(): Boolean {
+        return Settings.Global.getInt(
+            contentResolver,
+            Settings.Global.ADB_ENABLED, 0
+        ) == 1
+    }
+
+    private fun areUnknownSourcesEnabled(): Boolean {
+        // Note: For Android 8.0+, this is handled per-app, but this checks the global deprecated setting 
+        // which some older spyware still attempts to toggle.
+        return try {
+            Settings.Secure.getInt(
+                contentResolver,
+                Settings.Secure.INSTALL_NON_MARKET_APPS
+            ) == 1
+        } catch (e: Settings.SettingNotFoundException) {
+            false // Default to safe if setting not found
+        }
+    }
+}

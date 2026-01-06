@@ -1,0 +1,233 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+
+void main() {
+  runApp(const CodeCargoApp());
+}
+
+class CodeCargoApp extends StatelessWidget {
+  const CodeCargoApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Code Cargo',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1E1E1E),
+        colorScheme: const ColorScheme.dark(primary: Color(0xFFBB86FC)),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF121212)),
+      ),
+      home: const CargoBay(),
+    );
+  }
+}
+
+class CargoBay extends StatefulWidget {
+  const CargoBay({super.key});
+
+  @override
+  State<CargoBay> createState() => _CargoBayState();
+}
+
+class _CargoBayState extends State<CargoBay> {
+  // Stored Files
+  List<FileSystemEntity> _files = [];
+  
+  // Input Controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _sizeController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshFiles();
+  }
+
+  // --- Logic: File Management ---
+
+  Future<void> _refreshFiles() async {
+    final directory = await getApplicationDocumentsDirectory();
+    setState(() {
+      _files = directory.listSync().where((e) => e is File).toList();
+    });
+  }
+
+  Future<void> _saveFile() async {
+    if (_nameController.text.isEmpty || _contentController.text.isEmpty) return;
+
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/${_nameController.text}';
+    final file = File(path);
+
+    await file.writeAsString(_contentController.text);
+    
+    // Clear inputs
+    _nameController.clear();
+    _contentController.clear();
+    _sizeController.clear();
+    
+    // Refresh List
+    await _refreshFiles();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("File Secured in Cargo Bay")));
+  }
+
+  Future<void> _shareFile(File file) async {
+    // This allows you to "Drag away" (Export) to Google Drive, Email, or PC
+    await Share.shareXFiles([XFile(file.path)], text: 'Exporting from Code Cargo');
+  }
+
+  Future<void> _deleteFile(File file) async {
+    await file.delete();
+    _refreshFiles();
+  }
+
+  // --- Logic: Web Scout ---
+
+  Future<void> _scoutWebForFile() async {
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter a filename to scout")));
+      return;
+    }
+    
+    // Safety: Search Google/PyPI instead of direct download to verify size manually
+    // This fulfills "Search web for exact matches" safely
+    final query = Uri.encodeComponent("index of \"${_nameController.text}\" download");
+    final url = Uri.parse("https://www.google.com/search?q=$query");
+    
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch scout');
+    }
+  }
+
+  // --- UI Construction ---
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Code Cargo: Staging Area")),
+      body: Column(
+        children: [
+          // 1. Input Area (The "Chat Capture")
+          Expanded(
+            flex: 4,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              color: const Color(0xFF252525),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("INCOMING MANIFEST", style: TextStyle(color: Colors.grey, letterSpacing: 1.5)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: "Filename (e.g. script.py)",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton.icon(
+                          onPressed: _scoutWebForFile,
+                          icon: const Icon(Icons.search),
+                          label: const Text("SCOUT"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueGrey,
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15)
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _contentController,
+                      maxLines: 10,
+                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                      decoration: const InputDecoration(
+                        labelText: "Paste Code / Script Content Here",
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Manual Verification Field
+                    TextField(
+                      controller: _sizeController,
+                      decoration: const InputDecoration(
+                        labelText: "Verified Size (e.g. '4kb' - Check match on Web)",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.check_circle_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _saveFile,
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFBB86FC)),
+                        child: const Text("SECURE FILE TO STORAGE", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // 2. The "Little Space" (Staging Area)
+          Expanded(
+            flex: 3,
+            child: Container(
+              color: const Color(0xFF121212),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    color: const Color(0xFF333333),
+                    child: const Text("READY FOR EXPORT", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _files.length,
+                      itemBuilder: (context, index) {
+                        final file = _files[index] as File;
+                        final name = file.path.split('/').last;
+                        return ListTile(
+                          leading: const Icon(Icons.insert_drive_file, color: Color(0xFF03DAC6)),
+                          title: Text(name),
+                          subtitle: Text("Size: ${file.lengthSync()} bytes"),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.share, color: Colors.blue),
+                                onPressed: () => _shareFile(file),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _deleteFile(file),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

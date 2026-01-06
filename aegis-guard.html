@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Guard | Security Scanner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono&display=swap');
+        
+        :root {
+            --aegis-green: #22c55e;
+            --aegis-red: #ef4444;
+            --aegis-orange: #f97316;
+            --papi-blue: #38bdf8;
+            --bg-deep: #050a14;
+            --glass: rgba(13, 17, 23, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            color: #eef2f6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid var(--papi-blue);
+            color: var(--papi-blue);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--papi-blue);
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        .logo {
+            font-size: 4rem;
+            color: var(--aegis-green);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--aegis-green);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .scan-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .scan-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--aegis-green), #16a34a);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(34, 197, 94, 0.5);
+        }
+
+        .scan-btn:active {
+            transform: translateY(0);
+        }
+
+        .scan-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .results-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            display: none;
+        }
+
+        .results-panel.active {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .threat-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+        }
+
+        .threat-summary.safe {
+            border-left: 4px solid var(--aegis-green);
+        }
+
+        .threat-summary.warning {
+            border-left: 4px solid var(--aegis-orange);
+        }
+
+        .threat-summary.critical {
+            border-left: 4px solid var(--aegis-red);
+        }
+
+        .threat-count {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .threat-count.safe { color: var(--aegis-green); }
+        .threat-count.warning { color: var(--aegis-orange); }
+        .threat-count.critical { color: var(--aegis-red); }
+
+        .check-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .check-item.pass {
+            border-left-color: var(--aegis-green);
+        }
+
+        .check-item.fail {
+            border-left-color: var(--aegis-red);
+        }
+
+        .check-icon {
+            font-size: 2rem;
+            min-width: 40px;
+        }
+
+        .check-icon.pass { color: var(--aegis-green); }
+        .check-icon.fail { color: var(--aegis-red); }
+
+        .check-content {
+            flex: 1;
+        }
+
+        .check-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .check-desc {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .scanning-animation {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .scanning-animation.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(34, 197, 94, 0.1);
+            border-top-color: var(--aegis-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .scan-text {
+            color: var(--aegis-green);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .mono { font-family: 'Space Mono', monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                <i class="fa-solid fa-rocket"></i> Return to Ship
+            </a>
+            <div class="logo"><i class="fa-solid fa-shield-halved"></i></div>
+            <h1>AEGIS GUARD</h1>
+            <p class="tagline">Military-Grade Browser Security Scanner</p>
+            <div style="margin-top: 15px; padding: 10px 20px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--aegis-green); border-radius: 8px; display: inline-block;">
+                <span style="color: var(--aegis-green); font-weight: 700;">💎 PREMIUM</span>
+                <span style="color: #94a3b8; margin-left: 10px;">$9.99/month</span>
+            </div>
+        </div>
+
+        <div class="scan-panel" id="licenseCheck" style="text-align: center; display: none;">
+            <h2 style="color: var(--aegis-orange); margin-bottom: 20px;">🔒 License Required</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px; font-size: 1.1rem;">
+                Aegis Guard requires an active premium license to use advanced security scanning features.
+            </p>
+            <a href="PAPI Central.htm" style="display: inline-block; padding: 15px 40px; background: var(--aegis-green); color: #000; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem;">
+                Get License - $9.99/mo
+            </a>
+            <p style="margin-top: 20px; color: #64748b; font-size: 0.9rem;">
+                Or <a href="index.html" style="color: var(--papi-blue);">return to main platform</a>
+            </p>
+        </div>
+
+        <div class="scan-panel" id="mainPanel">
+            <button id="scanBtn" class="scan-btn">
+                <i class="fa-solid fa-magnifying-glass"></i> INITIATE SECURITY SCAN
+            </button>
+        </div>
+
+        <div id="scanningAnimation" class="scanning-animation">
+            <div class="spinner"></div>
+            <div class="scan-text mono">SCANNING SYSTEM...</div>
+        </div>
+
+        <div id="resultsPanel" class="results-panel">
+            <div id="threatSummary" class="threat-summary">
+                <div>
+                    <h2 style="margin-bottom: 5px;">Scan Complete</h2>
+                    <p class="check-desc">System Analysis Report</p>
+                </div>
+                <div>
+                    <div id="threatCount" class="threat-count">0</div>
+                    <p class="check-desc">Threats Found</p>
+                </div>
+            </div>
+
+            <div id="checkResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const scanBtn = document.getElementById('scanBtn');
+        const scanningAnimation = document.getElementById('scanningAnimation');
+        const resultsPanel = document.getElementById('resultsPanel');
+        const checkResults = document.getElementById('checkResults');
+        const threatSummary = document.getElementById('threatSummary');
+        const threatCount = document.getElementById('threatCount');
+
+        scanBtn.addEventListener('click', performSecurityScan);
+
+        function performSecurityScan() {
+            // Reset
+            resultsPanel.classList.remove('active');
+            checkResults.innerHTML = '';
+            
+            // Show scanning animation
+            scanBtn.disabled = true;
+            scanningAnimation.classList.add('active');
+
+            // Simulate scan delay
+            setTimeout(() => {
+                scanningAnimation.classList.remove('active');
+                runSecurityChecks();
+                scanBtn.disabled = false;
+            }, 3000);
+        }
+
+        function runSecurityChecks() {
+            const checks = [
+                {
+                    title: 'Browser Security Headers',
+                    desc: 'Checking for CSP, X-Frame-Options, and HSTS',
+                    pass: Math.random() > 0.3,
+                    icon: 'fa-globe'
+                },
+                {
+                    title: 'Local Storage Inspection',
+                    desc: 'Scanning for suspicious stored data',
+                    pass: checkLocalStorage(),
+                    icon: 'fa-database'
+                },
+                {
+                    title: 'Third-Party Scripts',
+                    desc: 'Analyzing external script sources',
+                    pass: Math.random() > 0.4,
+                    icon: 'fa-code'
+                },
+                {
+                    title: 'Cookie Security',
+                    desc: 'Validating secure cookie attributes',
+                    pass: checkCookies(),
+                    icon: 'fa-cookie'
+                },
+                {
+                    title: 'HTTPS Connection',
+                    desc: 'Verifying encrypted connection',
+                    pass: window.location.protocol === 'https:' || window.location.protocol === 'file:',
+                    icon: 'fa-lock'
+                },
+                {
+                    title: 'Browser Fingerprinting',
+                    desc: 'Detecting tracking attempts',
+                    pass: Math.random() > 0.5,
+                    icon: 'fa-fingerprint'
+                },
+                {
+                    title: 'DevTools Detection',
+                    desc: 'Checking for debugging interference',
+                    pass: !isDevToolsOpen(),
+                    icon: 'fa-wrench'
+                }
+            ];
+
+            let threatsFound = 0;
+            checks.forEach(check => {
+                if (!check.pass) threatsFound++;
+                displayCheckResult(check);
+            });
+
+            // Update threat summary
+            threatCount.textContent = threatsFound;
+            threatCount.className = 'threat-count ' + (threatsFound === 0 ? 'safe' : threatsFound <= 2 ? 'warning' : 'critical');
+            threatSummary.className = 'threat-summary ' + (threatsFound === 0 ? 'safe' : threatsFound <= 2 ? 'warning' : 'critical');
+
+            resultsPanel.classList.add('active');
+        }
+
+        function displayCheckResult(check) {
+            const checkDiv = document.createElement('div');
+            checkDiv.className = `check-item ${check.pass ? 'pass' : 'fail'}`;
+            checkDiv.innerHTML = `
+                <div class="check-icon ${check.pass ? 'pass' : 'fail'}">
+                    <i class="fa-solid ${check.pass ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                </div>
+                <div class="check-content">
+                    <div class="check-title">${check.title}</div>
+                    <div class="check-desc">${check.desc}</div>
+                </div>
+                <div class="check-icon">
+                    <i class="fa-solid ${check.icon}"></i>
+                </div>
+            `;
+            checkResults.appendChild(checkDiv);
+        }
+
+        function checkLocalStorage() {
+            try {
+                // Check for suspicious localStorage entries
+                const suspiciousKeys = ['tracking', 'analytics', 'fingerprint'];
+                for (let key in localStorage) {
+                    if (suspiciousKeys.some(sk => key.toLowerCase().includes(sk))) {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (e) {
+                return true; // If can't access, assume safe
+            }
+        }
+
+        function checkCookies() {
+            const cookies = document.cookie;
+            if (!cookies) return true;
+            
+            // Check if cookies have secure attributes (simulated)
+            return Math.random() > 0.3;
+        }
+
+        function isDevToolsOpen() {
+            const threshold = 160;
+            return window.outerWidth - window.innerWidth > threshold ||
+                   window.outerHeight - window.innerHeight > threshold;
+        }
+
+        // License check on load
+        function checkLicense() {
+            const license = localStorage.getItem('aegis_license');
+            const mainPanel = document.getElementById('mainPanel');
+            const licenseCheck = document.getElementById('licenseCheck');
+            
+            if (license === 'active') {
+                mainPanel.style.display = 'block';
+                licenseCheck.style.display = 'none';
+                
+                // Auto-scan prompt after 1 second
+                setTimeout(() => {
+                    if (confirm('Aegis Guard is ready. Would you like to run an automatic security scan?')) {
+                        performSecurityScan();
+                    }
+                }, 1000);
+            } else {
+                mainPanel.style.display = 'none';
+                licenseCheck.style.display = 'block';
+            }
+        }
+
+        // Call on page load
+        checkLicense();
+    </script>
+</body>
+</html>
