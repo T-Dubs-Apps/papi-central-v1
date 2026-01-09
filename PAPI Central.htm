@@ -96,11 +96,37 @@
         .product-icon {
             font-size: 3rem;
             margin-bottom: 15px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
         }
-        .product-card.ai .product-icon { color: var(--papi-blue); }
-        .product-card.automation .product-icon { color: var(--papi-orange); }
-        .product-card.security .product-icon { color: var(--papi-green); }
-        .product-card.bundle .product-icon { color: var(--papi-purple); }
+        .product-card:hover .product-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        .product-card.ai .product-icon { 
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+        }
+        .product-card.automation .product-icon { 
+            background: linear-gradient(135deg, #f97316, #c2410c);
+            color: white;
+        }
+        .product-card.security .product-icon { 
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white;
+        }
+        .product-card.bundle .product-icon { 
+            background: linear-gradient(135deg, #a855f7, #7e22ce);
+            color: white;
+        }
         
         .product-name {
             font-size: 1.5rem;
@@ -250,6 +276,65 @@
         </div>
 
         <div class="products-grid">
+            <!-- Key Generator Pro -->
+            <div class="product-card security">
+                <span class="badge">ENTERPRISE GRADE</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h2 class="product-name">Key Generator Pro</h2>
+                <p class="product-desc">Quantum-grade cryptographic key generation for enterprise security</p>
+                <ul class="features">
+                    <li>150 Keys/Month Generated</li>
+                    <li>All Key Types (API, JWT, License)</li>
+                    <li>Multi-Platform Support</li>
+                    <li>Entropy Validation</li>
+                    <li>Key History & Export</li>
+                    <li>Web Crypto API Security</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$99.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase security" onclick="purchase('keygen_pro', 99.99, 'monthly')">
+                    <i class="fa-solid fa-shield-halved"></i> Professional Plan
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('keygen_pro')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
+                </button>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #1e293b; text-align: center;">
+                    <div style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Need unlimited keys?</div>
+                    <button class="btn-purchase bundle" onclick="purchase('keygen_enterprise', 199.99, 'monthly')" style="font-size: 0.9rem; padding: 10px 20px;">
+                        <i class="fa-solid fa-crown"></i> Enterprise: $199.99/mo - Unlimited
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cortex App Studio (NEW!) -->
+            <div class="product-card ai">
+                <span class="badge">NEW! 🚀</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-magic"></i>
+                </div>
+                <h2 class="product-name">Cortex App Studio</h2>
+                <p class="product-desc">Build, preview & deploy apps with AI - Complete dev environment in your browser!</p>
+                <ul class="features">
+                    <li>AI App Generator (any app!)</li>
+                    <li>Private Preview Browser</li>
+                    <li>Device Testing (mobile/tablet)</li>
+                    <li>One-Click Deployment</li>
+                    <li>License Protection Built-in</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$29.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase ai" onclick="purchase('cortex_app_studio', 29.99, 'monthly')">
+                    <i class="fa-solid fa-rocket"></i> Subscribe Now
+                </button>
+                <button class="btn-purchase ai" onclick="window.location.href='LAUNCH-Cortex-App-Studio.html'" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-magic"></i> Launch Studio
+                </button>
+            </div>
+
             <!-- AI Assistant Pro -->
             <div class="product-card ai">
                 <span class="badge">BEST SELLER</span>
@@ -270,6 +355,9 @@
                 </div>
                 <button class="btn-purchase ai" onclick="purchase('ai_pro', 49.99, 'monthly')">
                     <i class="fa-solid fa-rocket"></i> Subscribe Now
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('ai_pro')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
                 </button>
             </div>
 
@@ -293,6 +381,9 @@
                 <button class="btn-purchase automation" onclick="purchase('automation', 29.99, 'monthly')">
                     <i class="fa-solid fa-bolt"></i> Activate License
                 </button>
+                <button class="btn-purchase ai" onclick="launchApp('automation')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
+                </button>
             </div>
 
             <!-- Aegis Guard -->
@@ -314,6 +405,9 @@
                 </div>
                 <button class="btn-purchase security" onclick="purchase('aegis', 9.99, 'monthly')">
                     <i class="fa-solid fa-lock"></i> Get Protected
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('aegis')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
                 </button>
             </div>
 
@@ -338,6 +432,9 @@
                 <button class="btn-purchase security" onclick="purchase('aegis_gov', 99.99, 'monthly')">
                     <i class="fa-solid fa-shield-halved"></i> Request Clearance
                 </button>
+                <button class="btn-purchase ai" onclick="launchApp('aegis_gov')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
+                </button>
             </div>
 
             <!-- CallSentry AI -->
@@ -359,6 +456,9 @@
                 </div>
                 <button class="btn-purchase security" onclick="purchase('callsentry', 14.99, 'monthly')">
                     <i class="fa-solid fa-shield-halved"></i> Activate Protection
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('callsentry')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
                 </button>
             </div>
 
@@ -383,6 +483,9 @@
                 </div>
                 <button class="btn-purchase bundle" onclick="purchase('nk', 50, 'monthly')">
                     <i class="fa-solid fa-magic"></i> Build Without Code
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('nk')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App
                 </button>
             </div>
 
@@ -410,28 +513,82 @@
                 </button>
             </div>
 
-            <!-- Complete Bundle -->
-            <div class="product-card bundle">
-                <span class="badge">SAVE 40%</span>
+            <!-- MarketPulse Pro -->
+            <div class="product-card automation">
+                <span class="badge">NEW</span>
                 <div class="product-icon">
-                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-chart-line"></i>
                 </div>
-                <h2 class="product-name">Complete Bundle</h2>
-                <p class="product-desc">All apps + premium features at a massive discount</p>
+                <h2 class="product-name">MarketPulse Pro</h2>
+                <p class="product-desc">Real-time market analysis & pricing intelligence</p>
                 <ul class="features">
-                    <li>AI Assistant Pro (Unlimited)</li>
-                    <li>Automation Hub (Full Access)</li>
-                    <li>Aegis Guard (Protected)</li>
-                    <li>CallSentry AI (Premium)</li>
-                    <li>No Knowledge Kit (Included!)</li>
-                    <li>Priority Support</li>
+                    <li>Price Tracking & Analytics</li>
+                    <li>Market Trend Analysis</li>
+                    <li>Competitor Monitoring</li>
+                    <li>Price Optimization AI</li>
+                    <li>Custom Reports & Alerts</li>
+                    <li>API Integration</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$29.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase automation" onclick="purchase('marketpulse', 29.99, 'monthly')">
+                    <i class="fa-solid fa-chart-bar"></i> Start Tracking
+                </button>                <button class="btn-purchase ai" onclick="launchApp('marketpulse')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App (Coming Soon)
+                </button>            </div>
+
+            <!-- SiteSnap Pro -->
+            <div class="product-card ai">
+                <span class="badge">PRO</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <h2 class="product-name">SiteSnap Pro</h2>
+                <p class="product-desc">Professional website screenshots & monitoring</p>
+                <ul class="features">
+                    <li>Full-Page Screenshots</li>
+                    <li>Mobile & Desktop Views</li>
+                    <li>Scheduled Monitoring</li>
+                    <li>Change Detection Alerts</li>
+                    <li>PDF Export & Archive</li>
+                    <li>Team Collaboration</li>
+                </ul>
+                <div class="price-section">
+                    <div class="price">$39.99<span class="price-period">/mo</span></div>
+                </div>
+                <button class="btn-purchase ai" onclick="purchase('sitesnap', 39.99, 'monthly')">
+                    <i class="fa-solid fa-bolt"></i> Capture Sites
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('sitesnap')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App (Coming Soon)
+                </button>
+            </div>
+
+            <!-- Sentinel Pro -->
+            <div class="product-card security">
+                <span class="badge">ELITE</span>
+                <div class="product-icon">
+                    <i class="fa-solid fa-satellite"></i>
+                </div>
+                <h2 class="product-name">Sentinel Pro</h2>
+                <p class="product-desc">Advanced security monitoring & threat detection</p>
+                <ul class="features">
+                    <li>24/7 Security Monitoring</li>
+                    <li>Threat Intelligence Feed</li>
+                    <li>Automated Incident Response</li>
+                    <li>Vulnerability Scanning</li>
+                    <li>Compliance Reporting</li>
+                    <li>SOC Dashboard Access</li>
                 </ul>
                 <div class="price-section">
                     <div class="price">$49.99<span class="price-period">/mo</span></div>
-                    <div style="color: #64748b; text-decoration: line-through;">Regular: $154.96/mo</div>
                 </div>
-                <button class="btn-purchase bundle" onclick="purchase('bundle', 49.99, 'monthly')">
-                    <i class="fa-solid fa-crown"></i> Get Everything
+                <button class="btn-purchase security" onclick="purchase('sentinel', 49.99, 'monthly')">
+                    <i class="fa-solid fa-shield-alt"></i> Secure Now
+                </button>
+                <button class="btn-purchase ai" onclick="launchApp('sentinel')" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-rocket"></i> Launch App (Coming Soon)
                 </button>
             </div>
         </div>
@@ -445,18 +602,49 @@
 
     <script>
         // Stripe Public Key - Replace with your actual key
-        const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_KEY_HERE'; // TODO: Replace with real key
+        const STRIPE_PUBLIC_KEY = 'pk_test_51Sl9RJFZpNdjWKvvGG4Db38IM1qkGUjOYOn0H3ie4m01BZwBRibBcbM1WDakoPXLMVdfd8ApF7BiKstKL9GDyMZW00PGEK5T90';
         
-        // Product IDs mapped to Stripe Price IDs
+        // Product IDs mapped to Stripe Price IDs (12 products)
         const STRIPE_PRICES = {
-            'ai_pro': 'price_YOUR_AI_PRO_PRICE_ID',
-            'automation': 'price_YOUR_AUTOMATION_PRICE_ID',
-            'callsentry': 'price_YOUR_CALLSENTRY_PRICE_ID',
-            'aegis': 'price_YOUR_AEGIS_PRICE_ID',
-            'aegis_gov': 'price_YOUR_AEGIS_GOV_PRICE_ID',
-            'nk': 'price_YOUR_NO_KNOWLEDGE_KIT_PRICE_ID',
-            'bundle': 'price_YOUR_BUNDLE_PRICE_ID'
+            'keygen_pro': 'price_YOUR_KEYGEN_PRO_PRICE_ID',      // $99.99/mo (150 keys/mo)
+            'keygen_enterprise': 'price_YOUR_KEYGEN_ENT_PRICE_ID', // $199.99/mo (unlimited)
+            'ai_pro': 'price_YOUR_AI_PRO_PRICE_ID',               // $49.99/mo
+            'code-cargo': 'price_YOUR_CODE_CARGO_PRICE_ID',      // $39.99/mo
+            'automation': 'price_YOUR_AUTOMATION_PRICE_ID',      // $19.99/mo
+            'callsentry': 'price_YOUR_CALLSENTRY_PRICE_ID',      // $14.99/mo
+            'aegis': 'price_YOUR_AEGIS_PRICE_ID',                // $99.99/mo
+            'aegis_gov': 'price_YOUR_AEGIS_GOV_PRICE_ID',        // $99.99/mo
+            'nk': 'price_YOUR_NO_KNOWLEDGE_KIT_PRICE_ID',        // $49.99 one-time
+            'marketpulse': 'price_YOUR_MARKETPULSE_PRICE_ID',    // $29.99/mo
+            'sitesnap': 'price_YOUR_SITESNAP_PRICE_ID',          // $39.99/mo
+            'sentinel': 'price_YOUR_SENTINEL_PRICE_ID'           // $49.99/mo
         };
+        
+        // Product IDs mapped to app HTML files
+        const APP_FILES = {
+            'keygen_pro': 'key-generator-pro.html',
+            'keygen_enterprise': 'key-generator-pro.html',
+            'ai_pro': 'ai-assistant-pro.html',
+            'code-cargo': 'code-cargo.html',
+            'automation': 'automation-hub.html',
+            'callsentry': 'call-sentry.html',
+            'aegis': 'aegis-guard.html',
+            'aegis_gov': 'aegis-government.html',
+            'nk': 'no-knowledge-kit.html',
+            'marketpulse': 'index.html', // Not yet created
+            'sitesnap': 'index.html',    // Not yet created
+            'sentinel': 'index.html'     // Not yet created
+        };
+        
+        // Launch app function
+        function launchApp(productId) {
+            const appFile = APP_FILES[productId];
+            if (appFile) {
+                window.open(appFile, '_blank');
+            } else {
+                alert('App file not found. Please contact support.');
+            }
+        }
         
         async function purchase(productId, amount, billingType) {
             // Check if already has license
@@ -486,8 +674,8 @@
                         btn.innerHTML = '<i class="fa-solid fa-check"></i> Activated!';
                         
                         setTimeout(() => {
-                            alert(`✅ ${getProductName(productId)} activated successfully!\n\nYour license is now active. Return to the main app to use your new features.`);
-                            window.location.href = 'index.html';
+                            // Redirect to main page with success parameter to trigger alien delivery
+                            window.location.href = 'index.html?success=true&session_id=demo_' + Date.now();
                         }, 1000);
                     }, 2000);
                 } else {
@@ -498,7 +686,7 @@
                     const { error } = await stripe.redirectToCheckout({
                         lineItems: [{price: priceId, quantity: 1}],
                         mode: billingType === 'monthly' ? 'subscription' : 'payment',
-                        successUrl: `${window.location.origin}/success.html?product=${productId}`,
+                        successUrl: `${window.location.origin}/index.html?success=true&session_id={CHECKOUT_SESSION_ID}`,
                         cancelUrl: window.location.href,
                         clientReferenceId: generateLicenseKey(productId)
                     });
@@ -583,8 +771,7 @@
             purchases.push({
                 product: productId,
                 licenseKey: licenseKey,
-                purchasedAt: Date.now()callsentry', 'nk', 'bundle'];
-            products.forEach(productId 
+                purchasedAt: Date.now()
             });
             localStorage.setItem('purchase_history', JSON.stringify(purchases));
         }

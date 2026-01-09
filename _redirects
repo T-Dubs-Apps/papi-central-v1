@@ -1,0 +1,34 @@
+# Render/Netlify redirects for PAPI Central
+# SPA fallback routing
+
+# Health check endpoint
+/health /health.json 200
+
+# Main routes
+/ /index.html 200
+/index /index.html 200
+
+# App routes - serve HTML files directly
+/LAUNCH-* /:splat 200
+/PAPI* /:splat 200
+/aegis-* /:splat 200
+/ai-* /:splat 200
+/automation-* /:splat 200
+/beta-* /:splat 200
+/call-* /:splat 200
+/code-* /:splat 200
+/cortex-* /:splat 200
+/key-* /:splat 200
+/no-* /:splat 200
+/trial-* /:splat 200
+/unlock-* /:splat 200
+/about-* /:splat 200
+/landing* /:splat 200
+/licenses* /:splat 200
+/link-* /:splat 200
+/master-* /:splat 200
+/stripe-* /:splat 200
+/success* /:splat 200
+
+# Fallback for everything else
+/* /index.html 200

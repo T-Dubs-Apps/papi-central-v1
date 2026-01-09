@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launching Cortex App Studio...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Space Mono', monospace;
+        }
+        .loader {
+            border: 5px solid #f3f4f6;
+            border-top: 5px solid #10b981;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="text-center">
+        <div class="loader mx-auto mb-6"></div>
+        <h1 class="text-3xl font-bold text-white mb-2">🎨 Launching Cortex App Studio</h1>
+        <p class="text-gray-200">Build → Preview → Deploy your apps...</p>
+    </div>
+
+    <script>
+        // Check license
+        const hasLicense = localStorage.getItem('cortex_desktop_license') === 'active' ||
+                          localStorage.getItem('papi_license') === 'active' ||
+                          localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+
+        if (hasLicense) {
+            // Licensed - go to app
+            setTimeout(() => {
+                window.location.href = 'cortex-app-studio.html';
+            }, 1500);
+        } else {
+            // Trial mode - show upgrade after brief delay
+            setTimeout(() => {
+                if (confirm('Cortex App Studio requires a license.\n\nTry it in DEMO MODE first?\n\n(Full features unlock with license)')) {
+                    window.location.href = 'cortex-app-studio.html';
+                } else {
+                    window.location.href = 'PAPI Central.htm';
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

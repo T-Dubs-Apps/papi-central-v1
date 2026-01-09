@@ -1,0 +1,61 @@
+# Render Configuration for PAPI Central
+# Static site deployment with fallback routing
+
+services:
+  # Static Site - Main PAPI Central Apps
+  - type: web
+    name: papi-central
+    runtime: static
+    buildCommand: echo "Static site - no build needed"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /*.js
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.css
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /
+        destination: /index.html
+      - type: rewrite
+        source: /*
+        destination: /:splat
+
+  # Python Backend - Cortex Server (Optional)
+  - type: web
+    name: papi-cortex-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python cortex_server.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 5000
+    autoDeploy: true
+
+  # Node.js Backend - Payment Server (Optional)
+  - type: web
+    name: papi-payment-api
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: PORT
+        value: 3000
+    autoDeploy: true

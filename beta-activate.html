@@ -161,6 +161,9 @@
                 }
             }
 
+            // Set beta license flag for full app access
+            localStorage.setItem('beta_license', 'active');
+
             // Update tester record
             const testers = JSON.parse(localStorage.getItem('beta_testers') || '[]');
             const index = testers.findIndex(t => t.licenseKey === tester.licenseKey);

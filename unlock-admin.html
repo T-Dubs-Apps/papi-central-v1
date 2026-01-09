@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI Admin Unlock</title>
+    <style>
+        body {
+            background: #020617;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #0f172a;
+            padding: 40px;
+            border-radius: 16px;
+            border: 2px solid #22c55e;
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #22c55e;
+            margin-bottom: 20px;
+        }
+        .status {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #22c55e;
+        }
+        button {
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔓 PAPI ADMIN UNLOCK</h1>
+        <p>Click below to activate unlimited access to all PAPI Central apps</p>
+        
+        <button onclick="unlockAll()">UNLOCK FULL ACCESS</button>
+        
+        <div class="status" id="status">
+            Waiting for activation...
+        </div>
+    </div>
+
+    <script>
+        function unlockAll() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<div class="success">🔑 ACTIVATING ADMIN ACCESS...</div><br>';
+            
+            const updates = [];
+            
+            // Master Admin Access
+            localStorage.setItem('master_admin', 'TROY_WALKER_2026');
+            updates.push('✅ Master Admin: ACTIVE');
+            
+            // Admin Email
+            localStorage.setItem('current_user_email', 'mr.troy.walker.62@gmail.com');
+            updates.push('✅ Admin Email: mr.troy.walker.62@gmail.com');
+            
+            // All App Licenses
+            const licenses = [
+                'papi_license',
+                'aegis_license',
+                'cortex_license',
+                'cortex_desktop_license',
+                'automation_license',
+                'ai_assistant_pro_license',
+                'call_sentry_license',
+                'code_cargo_license',
+                'no_knowledge_kit_license',
+                'beta_license'
+            ];
+            
+            licenses.forEach(license => {
+                localStorage.setItem(license, 'active');
+                updates.push(`✅ ${license}: ACTIVE`);
+            });
+            
+            // Unlimited trial access (remove any trial restrictions)
+            localStorage.removeItem('trial_license');
+            updates.push('✅ Trial restrictions: REMOVED');
+            
+            // Set unlimited builds and chats for trial system
+            const unlimitedTrialData = {
+                email: 'mr.troy.walker.62@gmail.com',
+                isAdmin: true,
+                buildsRemaining: {
+                    alien: 999999,
+                    cortex: 999999,
+                    nokn: 999999
+                },
+                chatsRemaining: {
+                    alien: 999999,
+                    cortex: 999999,
+                    nokn: 999999
+                },
+                surveyCompleted: true,
+                socialShared: true,
+                active: true
+            };
+            
+            localStorage.setItem('trial_mr.troy.walker.62@gmail.com', JSON.stringify(unlimitedTrialData));
+            localStorage.setItem('current_trial_user', 'mr.troy.walker.62@gmail.com');
+            updates.push('✅ Unlimited builds: ACTIVE');
+            updates.push('✅ Unlimited chats: ACTIVE');
+            
+            // TOS Acceptance
+            localStorage.setItem('papi_tos_accepted', 'true');
+            updates.push('✅ TOS: ACCEPTED');
+            
+            // Display all updates
+            status.innerHTML = '<div class="success">🎉 FULL ACCESS UNLOCKED!</div><br>' + 
+                              updates.join('<br>') + 
+                              '<br><br><div class="success">✨ All PAPI Central apps are now unlocked!</div>' +
+                              '<br><div style="color: #94a3b8;">Refresh any app page to see changes.</div>';
+            
+            console.log('PAPI Admin Access Unlocked:', {
+                master_admin: true,
+                licenses: licenses.length,
+                unlimited_access: true
+            });
+        }
+    </script>
+</body>
+</html>

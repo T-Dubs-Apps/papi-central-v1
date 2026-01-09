@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin Activation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-screen flex items-center justify-center">
+    
+    <div class="max-w-lg w-full mx-4">
+        <div class="bg-gray-800 border-2 border-blue-500 rounded-xl p-8">
+            <div class="text-center mb-6">
+                <div class="bg-blue-500 w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-crown text-5xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-blue-400 mb-2">MASTER ADMIN ACTIVATION</h1>
+                <p class="text-gray-400">Troy Walker - Full Access to All Apps</p>
+            </div>
+
+            <div id="status" class="bg-gray-900 rounded-lg p-6 mb-6 text-center">
+                <p class="text-lg mb-4">Click below to activate unlimited access</p>
+                <button 
+                    onclick="activateMasterAdmin()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-unlock-alt mr-2"></i> ACTIVATE MASTER ADMIN
+                </button>
+            </div>
+
+            <div id="success" class="bg-green-900 border border-green-500 rounded-lg p-4 hidden">
+                <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                <span class="font-bold">Master Admin Activated!</span>
+                <p class="text-sm text-gray-300 mt-2">You now have unlimited access to all apps.</p>
+            </div>
+
+            <div class="mt-6 text-center">
+                <a href="index.html" class="text-blue-400 hover:text-blue-300">
+                    <i class="fas fa-rocket mr-2"></i> Launch PAPI Central
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check current status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const isActivated = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            if (isActivated) {
+                document.getElementById('status').innerHTML = `
+                    <div class="text-green-400">
+                        <i class="fas fa-check-circle text-4xl mb-3"></i>
+                        <p class="text-xl font-bold">Already Activated!</p>
+                        <p class="text-sm text-gray-400 mt-2">Master Admin Status: ACTIVE</p>
+                    </div>
+                `;
+            }
+        });
+
+        function activateMasterAdmin() {
+            // Set master admin flag
+            localStorage.setItem('master_admin', 'TROY_WALKER_2026');
+            
+            // Set beta license for backward compatibility
+            localStorage.setItem('beta_license', 'active');
+            
+            // Activate all app licenses
+            const licenses = [
+                'papi_license',
+                'automation_license',
+                'aegis_license',
+                'aegis_gov_license',
+                'callsentry_license',
+                'nk_license',
+                'code_cargo_license',
+                'marketpulse_license',
+                'sitesnap_license',
+                'sentinel_license',
+                'keygen_license',
+                'bundle_license'
+            ];
+            
+            licenses.forEach(license => {
+                localStorage.setItem(license, 'active');
+                localStorage.setItem(license + '_data', JSON.stringify({
+                    type: 'master_admin',
+                    user: 'Troy Walker',
+                    expires: 'Never',
+                    activatedDate: new Date().toISOString()
+                }));
+            });
+            
+            // Show success
+            document.getElementById('success').classList.remove('hidden');
+            
+            // Update status
+            document.getElementById('status').innerHTML = `
+                <div class="text-green-400 animate-pulse">
+                    <i class="fas fa-check-circle text-4xl mb-3"></i>
+                    <p class="text-xl font-bold">ACTIVATED!</p>
+                    <p class="text-sm text-gray-400 mt-2">Unlimited Access Granted</p>
+                </div>
+            `;
+            
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>

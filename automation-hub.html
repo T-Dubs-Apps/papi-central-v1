@@ -80,6 +80,7 @@
             font-size: 2.5rem;
             background: linear-gradient(135deg, var(--auto-orange), var(--auto-blue));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
             letter-spacing: 2px;
@@ -432,11 +433,14 @@
     <script>
         // License check
         function checkLicense() {
+            // Admin bypass
+            const isAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const adminEmail = localStorage.getItem('current_user_email') === 'mr.troy.walker.62@gmail.com';
             const license = localStorage.getItem('automation_license');
             const mainContent = document.getElementById('mainContent');
             const licenseGate = document.getElementById('licenseGate');
             
-            if (license === 'active') {
+            if (license === 'active' || isAdmin || adminEmail) {
                 mainContent.style.display = 'grid';
                 licenseGate.style.display = 'none';
                 initProjects();

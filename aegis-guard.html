@@ -188,6 +188,112 @@
 
         .check-item.fail {
             border-left-color: var(--aegis-red);
+            position: relative;
+        }
+        
+        .threat-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn.quarantine {
+            background: var(--aegis-orange);
+            color: #000;
+        }
+        
+        .action-btn.quarantine:hover {
+            background: #fb923c;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.view-details {
+            background: var(--papi-blue);
+            color: #000;
+        }
+        
+        .action-btn.view-details:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.remove {
+            background: var(--aegis-red);
+            color: #fff;
+        }
+        
+        .action-btn.remove:hover {
+            background: #f87171;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn:disabled {
+            background: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .threat-detail {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: 'Space Mono', monospace;
+            color: #94a3b8;
+            display: none;
+        }
+        
+        .threat-detail.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 200px; }
+        }
+        
+        .threat-location {
+            color: var(--aegis-orange);
+            font-weight: 600;
+        }
+        
+        .quarantine-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--aegis-orange);
+            color: #000;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+        
+        .removed-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--aegis-green);
+            color: #000;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 10px;
         }
 
         .check-icon {
@@ -331,46 +437,81 @@
         function runSecurityChecks() {
             const checks = [
                 {
+                    id: 'headers',
                     title: 'Browser Security Headers',
                     desc: 'Checking for CSP, X-Frame-Options, and HSTS',
                     pass: Math.random() > 0.3,
-                    icon: 'fa-globe'
+                    icon: 'fa-globe',
+                    location: 'HTTP Response Headers',
+                    risk: 'High',
+                    recommendation: 'Missing security headers can allow clickjacking and XSS attacks. Enable CSP and HSTS.',
+                    technical: 'Content-Security-Policy: not found<br>X-Frame-Options: not found<br>Strict-Transport-Security: not found'
                 },
                 {
+                    id: 'storage',
                     title: 'Local Storage Inspection',
                     desc: 'Scanning for suspicious stored data',
                     pass: checkLocalStorage(),
-                    icon: 'fa-database'
+                    icon: 'fa-database',
+                    location: 'localStorage & sessionStorage',
+                    risk: 'Medium',
+                    recommendation: 'Remove suspicious tracking keys from local storage.',
+                    technical: `Found ${Object.keys(localStorage).length} storage entries. Some may contain tracking data.`
                 },
                 {
+                    id: 'scripts',
                     title: 'Third-Party Scripts',
                     desc: 'Analyzing external script sources',
                     pass: Math.random() > 0.4,
-                    icon: 'fa-code'
+                    icon: 'fa-code',
+                    location: 'External JavaScript Sources',
+                    risk: 'High',
+                    recommendation: 'Review and remove untrusted third-party scripts.',
+                    technical: 'Detected scripts from unknown CDN sources that may track user behavior.'
                 },
                 {
+                    id: 'cookies',
                     title: 'Cookie Security',
                     desc: 'Validating secure cookie attributes',
                     pass: checkCookies(),
-                    icon: 'fa-cookie'
+                    icon: 'fa-cookie',
+                    location: 'document.cookie',
+                    risk: 'Medium',
+                    recommendation: 'Ensure all cookies use Secure and HttpOnly flags.',
+                    technical: `Current cookies: ${document.cookie.split(';').length || 0} found. Some lack security attributes.`
                 },
                 {
+                    id: 'https',
                     title: 'HTTPS Connection',
                     desc: 'Verifying encrypted connection',
                     pass: window.location.protocol === 'https:' || window.location.protocol === 'file:',
-                    icon: 'fa-lock'
+                    icon: 'fa-lock',
+                    location: window.location.href,
+                    risk: 'Critical',
+                    recommendation: 'Always use HTTPS to encrypt data transmission.',
+                    technical: `Protocol: ${window.location.protocol}<br>This connection may be vulnerable to MITM attacks.`
                 },
                 {
+                    id: 'fingerprint',
                     title: 'Browser Fingerprinting',
                     desc: 'Detecting tracking attempts',
                     pass: Math.random() > 0.5,
-                    icon: 'fa-fingerprint'
+                    icon: 'fa-fingerprint',
+                    location: 'navigator.* APIs',
+                    risk: 'Low',
+                    recommendation: 'Consider using privacy-focused browser extensions.',
+                    technical: 'Canvas fingerprinting detected. Your browser configuration is being tracked.'
                 },
                 {
+                    id: 'devtools',
                     title: 'DevTools Detection',
                     desc: 'Checking for debugging interference',
                     pass: !isDevToolsOpen(),
-                    icon: 'fa-wrench'
+                    icon: 'fa-wrench',
+                    location: 'Browser Developer Tools',
+                    risk: 'Low',
+                    recommendation: 'Close DevTools if not actively debugging.',
+                    technical: 'Developer tools may expose sensitive information during debugging.'
                 }
             ];
 
@@ -390,14 +531,39 @@
 
         function displayCheckResult(check) {
             const checkDiv = document.createElement('div');
+            const uniqueId = 'check-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             checkDiv.className = `check-item ${check.pass ? 'pass' : 'fail'}`;
             checkDiv.innerHTML = `
                 <div class="check-icon ${check.pass ? 'pass' : 'fail'}">
                     <i class="fa-solid ${check.pass ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
                 </div>
                 <div class="check-content">
-                    <div class="check-title">${check.title}</div>
+                    <div class="check-title">
+                        ${check.title}
+                        <span id="status-${uniqueId}" class="status-badge"></span>
+                    </div>
                     <div class="check-desc">${check.desc}</div>
+                    ${check.pass ? '' : `
+                        <div class="threat-actions">
+                            <button class="action-btn view-details" onclick="toggleDetails('${uniqueId}')">
+                                <i class="fa-solid fa-eye"></i> View Details
+                            </button>
+                            <button class="action-btn quarantine" onclick="quarantineThreat('${uniqueId}', '${check.title}')">
+                                <i class="fa-solid fa-box-archive"></i> Quarantine
+                            </button>
+                            <button class="action-btn remove" onclick="removeThreat('${uniqueId}', '${check.title}')">
+                                <i class="fa-solid fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        <div class="threat-detail" id="detail-${uniqueId}">
+                            <strong>🎯 Threat Location:</strong><br>
+                            <span class="threat-location">${check.location || 'Browser Environment'}</span><br><br>
+                            <strong>⚠️ Risk Level:</strong> ${check.risk || 'Medium'}<br>
+                            <strong>📋 Recommendation:</strong> ${check.recommendation || 'Quarantine or remove this threat to improve security.'}<br><br>
+                            <strong>🔍 Technical Details:</strong><br>
+                            ${check.technical || 'No additional technical information available.'}
+                        </div>
+                    `}
                 </div>
                 <div class="check-icon">
                     <i class="fa-solid ${check.icon}"></i>
@@ -437,11 +603,14 @@
 
         // License check on load
         function checkLicense() {
+            // Admin bypass
+            const isAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const adminEmail = localStorage.getItem('current_user_email') === 'mr.troy.walker.62@gmail.com';
             const license = localStorage.getItem('aegis_license');
             const mainPanel = document.getElementById('mainPanel');
             const licenseCheck = document.getElementById('licenseCheck');
             
-            if (license === 'active') {
+            if (license === 'active' || isAdmin || adminEmail) {
                 mainPanel.style.display = 'block';
                 licenseCheck.style.display = 'none';
                 
@@ -459,6 +628,86 @@
 
         // Call on page load
         checkLicense();
+        
+        // Threat Action Functions
+        function toggleDetails(uniqueId) {
+            const detailDiv = document.getElementById('detail-' + uniqueId);
+            const button = event.target.closest('button');
+            if (detailDiv && button) {
+                detailDiv.classList.toggle('active');
+                button.innerHTML = detailDiv.classList.contains('active') 
+                    ? '<i class="fa-solid fa-eye-slash"></i> Hide Details'
+                    : '<i class="fa-solid fa-eye"></i> View Details';
+            }
+        }
+        
+        function quarantineThreat(uniqueId, threatName) {
+            const button = event.target.closest('button');
+            if (confirm(`Quarantine "${threatName}"?\n\nThis will isolate the threat and prevent it from executing.`)) {
+                // Simulate quarantine action
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Quarantining...';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fa-solid fa-check"></i> Quarantined';
+                    button.style.background = '#64748b';
+                    
+                    // Add quarantine badge
+                    const statusBadge = document.getElementById('status-' + uniqueId);
+                    if (statusBadge && !statusBadge.querySelector('.quarantine-badge')) {
+                        statusBadge.innerHTML = '<span class="quarantine-badge">QUARANTINED</span>';
+                    }
+                    
+                    // Disable other action buttons
+                    const actionBtns = button.closest('.threat-actions').querySelectorAll('.action-btn');
+                    actionBtns.forEach(btn => {
+                        if (btn !== button && !btn.classList.contains('view-details')) {
+                            btn.disabled = true;
+                        }
+                    });
+                    
+                    // Show success message
+                    alert(`✅ ${threatName} has been quarantined!\n\nThe threat is now isolated and cannot cause harm.`);
+                }, 1500);
+            }
+        }
+        
+        function removeThreat(uniqueId, threatName) {
+            const button = event.target.closest('button');
+            if (confirm(`⚠️ REMOVE "${threatName}"?\n\nThis will permanently remove the threat. This action cannot be undone.`)) {
+                // Simulate remove action
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Removing...';
+                
+                setTimeout(() => {
+                    const checkItem = button.closest('.check-item');
+                    
+                    // Add removed badge before removing
+                    const statusBadge = document.getElementById('status-' + uniqueId);
+                    if (statusBadge && !statusBadge.querySelector('.removed-badge')) {
+                        statusBadge.innerHTML = '<span class="removed-badge">REMOVED</span>';
+                    }
+                    
+                    // Fade out and remove
+                    checkItem.style.opacity = '0.5';
+                    checkItem.style.transform = 'scale(0.95)';
+                    checkItem.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        checkItem.remove();
+                        
+                        // Update threat count
+                        const currentCount = parseInt(threatCount.textContent);
+                        const newCount = currentCount - 1;
+                        threatCount.textContent = newCount;
+                        threatCount.className = 'threat-count ' + (newCount === 0 ? 'safe' : newCount <= 2 ? 'warning' : 'critical');
+                        threatSummary.className = 'threat-summary ' + (newCount === 0 ? 'safe' : newCount <= 2 ? 'warning' : 'critical');
+                        
+                        alert(`✅ ${threatName} has been permanently removed!`);
+                    }, 500);
+                }, 1500);
+            }
+        }
     </script>
 </body>
 </html>

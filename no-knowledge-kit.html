@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PAPI Key Loader - Universal API Key Management -->
+    <script src="papi-key-loader.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
@@ -60,7 +62,7 @@
             height: 40px;
             display: flex;
             align-items: center;
-            justify-center;
+            justify-content: center;
             border-radius: 8px;
             font-size: 1.2rem;
             color: #1e293b;
@@ -147,7 +149,7 @@
                 <span class="bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded">$50/mo</span>
             </div>
             <div class="flex items-center gap-3">
-                <input type="password" id="apiKey" placeholder="Gemini API Key" 
+                <input type="password" id="apiKey" placeholder="Gemini or OpenAI API Key" 
                     class="bg-gray-800 border border-gray-600 text-white text-xs p-2 rounded w-64">
                 <button onclick="saveKey()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs">
                     SAVE
@@ -171,6 +173,11 @@
                     </div>
                     <input type="text" id="userRequest" placeholder="Describe your app..." 
                         class="flex-1 bg-gray-900 border-t border-b border-gray-600 text-white p-4">
+                    <button onclick="toggleVoiceInput()" id="voiceBtn" 
+                        class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-4 border-t border-b border-gray-600 transition-all duration-300"
+                        title="Voice Input">
+                        <i class="fas fa-microphone" id="voiceIcon"></i>
+                    </button>
                     <button onclick="startAutomation()" id="startBtn" 
                         class="bg-gradient-to-r from-amber-500 via-blue-500 to-pink-500 text-white font-bold px-8 py-4 rounded-tr-lg">
                         INITIALIZE
@@ -292,27 +299,194 @@
 
     <script>
         function checkLicense() {
+            // Check for admin access first
+            const isAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const adminEmail = localStorage.getItem('current_user_email') === 'mr.troy.walker.62@gmail.com';
+            
+            // Check for licenses
             const hasLicense = localStorage.getItem('nk_license') === 'active' || 
-                             localStorage.getItem('bundle_license') === 'active';
-            if (!hasLicense) {
+                             localStorage.getItem('no_knowledge_kit_license') === 'active' ||
+                             localStorage.getItem('bundle_license') === 'active' ||
+                             localStorage.getItem('papi_license') === 'active';
+            
+            // Grant access if admin or has license
+            if (!hasLicense && !isAdmin && !adminEmail) {
                 document.getElementById('licenseGate').classList.remove('hidden');
                 return false;
             }
             return true;
         }
 
-        window.addEventListener('DOMContentLoaded', () => checkLicense());
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLicense();
+            loadApiKey();
+        });
 
-        let apiKey = localStorage.getItem("code_auto_key") || "";
+        let apiKey = "";
         let projectData = { idea: "", strategy: "", spec: "", rawCode: "", files: [], zipBlob: null };
 
-        if(apiKey) document.getElementById("apiKey").value = apiKey;
+        function loadApiKey() {
+            // Try PAPI universal key system first - check for both Gemini and OpenAI
+            if (window.PAPI && typeof PAPI.loadKey === 'function') {
+                apiKey = PAPI.loadKey('no-knowledge-kit.html', 'gemini') || 
+                         PAPI.loadKey('no-knowledge-kit.html', 'openai') || 
+                         PAPI.loadKey() || "";
+            }
+            
+            // Fallback to local storage - check multiple keys
+            if (!apiKey) {
+                apiKey = localStorage.getItem("gemini_key") || 
+                         localStorage.getItem("openai_key_1") || 
+                         localStorage.getItem("code_auto_key") || "";
+            }
+            
+            if(apiKey) {
+                document.getElementById("apiKey").value = apiKey;
+                // Auto-detect key type
+                if (apiKey.startsWith('sk-')) {
+                    console.log('✅ OpenAI key detected');
+                } else if (apiKey.startsWith('AIza')) {
+                    console.log('✅ Gemini key detected');
+                }
+            } else {
+                console.log("ℹ️ No API key found. You can use:");
+                console.log("  - Gemini: https://makersuite.google.com/app/apikey");
+                console.log("  - OpenAI: https://platform.openai.com/api-keys");
+            }
+        }
 
         function saveKey() {
             apiKey = document.getElementById("apiKey").value.trim();
+            if (!apiKey) {
+                alert("❌ Please enter an API key");
+                return;
+            }
+            
+            // Save to both systems for compatibility
             localStorage.setItem("code_auto_key", apiKey);
-            alert("API Key Saved");
+            
+            // Detect and save to appropriate key
+            if (apiKey.startsWith('sk-')) {
+                localStorage.setItem("openai_key_1", apiKey);
+                alert("✅ OpenAI API Key Saved");
+            } else if (apiKey.startsWith('AIza')) {
+                localStorage.setItem("gemini_key", apiKey);
+                alert("✅ Gemini API Key Saved");
+            } else {
+                localStorage.setItem("gemini_key", apiKey);
+                alert("✅ API Key Saved");
+            }
         }
+
+        // Voice Recognition Setup
+        let recognition = null;
+        let isListening = false;
+
+        function initializeSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.warn('Speech recognition not supported');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceIcon = document.getElementById('voiceIcon');
+                voiceBtn.classList.add('bg-red-600', 'animate-pulse');
+                voiceBtn.classList.remove('bg-gray-800');
+                voiceIcon.classList.add('fa-microphone-slash');
+                voiceIcon.classList.remove('fa-microphone');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                const input = document.getElementById('userRequest');
+                if (finalTranscript) {
+                    input.value += finalTranscript;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                stopVoiceInput();
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    // Restart if still listening
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        stopVoiceInput();
+                    }
+                }
+            };
+
+            // Request microphone permission on load
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => console.log('🎤 Microphone ready'))
+                .catch(err => console.warn('Microphone permission denied:', err));
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                initializeSpeechRecognition();
+                if (!recognition) {
+                    alert('Voice input not supported in this browser');
+                    return;
+                }
+            }
+
+            if (isListening) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput();
+            }
+        }
+
+        function startVoiceInput() {
+            try {
+                recognition.start();
+                isListening = true;
+            } catch (e) {
+                console.error('Failed to start recognition:', e);
+            }
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                isListening = false;
+                recognition.stop();
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceIcon = document.getElementById('voiceIcon');
+                voiceBtn.classList.remove('bg-red-600', 'animate-pulse');
+                voiceBtn.classList.add('bg-gray-800');
+                voiceIcon.classList.remove('fa-microphone-slash');
+                voiceIcon.classList.add('fa-microphone');
+            }
+        }
+
+        // Initialize voice recognition on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeSpeechRecognition();
+        });
 
         function log(agent, message, type="info") {
             const el = document.getElementById(`log-${agent}`);
@@ -490,15 +664,102 @@
         }
 
         async function callGemini(prompt) {
+            if (!apiKey || apiKey.trim() === '') {
+                throw new Error("No API key provided. Please enter a Gemini or OpenAI API key.");
+            }
+
+            // Detect key type and use appropriate API
+            if (apiKey.startsWith('sk-')) {
+                return await callOpenAI(prompt);
+            } else {
+                return await callGeminiAPI(prompt);
+            }
+        }
+
+        async function callOpenAI(prompt) {
+            const url = 'https://api.openai.com/v1/chat/completions';
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0.7,
+                        max_tokens: 2000
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    
+                    if (response.status === 401) {
+                        throw new Error("Invalid OpenAI API key. Check your key at platform.openai.com");
+                    } else if (response.status === 429) {
+                        throw new Error("Rate limit exceeded. Please wait a moment and try again.");
+                    } else {
+                        throw new Error(`OpenAI API Error: ${errorMsg}`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                if (!data.choices || !data.choices[0]?.message?.content) {
+                    throw new Error("Invalid API response format");
+                }
+                
+                return data.choices[0].message.content;
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    throw new Error("Network error. Check your internet connection.");
+                }
+                throw error;
+            }
+        }
+
+        async function callGeminiAPI(prompt) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            if (!response.ok) throw new Error("API failed");
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    
+                    if (response.status === 400) {
+                        throw new Error("Invalid Gemini API key format. Get a key at makersuite.google.com/app/apikey");
+                    } else if (response.status === 403) {
+                        throw new Error("Gemini API key authentication failed. Verify your key is activated.");
+                    } else if (response.status === 429) {
+                        throw new Error("Rate limit exceeded. Please wait a moment and try again.");
+                    } else {
+                        throw new Error(`Gemini API Error: ${errorMsg}`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                    throw new Error("Invalid API response format");
+                }
+                
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    throw new Error("Network error. Check your internet connection.");
+                }
+                throw error;
+            }
         }
     </script>
 </body>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI Central | AI Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --papi-blue: #38bdf8;
+            --papi-cyan: #00f2ea;
+            --papi-purple: #d946ef;
+            --papi-bg: #020617;
+            --papi-card: #0f172a;
+            --papi-border: #1e293b;
+            --papi-success: #22c55e;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--papi-bg);
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(217, 70, 239, 0.15) 0%, transparent 50%);
+        }
+        
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-bottom: 1px solid var(--papi-border);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, transparent 100%);
+        }
+        
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            background: linear-gradient(135deg, var(--papi-cyan), var(--papi-blue), var(--papi-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5)); }
+            50% { filter: drop-shadow(0 0 40px rgba(217, 70, 239, 0.8)); }
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: var(--papi-card);
+            border: 1px solid var(--papi-success);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--papi-success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            color: var(--papi-blue);
+            margin-bottom: 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .section-title::before,
+        .section-title::after {
+            content: '';
+            height: 2px;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, var(--papi-blue), transparent);
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+        
+        .app-card {
+            background: var(--papi-card);
+            border: 1px solid var(--papi-border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--papi-cyan), var(--papi-blue), var(--papi-purple));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--papi-blue);
+            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.3);
+        }
+        
+        .app-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--papi-cyan), var(--papi-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .app-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .app-desc {
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .app-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--papi-blue), var(--papi-purple));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .app-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.5);
+        }
+        
+        .premium-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .beta-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--papi-purple), #ec4899);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .admin-section {
+            background: var(--papi-card);
+            border: 2px solid var(--papi-success);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--papi-border);
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 60px;
+        }
+        
+        @media (max-width: 768px) {
+            .logo { font-size: 2.5rem; letter-spacing: 4px; }
+            .section-title { font-size: 1.5rem; }
+            .apps-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">PAPI CENTRAL</div>
+        <div class="tagline">"One of the most important things that a human can have is self control."</div>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>All Systems Online</span>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- Main Apps Section -->
+        <h2 class="section-title">Core Applications</h2>
+        <div class="apps-grid">
+            
+            <!-- Alien AI Assistant -->
+            <div class="app-card">
+                <div class="app-icon">🛸</div>
+                <h3 class="app-name">Alien AI Assistant</h3>
+                <p class="app-desc">3D spaceship interface with intelligent AI pilot. Voice commands, conversation memory, and animated interactions.</p>
+                <a href="index.html" class="app-link">
+                    Launch Interface <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Cortex App Studio -->
+            <div class="app-card">
+                <span class="premium-badge">Premium</span>
+                <div class="app-icon">🧠</div>
+                <h3 class="app-name">Cortex App Studio</h3>
+                <p class="app-desc">Voice-powered app generation studio. Build complete applications with AI assistance, code validation, and deployment tools.</p>
+                <a href="cortex-app-studio.html" class="app-link">
+                    Open Studio <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- No Knowledge Kit -->
+            <div class="app-card">
+                <div class="app-icon">📚</div>
+                <h3 class="app-name">No Knowledge Kit</h3>
+                <p class="app-desc">Learn anything without prerequisites. AI breaks down complex topics into digestible lessons with zero assumed knowledge.</p>
+                <a href="no-knowledge-kit.html" class="app-link">
+                    Start Learning <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Aegis Guard -->
+            <div class="app-card">
+                <span class="premium-badge">Premium</span>
+                <div class="app-icon">🛡️</div>
+                <h3 class="app-name">Aegis Guard</h3>
+                <p class="app-desc">Commercial-grade security suite with AES-256 encryption, clone detection, and privacy protection.</p>
+                <a href="aegis-guard.html" class="app-link">
+                    Access Security <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Automation Hub -->
+            <div class="app-card">
+                <div class="app-icon">⚙️</div>
+                <h3 class="app-name">Automation Hub</h3>
+                <p class="app-desc">Automate repetitive tasks with AI-powered workflows. Schedule, monitor, and optimize your daily operations.</p>
+                <a href="automation-hub.html" class="app-link">
+                    Launch Hub <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- AI Assistant Pro -->
+            <div class="app-card">
+                <span class="premium-badge">Premium</span>
+                <div class="app-icon">🤖</div>
+                <h3 class="app-name">AI Assistant Pro</h3>
+                <p class="app-desc">Advanced AI assistant with multi-provider support, extended context, and professional features.</p>
+                <a href="ai-assistant-pro.html" class="app-link">
+                    Open Assistant <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Tools & Utilities Section -->
+        <h2 class="section-title">Tools & Utilities</h2>
+        <div class="apps-grid">
+            
+            <!-- Key Controller -->
+            <div class="app-card">
+                <div class="app-icon">🔑</div>
+                <h3 class="app-name">Key Controller</h3>
+                <p class="app-desc">Centralized API key management with rotation, masking, and multi-provider support. Secure key storage.</p>
+                <a href="key-controller.html" class="app-link">
+                    Manage Keys <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Code Cargo -->
+            <div class="app-card">
+                <div class="app-icon">📦</div>
+                <h3 class="app-name">Code Cargo</h3>
+                <p class="app-desc">Package and deploy your projects with AI assistance. Export, compress, and share complete codebases.</p>
+                <a href="code-cargo.html" class="app-link">
+                    Ship Code <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Call Sentry -->
+            <div class="app-card">
+                <div class="app-icon">📞</div>
+                <h3 class="app-name">Call Sentry</h3>
+                <p class="app-desc">Smart call screening and management. Block spam, log calls, and get AI-powered insights.</p>
+                <a href="call-sentry.html" class="app-link">
+                    Monitor Calls <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Cortex Desktop Bridge -->
+            <div class="app-card">
+                <span class="premium-badge">Premium</span>
+                <div class="app-icon">🌉</div>
+                <h3 class="app-name">Cortex Desktop Bridge</h3>
+                <p class="app-desc">Connect web interface to desktop Python AI. Real-time conversation sync and memory persistence.</p>
+                <a href="cortex-desktop-bridge.html" class="app-link">
+                    Connect Desktop <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Admin & Testing Section -->
+        <div class="admin-section">
+            <h2 class="section-title">Administration</h2>
+            <div class="apps-grid">
+                
+                <!-- Trial Link Generator -->
+                <div class="app-card">
+                    <div class="app-icon">🔗</div>
+                    <h3 class="app-name">Trial Link Generator</h3>
+                    <p class="app-desc">Create shareable trial links for testers. Manage builds, chats, and track usage statistics.</p>
+                    <a href="trial-link-generator.html" class="app-link">
+                        Generate Links <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Beta Admin -->
+                <div class="app-card">
+                    <div class="app-icon">👨‍💼</div>
+                    <h3 class="app-name">Beta Admin Panel</h3>
+                    <p class="app-desc">Manage beta testers, generate licenses, and track activation status. Admin access required.</p>
+                    <a href="beta-admin.html" class="app-link">
+                        Admin Portal <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Marketplace -->
+                <div class="app-card">
+                    <span class="premium-badge">Premium</span>
+                    <div class="app-icon">🏪</div>
+                    <h3 class="app-name">PAPI Marketplace</h3>
+                    <p class="app-desc">Purchase commercial licenses and premium features. Secure payment processing via Stripe.</p>
+                    <a href="PAPI Central.htm" class="app-link">
+                        Visit Store <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p><strong>PAPI Central</strong> - Personal Automated Protection Interface</p>
+        <p style="margin-top: 10px;">Network Status: <span style="color: var(--papi-success);">SECURED</span> | Operating Temp: <span style="color: var(--papi-blue);">COLD</span></p>
+        <p style="margin-top: 20px; font-size: 0.8rem;">© 2026 PAPI Central. All rights reserved.</p>
+    </div>
+
+</body>
+</html>

@@ -1,8 +1,21 @@
 {
+  "name": "papi-central",
+  "version": "1.0.0",
+  "description": "PAPI Central - Personal Automated Protection Interface with AI Suite",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "stripe": "^20.1.0"
+  },
+  "pythonDependencies": {
+    "note": "For Cortex Desktop, install Python dependencies with: pip install -r requirements.txt",
+    "flask": "3.0.0",
+    "flask-cors": "4.0.0",
+    "requests": "2.31.0"
   }
 }

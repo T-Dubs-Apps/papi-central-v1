@@ -1,6 +1,7 @@
-# Netlify Configuration
+# Netlify Configuration for PAPI Central
 [build]
   publish = "."
+  command = "echo 'No build needed - static site'"
   
 [[redirects]]
   from = "/*"
@@ -13,3 +14,9 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/health.json"
+  [headers.values]
+    Cache-Control = "no-cache"

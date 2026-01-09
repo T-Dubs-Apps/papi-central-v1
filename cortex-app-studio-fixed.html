@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cortex App Studio - Working Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5rem; color: #a78bfa; margin-bottom: 10px; }
+        .header p { color: #cbd5e1; font-size: 1.1rem; }
+        
+        .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        
+        .panel {
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid #6366f1;
+            border-radius: 12px;
+            padding: 25px;
+        }
+        
+        .panel h2 { font-size: 1.5rem; margin-bottom: 20px; color: #a78bfa; }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover { transform: translateY(-2px); }
+        
+        .code-output {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            color: #64ffda;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 15px;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 500px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .device-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .device-btn {
+            flex: 1;
+            padding: 10px;
+            background: #374151;
+            border: 1px solid #6366f1;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .device-btn.active { background: #6366f1; }
+        
+        .deploy-section {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .deploy-section h2 { color: #22c55e; margin-bottom: 15px; }
+        
+        .deploy-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #22c55e, #10b981);
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        
+        .quick-templates {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .template-btn {
+            padding: 8px 16px;
+            background: #374151;
+            border: 1px solid #6366f1;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .split-view { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎨 Cortex App Studio</h1>
+            <p>Build → Preview → Deploy - All in One Place!</p>
+        </div>
+
+        <!-- Main Split View -->
+        <div class="split-view">
+            <!-- LEFT: AI Generation -->
+            <div class="panel">
+                <h2>🧠 AI App Generator</h2>
+                
+                <label style="display: block; margin-bottom: 8px; color: #cbd5e1;">What do you want to build?</label>
+                <textarea 
+                    id="appRequest" 
+                    placeholder="Example: Build me a todo app with dark mode and localStorage"
+                ></textarea>
+                
+                <button onclick="generateApp()" style="width: 100%;">
+                    ✨ Generate App with AI
+                </button>
+
+                <div style="margin-top: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #cbd5e1; font-weight: bold;">Generated Code:</label>
+                    <div id="codeOutput" class="code-output">// Your generated app code will appear here...
+// Try it: Type something like "Build me a calculator"</div>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">Quick Templates:</p>
+                    <div class="quick-templates">
+                        <button class="template-btn" onclick="quickGen('todo app')">Todo List</button>
+                        <button class="template-btn" onclick="quickGen('calculator')">Calculator</button>
+                        <button class="template-btn" onclick="quickGen('countdown timer')">Timer</button>
+                        <button class="template-btn" onclick="quickGen('landing page')">Landing Page</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Live Preview -->
+            <div class="panel">
+                <h2>👁️ Live Preview Browser</h2>
+
+                <div class="device-buttons">
+                    <button class="device-btn active" onclick="setDevice('desktop')">🖥️ Desktop</button>
+                    <button class="device-btn" onclick="setDevice('tablet')">📱 Tablet</button>
+                    <button class="device-btn" onclick="setDevice('mobile')">📱 Mobile</button>
+                </div>
+
+                <iframe 
+                    id="previewFrame" 
+                    class="preview-frame"
+                    sandbox="allow-scripts allow-same-origin"
+                    srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);color:white;'><div style='text-align:center;'><h1>🎨 Preview Browser Ready</h1><p>Generate an app on the left to see it here!</p></div></body></html>"
+                ></iframe>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="refreshPreview()" style="flex: 1;">🔄 Refresh</button>
+                    <button onclick="openInNewTab()" style="flex: 1;">🔗 Open in Tab</button>
+                    <button onclick="copyCode()" style="flex: 1;">📋 Copy Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deploy Section -->
+        <div class="deploy-section">
+            <h2>🚀 Ready to Deploy?</h2>
+            <p style="color: #cbd5e1; margin-bottom: 10px;">Your app is working perfectly in the preview browser!</p>
+            <p style="font-size: 14px; color: #94a3b8;">Test it thoroughly, then deploy with one click!</p>
+            <button class="deploy-btn" onclick="prepareDeployment()">
+                ☁️ Deploy to Web
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentCode = '';
+        let currentDevice = 'desktop';
+
+        // Generate App with AI
+        async function generateApp() {
+            const request = document.getElementById('appRequest').value;
+            if (!request) {
+                alert('Please describe what you want to build!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('codeOutput').textContent = '⚡ AI is building your app...\nThis may take a few seconds...';
+            
+            // Demo mode fallback
+            currentCode = generateDemoApp(request);
+            document.getElementById('codeOutput').textContent = currentCode;
+            updatePreview(currentCode);
+        }
+
+        // Generate demo app
+        function generateDemoApp(request) {
+            if (request.toLowerCase().includes('todo')) {
+                return getTodoAppCode();
+            } else if (request.toLowerCase().includes('calculator')) {
+                return getCalculatorCode();
+            } else if (request.toLowerCase().includes('timer') || request.toLowerCase().includes('countdown')) {
+                return getTimerCode();
+            } else {
+                return getDefaultAppCode(request);
+            }
+        }
+
+        // Update preview frame
+        function updatePreview(code) {
+            const frame = document.getElementById('previewFrame');
+            frame.srcdoc = code;
+        }
+
+        // Device switcher
+        function setDevice(device) {
+            currentDevice = device;
+            const frame = document.getElementById('previewFrame');
+            const buttons = document.querySelectorAll('.device-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            switch(device) {
+                case 'mobile':
+                    frame.style.width = '375px';
+                    frame.style.height = '667px';
+                    break;
+                case 'tablet':
+                    frame.style.width = '768px';
+                    frame.style.height = '1024px';
+                    break;
+                default:
+                    frame.style.width = '100%';
+                    frame.style.height = '500px';
+            }
+        }
+
+        // Refresh preview
+        function refreshPreview() {
+            updatePreview(currentCode);
+        }
+
+        // Open in new tab
+        function openInNewTab() {
+            if (!currentCode) {
+                alert('Generate an app first!');
+                return;
+            }
+            const blob = new Blob([currentCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        // Copy code
+        function copyCode() {
+            if (!currentCode) {
+                alert('Generate an app first!');
+                return;
+            }
+            navigator.clipboard.writeText(currentCode);
+            alert('Code copied to clipboard!');
+        }
+
+        // Quick generate
+        function quickGen(template) {
+            document.getElementById('appRequest').value = template;
+            generateApp();
+        }
+
+        // Deployment
+        function prepareDeployment() {
+            if (!currentCode || currentCode.includes('// Your generated app')) {
+                alert('Generate an app first before deploying!');
+                return;
+            }
+            
+            const appName = prompt('Name your app (e.g., my-awesome-app):');
+            if (!appName) return;
+            
+            const blob = new Blob([currentCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${appName}.html`;
+            a.click();
+            
+            alert('✅ App downloaded! Upload it to any hosting service (Netlify, Vercel, GitHub Pages)');
+        }
+
+        // Demo app templates
+        function getTodoAppCode() {
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App - Built with Cortex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 40px; max-width: 500px; width: 100%; }
+        h1 { color: #667eea; margin-bottom: 30px; text-align: center; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; }
+        button { padding: 15px 30px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .todo-item { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .todo-item.completed { opacity: 0.6; text-decoration: line-through; }
+        .delete-btn { background: #ef4444; padding: 5px 15px; border-radius: 5px; color: white; border: none; cursor: pointer; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 My Todo List</h1>
+        <div class="input-group">
+            <input id="todoInput" type="text" placeholder="What needs to be done?" />
+            <button onclick="addTodo()">Add</button>
+        </div>
+        <div id="todoList"></div>
+    </div>
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos') || '[]');
+        function renderTodos() {
+            document.getElementById('todoList').innerHTML = todos.map((todo, i) => \`
+                <div class="todo-item \${todo.done ? 'completed' : ''}" onclick="toggleTodo(\${i})">
+                    <span>\${todo.text}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTodo(\${i})">Delete</button>
+                </div>
+            \`).join('');
+        }
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            if (input.value.trim()) {
+                todos.push({ text: input.value, done: false });
+                input.value = '';
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+            }
+        }
+        function toggleTodo(i) {
+            todos[i].done = !todos[i].done;
+            localStorage.setItem('todos', JSON.stringify(todos));
+            renderTodos();
+        }
+        function deleteTodo(i) {
+            todos.splice(i, 1);
+            localStorage.setItem('todos', JSON.stringify(todos));
+            renderTodos();
+        }
+        document.getElementById('todoInput').addEventListener('keypress', e => { if (e.key === 'Enter') addTodo(); });
+        renderTodos();
+    </script>
+</body>
+</html>`;
+        }
+
+        function getCalculatorCode() {
+            return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Calculator</title><style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);margin:0;font-family:Arial}
+.calc{background:#1e293b;border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);width:300px}
+.display{background:#0f172a;color:#10b981;font-size:32px;padding:20px;border-radius:10px;text-align:right;margin-bottom:20px;min-height:60px}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+button{padding:20px;font-size:20px;border:none;border-radius:10px;cursor:pointer;background:#334155;color:white}
+button:hover{background:#475569}
+button.operator{background:#667eea}
+button.equals{background:#10b981;grid-column:span 2}
+button.clear{background:#ef4444}
+</style></head><body><div class="calc"><div class="display" id="display">0</div><div class="buttons">
+<button onclick="append('7')">7</button><button onclick="append('8')">8</button><button onclick="append('9')">9</button><button class="operator" onclick="append('/')">÷</button>
+<button onclick="append('4')">4</button><button onclick="append('5')">5</button><button onclick="append('6')">6</button><button class="operator" onclick="append('*')">×</button>
+<button onclick="append('1')">1</button><button onclick="append('2')">2</button><button onclick="append('3')">3</button><button class="operator" onclick="append('-')">−</button>
+<button onclick="append('0')">0</button><button onclick="append('.')">.</button><button class="equals" onclick="calculate()">=</button><button class="operator" onclick="append('+')">+</button>
+<button class="clear" onclick="clearDisplay()">C</button><button onclick="backspace()">⌫</button>
+</div></div><script>
+let display=document.getElementById('display');let current='0';
+function append(v){current=current==='0'?v:current+v;display.textContent=current}
+function clearDisplay(){current='0';display.textContent=current}
+function backspace(){current=current.slice(0,-1)||'0';display.textContent=current}
+function calculate(){try{current=eval(current).toString();display.textContent=current}catch{display.textContent='Error';current='0'}}
+</script></body></html>`;
+        }
+
+        function getTimerCode() {
+            return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Countdown Timer</title><style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#f093fb,#f5576c);margin:0;font-family:Arial;text-align:center}
+.container{background:white;padding:60px;border-radius:30px;box-shadow:0 20px 80px rgba(0,0,0,0.3)}
+h1{color:#f5576c;margin-bottom:40px}
+.timer{font-size:80px;font-weight:bold;color:#333;margin:30px 0}
+button{padding:20px 40px;font-size:20px;border:none;border-radius:15px;cursor:pointer;margin:10px}
+.start{background:#10b981;color:white}
+.stop{background:#ef4444;color:white}
+.reset{background:#6366f1;color:white}
+input{padding:15px;font-size:20px;border:2px solid #ddd;border-radius:10px;width:200px;text-align:center}
+</style></head><body><div class="container"><h1>⏱️ Countdown Timer</h1>
+<input id="timeInput" type="number" placeholder="Seconds" value="60">
+<div class="timer" id="display">01:00</div>
+<button class="start" onclick="startTimer()">Start</button>
+<button class="stop" onclick="stopTimer()">Stop</button>
+<button class="reset" onclick="resetTimer()">Reset</button>
+</div><script>
+let time=60;let interval;let running=false;
+function updateDisplay(){let m=Math.floor(time/60);let s=time%60;document.getElementById('display').textContent=\`\${m.toString().padStart(2,'0')}:\${s.toString().padStart(2,'0')}\`}
+function startTimer(){if(running)return;running=true;interval=setInterval(()=>{if(time>0){time--;updateDisplay()}else{stopTimer();alert('Time is up!')}},1000)}
+function stopTimer(){running=false;clearInterval(interval)}
+function resetTimer(){stopTimer();time=parseInt(document.getElementById('timeInput').value)||60;updateDisplay()}
+updateDisplay();
+</script></body></html>`;
+        }
+
+        function getDefaultAppCode(request) {
+            return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${request}</title><style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);margin:0;font-family:Arial}
+.container{background:white;padding:60px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;max-width:600px}
+h1{color:#667eea;margin-bottom:20px}
+p{color:#666;line-height:1.8}
+button{margin-top:30px;padding:15px 40px;background:#667eea;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+</style></head><body><div class="container">
+<h1>🎨 ${request}</h1>
+<p>This is your custom app for "${request}". The full AI version would generate complete functionality here!</p>
+<button onclick="alert('App functionality would go here!')">Try It</button>
+<p style="margin-top:30px;font-size:12px;color:#999;">Built with Cortex App Studio</p>
+</div></body></html>`;
+        }
+    </script>
+</body>
+</html>

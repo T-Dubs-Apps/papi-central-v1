@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DAW Cordova App Launcher</title>
+</head>
+<body style="background: #0a0e1a; color: #00f2ea; font-family: system-ui; padding: 40px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #00f2ea;">🎵 DAW Cordova App Launcher</h1>
+        <p style="color: #cbd5e1;">Select how you want to launch the DAW app:</p>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="window.open('file:///e:/DAW-Cordova/www/index.html', '_blank')" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; border: none; padding: 15px 30px; 
+                           border-radius: 8px; cursor: pointer; font-size: 16px; 
+                           margin: 10px 0; display: block; width: 100%;">
+                📂 Open Local File (E:\DAW-Cordova\www\index.html)
+            </button>
+            
+            <button onclick="window.open('http://localhost:8080', '_blank')" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; border: none; padding: 15px 30px; 
+                           border-radius: 8px; cursor: pointer; font-size: 16px; 
+                           margin: 10px 0; display: block; width: 100%;">
+                🌐 Open on Port 8080 (if server running)
+            </button>
+            
+            <button onclick="window.open('http://localhost:3000', '_blank')" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; border: none; padding: 15px 30px; 
+                           border-radius: 8px; cursor: pointer; font-size: 16px; 
+                           margin: 10px 0; display: block; width: 100%;">
+                🌐 Open on Port 3000 (if server running)
+            </button>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(0, 242, 234, 0.1); border-radius: 8px; border-left: 4px solid #00f2ea;">
+            <h3 style="margin-top: 0; color: #00f2ea;">ℹ️ Quick Start</h3>
+            <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                <strong>Option 1 (Direct File):</strong> Opens the HTML file directly from E:\DAW-Cordova\www\<br>
+                <strong>Option 2 (Port 8080):</strong> Use if you started a server with <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px;">python -m http.server 8080</code><br>
+                <strong>Option 3 (Port 3000):</strong> Use if you started a Node.js server
+            </p>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="file:///e:/DAW-Cordova/" style="color: #00f2ea; text-decoration: none; font-size: 14px;">
+                📁 Browse DAW-Cordova Folder
+            </a>
+        </div>
+    </div>
+</body>
+</html>

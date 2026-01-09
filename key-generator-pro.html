@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Generator Pro | PAPI Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PAPI Key Loader -->
+    <script src="papi-key-loader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'Space Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .quantum-glow {
+            animation: quantumPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes quantumPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(0, 255, 255, 0.6); }
+        }
+        
+        .tab-button {
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: rgba(0, 242, 234, 0.2);
+            border-color: #00f2ea;
+            color: #00f2ea;
+        }
+        
+        .key-slot {
+            background: rgba(0, 242, 234, 0.05);
+            border: 2px dashed rgba(0, 242, 234, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .key-slot.filled {
+            background: rgba(0, 242, 234, 0.1);
+            border: 2px solid rgba(0, 242, 234, 0.5);
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-white flex items-center gap-3">
+                        <i class="fas fa-key text-cyan-400"></i>
+                        Key Generator Pro
+                    </h1>
+                    <p class="text-gray-400 mt-2">Generate keys & manage API keys for all PAPI apps</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="text-center glass-card p-3 px-5">
+                        <div class="text-2xl font-bold text-cyan-400" id="totalKeys">0</div>
+                        <div class="text-xs text-gray-400">Keys Stored</div>
+                    </div>
+                    <div class="text-center glass-card p-3 px-5">
+                        <div class="text-2xl font-bold text-purple-400" id="totalApps">0</div>
+                        <div class="text-xs text-gray-400">Apps Linked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex gap-3 mb-6">
+            <button onclick="switchTab('generate')" id="tab-generate" class="tab-button active flex-1 py-3 px-6 glass-card font-semibold text-white border-2 border-transparent">
+                <i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Keys
+            </button>
+            <button onclick="switchTab('manage')" id="tab-manage" class="tab-button flex-1 py-3 px-6 glass-card font-semibold text-gray-400 border-2 border-transparent">
+                <i class="fas fa-database mr-2"></i>Manage & Store
+            </button>
+            <button onclick="switchTab('assign')" id="tab-assign" class="tab-button flex-1 py-3 px-6 glass-card font-semibold text-gray-400 border-2 border-transparent">
+                <i class="fas fa-link mr-2"></i>Assign to Apps
+            </button>
+        </div>
+
+        <!-- Tab Content: Generate -->
+        <div id="content-generate" class="tab-content">
+            <div class="glass-card p-8 quantum-glow">
+                <h2 class="text-2xl font-bold text-white mb-6">Generate Secure Keys</h2>
+                
+                <!-- Key Type Buttons -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <button onclick="generateKey('openai')" class="bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 text-white font-bold py-6 rounded-xl transition transform hover:scale-105">
+                        <i class="fa-solid fa-robot text-3xl mb-2"></i>
+                        <div class="text-lg">OpenAI</div>
+                        <div class="text-xs opacity-75">sk-*******</div>
+                    </button>
+                    <button onclick="generateKey('claude')" class="bg-gradient-to-br from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white font-bold py-6 rounded-xl transition transform hover:scale-105">
+                        <i class="fa-solid fa-brain text-3xl mb-2"></i>
+                        <div class="text-lg">Claude</div>
+                        <div class="text-xs opacity-75">sk-ant-*******</div>
+                    </button>
+                    <button onclick="generateKey('gemini')" class="bg-gradient-to-br from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 text-white font-bold py-6 rounded-xl transition transform hover:scale-105">
+                        <i class="fa-brands fa-google text-3xl mb-2"></i>
+                        <div class="text-lg">Gemini</div>
+                        <div class="text-xs opacity-75">AIza*******</div>
+                    </button>
+                    <button onclick="generateKey('license')" class="bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white font-bold py-6 rounded-xl transition transform hover:scale-105">
+                        <i class="fa-solid fa-certificate text-3xl mb-2"></i>
+                        <div class="text-lg">License</div>
+                        <div class="text-xs opacity-75">Custom Key</div>
+                    </button>
+                </div>
+
+                <!-- Key Length Slider -->
+                <div class="mb-6">
+                    <label class="text-cyan-400 font-bold mb-2 block">Key Strength: <span id="keyLengthDisplay">64</span> characters</label>
+                    <input type="range" id="keyLength" min="32" max="256" value="64" step="16" 
+                        oninput="document.getElementById('keyLengthDisplay').textContent = this.value"
+                        class="w-full h-3 bg-gray-700 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Generated Key Display -->
+                <div class="mb-6">
+                    <label class="text-white font-bold mb-2 block">Generated Key</label>
+                    <div class="relative">
+                        <input type="text" id="generatedKey" readonly 
+                            class="w-full px-4 py-4 bg-gray-900 border-2 border-cyan-500 rounded-lg text-cyan-400 font-mono text-sm pr-24"
+                            placeholder="Click a button above to generate a key...">
+                        <div class="absolute right-2 top-2 flex gap-2">
+                            <button onclick="copyKey()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="saveGeneratedKey()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Info -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-card p-4 text-center">
+                        <div class="text-2xl font-bold text-green-400" id="keyStrength">0%</div>
+                        <div class="text-xs text-gray-400 mt-1">Strength</div>
+                    </div>
+                    <div class="glass-card p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="keyEntropy">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Entropy (bits)</div>
+                    </div>
+                    <div class="glass-card p-4 text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="keyType">-</div>
+                        <div class="text-xs text-gray-400 mt-1">Type</div>
+                    </div>
+                    <div class="glass-card p-4 text-center">
+                        <div class="text-2xl font-bold text-cyan-400" id="keyLength">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Length</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Manage -->
+        <div id="content-manage" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- OpenAI Keys -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fab fa-openai text-green-400"></i>
+                        OpenAI Keys (Max 4)
+                    </h2>
+                    <div id="openai-keys-list" class="space-y-3 mb-4"></div>
+                    <button onclick="addOpenAISlot()" class="w-full py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                        <i class="fas fa-plus mr-2"></i>Add Key Slot
+                    </button>
+                </div>
+
+                <!-- Other Keys -->
+                <div class="space-y-6">
+                    <div class="glass-card p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-brain text-purple-400"></i>
+                            Claude Key
+                        </h2>
+                        <input type="password" id="claude-key" placeholder="sk-ant-..." 
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 mono text-sm mb-3">
+                        <button onclick="saveClaudeKey()" class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition">
+                            Save Claude Key
+                        </button>
+                    </div>
+
+                    <div class="glass-card p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-gem text-blue-400"></i>
+                            Gemini Key
+                        </h2>
+                        <input type="password" id="gemini-key" placeholder="AIza..." 
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 mono text-sm mb-3">
+                        <button onclick="saveGeminiKey()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition">
+                            Save Gemini Key
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Assign -->
+        <div id="content-assign" class="tab-content hidden">
+            <div class="glass-card p-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Link Keys to Apps</h2>
+                
+                <div class="mb-6 p-5 bg-cyan-900/20 border border-cyan-500/30 rounded-xl">
+                    <p class="text-cyan-300 mb-4"><i class="fas fa-info-circle mr-2"></i><strong>How it works:</strong> Type the exact filename of your app (e.g., "ai-assistant-pro.html") and assign which API key it should use.</p>
+                    <div class="flex gap-3">
+                        <input type="text" id="app-filename" placeholder="app-filename.html" 
+                            class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500">
+                        <select id="key-assignment" class="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white">
+                            <option value="auto">Auto-Rotate (Recommended)</option>
+                            <option value="key1">OpenAI Key 1</option>
+                            <option value="key2">OpenAI Key 2</option>
+                            <option value="key3">OpenAI Key 3</option>
+                            <option value="key4">OpenAI Key 4</option>
+                            <option value="claude">Claude</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
+                        <button onclick="assignKey()" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-semibold transition">
+                            <i class="fas fa-link mr-2"></i>Assign
+                        </button>
+                    </div>
+                </div>
+
+                <div id="app-assignments" class="space-y-2"></div>
+            </div>
+
+            <!-- Test Section -->
+            <div class="glass-card p-6 mt-6 border-l-4 border-emerald-400">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-vial text-emerald-400"></i>
+                    Test Your Keys
+                </h2>
+                <div class="flex gap-3 mb-4">
+                    <input type="text" id="test-message" placeholder="Type a test message..." value="Hello, test my API key"
+                        class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500">
+                    <button onclick="testAPI()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition">
+                        <i class="fas fa-flask mr-2"></i>Test OpenAI
+                    </button>
+                </div>
+                <div id="test-result" class="hidden p-4 bg-white/5 rounded-lg">
+                    <div class="text-sm text-gray-400 mb-2">Response:</div>
+                    <div id="test-response" class="text-white text-sm mono"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'generate';
+        let currentKeyType = '';
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+            });
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-400');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            
+            // Load data if needed
+            if (tab === 'manage') {
+                loadAllKeys();
+            } else if (tab === 'assign') {
+                loadAppAssignments();
+            }
+            
+            updateStats();
+        }
+        
+        // Key Generation Functions
+        function generateKey(type) {
+            currentKeyType = type;
+            const length = parseInt(document.getElementById('keyLength').value);
+            let key = '';
+            
+            if (type === 'openai') {
+                key = 'sk-' + generateRandomString(48);
+            } else if (type === 'claude') {
+                key = 'sk-ant-' + generateRandomString(40);
+            } else if (type === 'gemini') {
+                key = 'AIza' + generateRandomString(35);
+            } else if (type === 'license') {
+                key = generateLicenseKey();
+            } else {
+                key = generateRandomString(length);
+            }
+            
+            document.getElementById('generatedKey').value = key;
+            document.getElementById('keyType').textContent = type.toUpperCase();
+            document.getElementById('keyLength').textContent = key.length;
+            
+            const entropy = calculateEntropy(key);
+            const strength = Math.min(100, Math.floor((entropy / 256) * 100));
+            
+            document.getElementById('keyEntropy').textContent = entropy.toFixed(0);
+            document.getElementById('keyStrength').textContent = strength + '%';
+            
+            showNotification(`${type.toUpperCase()} key generated!`, 'success');
+        }
+        
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            const array = new Uint8Array(length);
+            crypto.getRandomValues(array);
+            for (let i = 0; i < length; i++) {
+                result += chars[array[i] % chars.length];
+            }
+            return result;
+        }
+        
+        function generateLicenseKey() {
+            const parts = [];
+            for (let i = 0; i < 5; i++) {
+                parts.push(generateRandomString(5).toUpperCase());
+            }
+            return parts.join('-');
+        }
+        
+        function calculateEntropy(str) {
+            const freq = {};
+            for (let char of str) {
+                freq[char] = (freq[char] || 0) + 1;
+            }
+            
+            let entropy = 0;
+            const len = str.length;
+            for (let char in freq) {
+                const p = freq[char] / len;
+                entropy -= p * Math.log2(p);
+            }
+            
+            return entropy * len;
+        }
+        
+        function copyKey() {
+            const keyInput = document.getElementById('generatedKey');
+            keyInput.select();
+            document.execCommand('copy');
+            showNotification('Key copied to clipboard!', 'success');
+        }
+        
+        function saveGeneratedKey() {
+            const key = document.getElementById('generatedKey').value;
+            if (!key) {
+                showNotification('No key to save!', 'error');
+                return;
+            }
+            
+            if (currentKeyType === 'openai') {
+                // Find next available slot
+                for (let i = 1; i <= 4; i++) {
+                    if (!localStorage.getItem(`openai_api_key${i}`)) {
+                        localStorage.setItem(`openai_api_key${i}`, key);
+                        showNotification(`Saved to OpenAI Key ${i}`, 'success');
+                        switchTab('manage');
+                        return;
+                    }
+                }
+                showNotification('All OpenAI slots full', 'warning');
+            } else if (currentKeyType === 'claude') {
+                localStorage.setItem('claude_api_key', key);
+                showNotification('Claude key saved!', 'success');
+                switchTab('manage');
+            } else if (currentKeyType === 'gemini') {
+                localStorage.setItem('gemini_api_key', key);
+                showNotification('Gemini key saved!', 'success');
+                switchTab('manage');
+            } else {
+                showNotification('Copy this key manually', 'warning');
+            }
+        }
+        
+        // Key Management Functions
+        function loadAllKeys() {
+            loadOpenAIKeys();
+            loadClaudeKey();
+            loadGeminiKey();
+        }
+        
+        function loadOpenAIKeys() {
+            const container = document.getElementById('openai-keys-list');
+            container.innerHTML = '';
+            
+            let hasKeys = false;
+            for (let i = 1; i <= 4; i++) {
+                const key = localStorage.getItem(`openai_api_key${i}`);
+                if (key || i <= 2) {
+                    hasKeys = true;
+                    const div = document.createElement('div');
+                    div.className = `key-slot ${key ? 'filled' : ''} p-3 rounded-lg`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-bold text-cyan-400">KEY ${i}</span>
+                            <span class="text-xs text-gray-500">Usage: ${localStorage.getItem(`key${i}_usage`) || 0} calls</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="password" id="openai-key${i}" value="${key || ''}" 
+                                placeholder="sk-..." 
+                                class="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded text-white text-xs mono">
+                            <button onclick="saveOpenAIKey(${i})" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition">
+                                Save
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                }
+            }
+        }
+        
+        function addOpenAISlot() {
+            const count = document.querySelectorAll('#openai-keys-list .key-slot').length;
+            if (count >= 4) {
+                showNotification('Maximum 4 OpenAI keys allowed', 'warning');
+                return;
+            }
+            loadOpenAIKeys();
+        }
+        
+        function saveOpenAIKey(num) {
+            const input = document.getElementById(`openai-key${num}`);
+            const key = input.value.trim();
+            
+            if (!key) {
+                localStorage.removeItem(`openai_api_key${num}`);
+                showNotification(`Key ${num} removed`, 'warning');
+            } else if (!key.startsWith('sk-')) {
+                showNotification('Invalid OpenAI key (must start with sk-)', 'error');
+                return;
+            } else {
+                localStorage.setItem(`openai_api_key${num}`, key);
+                showNotification(`OpenAI Key ${num} saved!`, 'success');
+            }
+            
+            loadOpenAIKeys();
+            updateStats();
+        }
+        
+        function loadClaudeKey() {
+            const key = localStorage.getItem('claude_api_key');
+            if (key) document.getElementById('claude-key').value = key;
+        }
+        
+        function saveClaudeKey() {
+            const key = document.getElementById('claude-key').value.trim();
+            if (!key) {
+                localStorage.removeItem('claude_api_key');
+                showNotification('Claude key removed', 'warning');
+            } else if (!key.startsWith('sk-ant-')) {
+                showNotification('Invalid Claude key (must start with sk-ant-)', 'error');
+                return;
+            } else {
+                localStorage.setItem('claude_api_key', key);
+                showNotification('Claude key saved!', 'success');
+            }
+            updateStats();
+        }
+        
+        function loadGeminiKey() {
+            const key = localStorage.getItem('gemini_api_key');
+            if (key) document.getElementById('gemini-key').value = key;
+        }
+        
+        function saveGeminiKey() {
+            const key = document.getElementById('gemini-key').value.trim();
+            if (!key) {
+                localStorage.removeItem('gemini_api_key');
+                showNotification('Gemini key removed', 'warning');
+            } else {
+                localStorage.setItem('gemini_api_key', key);
+                showNotification('Gemini key saved!', 'success');
+            }
+            updateStats();
+        }
+        
+        // App Assignment Functions
+        function assignKey() {
+            const appName = document.getElementById('app-filename').value.trim();
+            const assignment = document.getElementById('key-assignment').value;
+            
+            if (!appName) {
+                showNotification('Enter an app filename', 'error');
+                return;
+            }
+            
+            localStorage.setItem(`assign-${appName}`, assignment);
+            showNotification(`${appName} → ${assignment}`, 'success');
+            document.getElementById('app-filename').value = '';
+            
+            loadAppAssignments();
+            updateStats();
+        }
+        
+        function loadAppAssignments() {
+            const container = document.getElementById('app-assignments');
+            container.innerHTML = '';
+            
+            const assignments = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('assign-')) {
+                    assignments.push({
+                        app: key.replace('assign-', ''),
+                        key: localStorage.getItem(key)
+                    });
+                }
+            }
+            
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">No apps assigned yet. Add one above!</div>';
+                return;
+            }
+            
+            assignments.forEach(({ app, key }) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/10 transition';
+                div.innerHTML = `
+                    <div>
+                        <span class="text-white font-medium">${app}</span>
+                        <span class="ml-3 px-3 py-1 bg-purple-600/30 border border-purple-500/50 rounded-full text-purple-300 text-xs font-semibold">${key}</span>
+                    </div>
+                    <button onclick="removeAssignment('${app}')" class="text-red-400 hover:text-red-300 transition">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function removeAssignment(appName) {
+            localStorage.removeItem(`assign-${appName}`);
+            showNotification(`${appName} unassigned`, 'warning');
+            loadAppAssignments();
+            updateStats();
+        }
+        
+        // Test Function
+        async function testAPI() {
+            const message = document.getElementById('test-message').value.trim();
+            if (!message) {
+                showNotification('Enter a test message', 'error');
+                return;
+            }
+            
+            const key = localStorage.getItem('openai_api_key1');
+            if (!key) {
+                showNotification('No OpenAI key found', 'error');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('test-result');
+            const responseDiv = document.getElementById('test-response');
+            resultDiv.classList.remove('hidden');
+            responseDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{role: 'user', content: message}],
+                        max_tokens: 100
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    responseDiv.textContent = `Error: ${data.error.message}`;
+                    showNotification('API test failed', 'error');
+                } else {
+                    responseDiv.textContent = data.choices[0].message.content;
+                    showNotification('✅ API test successful!', 'success');
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+                showNotification('API test failed', 'error');
+            }
+        }
+        
+        // Stats
+        function updateStats() {
+            let totalKeys = 0;
+            for (let i = 1; i <= 4; i++) {
+                if (localStorage.getItem(`openai_api_key${i}`)) totalKeys++;
+            }
+            if (localStorage.getItem('claude_api_key')) totalKeys++;
+            if (localStorage.getItem('gemini_api_key')) totalKeys++;
+            document.getElementById('totalKeys').textContent = totalKeys;
+            
+            let totalApps = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                if (localStorage.key(i).startsWith('assign-')) totalApps++;
+            }
+            document.getElementById('totalApps').textContent = totalApps;
+        }
+        
+        // Notification
+        function showNotification(message, type = 'success') {
+            const colors = {
+                success: 'bg-emerald-600',
+                error: 'bg-red-600',
+                warning: 'bg-yellow-600'
+            };
+            
+            const div = document.createElement('div');
+            div.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-2xl z-50`;
+            div.textContent = message;
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.transition = 'opacity 0.3s';
+                setTimeout(() => div.remove(), 300);
+            }, 3000);
+        }
+        
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>

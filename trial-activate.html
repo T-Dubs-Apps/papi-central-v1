@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Free Trial - PAPI Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="glass rounded-3xl p-8 max-w-md w-full text-white shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fas fa-gift text-6xl mb-4"></i>
+            <h1 class="text-3xl font-bold mb-2">Tester Access Activation</h1>
+            <p class="text-white/80">30 Days • 3 Builds + 10 Chats • 3 Premium Apps</p>
+        </div>
+
+        <div id="activationContent">
+            <div class="bg-white/10 rounded-xl p-6 mb-6">
+                <h3 class="font-bold mb-3 text-lg">📦 Tester Benefits:</h3>
+                <ul class="space-y-2 text-sm">
+                    <li>✅ <strong>Initial:</strong> 3 builds + 10 chat sessions</li>
+                    <li>📊 <strong>Builds:</strong> 2 in Cortex, 2 in Alien AI, 2 in No Knowledge Kit</li>
+                    <li>💬 <strong>Chats:</strong> 30 total per month per app</li>
+                    <li>📝 After 10 chats: Complete feedback survey</li>
+                    <li>👥 Share with 5 friends: Unlock 3 more builds + 20 more chats</li>
+                    <li>✨ <strong>Total Possible:</strong> 6 builds + 30 chat sessions</li>
+                    <li>🔓 <strong>Unlimited access</strong> to apps you build</li>
+                    <li>⏱️ <strong>30-day tester period</strong></li>
+                </ul>
+            </div>
+
+            <form id="trialForm" class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-semibold">Email Address</label>
+                    <input type="email" id="email" required 
+                           class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                           placeholder="your@email.com">
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm font-semibold">Phone (Optional)</label>
+                    <input type="tel" id="phone" 
+                           class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                           placeholder="+1 (555) 123-4567">
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm font-semibold">Name</label>
+                    <input type="text" id="name" required 
+                           class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                           placeholder="Your Name">
+                </div>
+
+                <button type="submit" class="w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-purple-50 transition-all transform hover:scale-105">
+                    <i class="fas fa-rocket mr-2"></i> Activate Tester Access
+                </button>
+            </form>
+        </div>
+
+        <div id="successMessage" class="hidden text-center">
+            <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-4">Tester Access Activated!</h2>
+            <div class="bg-white/10 rounded-xl p-4 mb-6 text-sm space-y-2">
+                <p><strong>Expires:</strong> <span id="expiryDate"></span></p>
+                <p><strong>Builds Remaining:</strong> 3 (2 per app)</p>
+                <p><strong>Chats Remaining:</strong> 10 initially</p>
+                <p class="text-xs text-white/70 mt-2">✅ Survey + Share = 3 more builds + 20 more chats</p>
+            </div>
+            <div class="space-y-3">
+                <a href="index.html" class="block w-full bg-purple-500 text-white font-bold py-3 rounded-lg hover:bg-purple-600 transition">
+                    <i class="fas fa-robot mr-2"></i> Open Alien AI Assistant
+                </a>
+                <a href="cortex-app-studio.html" class="block w-full bg-indigo-500 text-white font-bold py-3 rounded-lg hover:bg-indigo-600 transition">
+                    <i class="fas fa-code mr-2"></i> Open Cortex App Studio
+                </a>
+                <a href="no-knowledge-kit.html" class="block w-full bg-teal-500 text-white font-bold py-3 rounded-lg hover:bg-teal-600 transition">
+                    <i class="fas fa-book mr-2"></i> Open No Knowledge Kit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get trial key from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const trialKey = urlParams.get('key');
+        const apps = urlParams.get('apps') || 'alien,cortex';
+        
+        // Handle form submission
+        document.getElementById('trialForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const name = document.getElementById('name').value.trim();
+            
+            // Check if already activated
+            const existingTrial = localStorage.getItem('trial_' + email);
+            if (existingTrial) {
+                alert('⚠️ You already have an active trial with this email!');
+                return;
+            }
+            
+            // Create trial license
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30);
+            
+            const trialData = {
+                email: email,
+                phone: phone,
+                name: name,
+                trialKey: trialKey,
+                apps: apps.split(','),
+                createdAt: new Date().toISOString(),
+                expiresAt: expiryDate.toISOString(),
+                buildsRemaining: {
+                    alien: 2,
+                    cortex: 2,
+                    nokn: 2  // No Knowledge Kit
+                },
+                chatsRemaining: {
+                    alien: 10,
+                    cortex: 10,
+                    nokn: 10
+                },
+                surveyCompleted: false,
+                socialShared: false,
+                active: true
+            };
+            
+            // Save trial data
+            localStorage.setItem('trial_' + email, JSON.stringify(trialData));
+            localStorage.setItem('current_trial_user', email);
+            localStorage.setItem('trial_license', 'active');
+            
+            // For Alien AI
+            localStorage.setItem('alien_trial_requests', '30');
+            localStorage.setItem('alien_trial_expiry', expiryDate.toISOString());
+            
+            // For Cortex
+            localStorage.setItem('cortex_trial_requests', '30');
+            localStorage.setItem('cortex_trial_expiry', expiryDate.toISOString());
+            
+            // Show success
+            document.getElementById('activationContent').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('expiryDate').textContent = expiryDate.toLocaleDateString();
+        });
+    </script>
+</body>
+</html>

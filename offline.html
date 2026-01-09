@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI Central - Offline</title>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --panel-bg: #0f172a;
+            --info: #38bdf8;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--bg-dark);
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: var(--panel-bg);
+            border: 2px solid var(--info);
+            border-radius: 16px;
+            padding: 60px 40px;
+            max-width: 600px;
+        }
+        
+        .icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            color: #94a3b8;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.5);
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="icon">🛸</div>
+        <h1>OFFLINE MODE</h1>
+        <p>
+            You're currently offline. PAPI Central is working from cached data.<br>
+            Some features may be limited until you reconnect to the internet.
+        </p>
+        <button class="btn" onclick="location.reload()">
+            Retry Connection
+        </button>
+        <div class="status">
+            <strong>What's Available Offline:</strong><br>
+            ✅ Alien AI Interface<br>
+            ✅ Health Monitor Dashboard<br>
+            ✅ Admin Unlock Tool<br>
+            ⚠️ API calls require internet connection
+        </div>
+    </div>
+</body>
+</html>

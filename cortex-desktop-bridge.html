@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI Cortex Desktop Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="papi-key-loader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        /* Tooltip Styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 13px;
+            line-height: 1.4;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        :root {
+            --cortex-purple: #9333ea;
+            --cortex-blue: #3b82f6;
+            --bg-dark: #0f172a;
+        }
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #e2e8f0;
+        }
+        
+        .terminal-window {
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--cortex-purple);
+            box-shadow: 0 0 40px rgba(147, 51, 234, 0.3);
+        }
+        
+        .terminal-output {
+            font-family: 'Space Mono', monospace;
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #020617;
+            border: 1px solid #1e293b;
+        }
+        
+        .terminal-line {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        .prompt {
+            color: var(--cortex-purple);
+            font-weight: bold;
+        }
+        
+        .response {
+            color: #3b82f6;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .glow-button {
+            background: linear-gradient(135deg, var(--cortex-purple), var(--cortex-blue));
+            box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .glow-button:hover {
+            box-shadow: 0 6px 30px rgba(147, 51, 234, 0.6);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-5xl mx-auto mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    <i class="fas fa-brain mr-3"></i>PAPI Cortex Desktop Bridge
+                    <span class="tooltip ml-2 text-lg">
+                        <i class="fas fa-question-circle text-gray-500"></i>
+                        <span class="tooltiptext">
+                            <b>What is this?</b><br>
+                            An AI assistant that runs on your desktop and remembers every conversation. Like ChatGPT, but with memory!
+                        </span>
+                    </span>
+                </h1>
+                <p class="text-gray-400 mt-2">
+                    Connect your desktop Python AI to the web
+                    <a href="MOM_TEST_GUIDE.md" class="text-purple-400 hover:text-purple-300 ml-2 text-sm">
+                        <i class="fas fa-book-open"></i> New? Read the beginner guide
+                    </a>
+                </p>
+            </div>
+            <div>
+                <span id="connectionStatus" class="status-badge bg-red-900 text-red-300">
+                    <i class="fas fa-circle mr-2"></i>Disconnected
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Terminal Window -->
+        <div class="lg:col-span-2">
+            <div class="terminal-window rounded-lg overflow-hidden">
+                <!-- Terminal Header -->
+                <div class="bg-gradient-to-r from-purple-900 to-blue-900 px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="ml-4 text-sm">Cortex Terminal</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-xs hover:text-white">
+                        <i class="fas fa-trash mr-1"></i>Clear
+                    </button>
+                </div>
+                
+                <!-- Terminal Output -->
+                <div id="terminalOutput" class="terminal-output"></div>
+                
+                <!-- Terminal Input -->
+                <div class="bg-gray-900 px-4 py-3 flex items-center">
+                    <span class="prompt mr-2">Cortex></span>
+                    <input 
+                        id="commandInput" 
+                        type="text" 
+                        class="flex-1 bg-transparent outline-none text-white"
+                        placeholder="Type your command or question..."
+                        onkeypress="if(event.key === 'Enter') sendCommand()"
+                    />
+                    <button onclick="sendCommand()" class="ml-2 px-4 py-1 glow-button text-white rounded">
+                        <i class="fas fa-paper-plane mr-1"></i>Send
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Commands -->
+            <div class="mt-4 flex flex-wrap gap-2">
+                <button onclick="quickCommand('stats')" class="tooltip px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm">
+                    <i class="fas fa-chart-bar mr-1"></i>Stats
+                    <span class="tooltiptext">View your usage statistics - conversations, projects, and expertise level</span>
+                </button>
+                <button onclick="quickCommand('ask How do I build a todo app?')" class="tooltip px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm">
+                    <i class="fas fa-code mr-1"></i>Generate Code
+                    <span class="tooltiptext">Get instant working code for a todo app - copy and paste ready!</span>
+                </button>
+                <button onclick="quickCommand('ask Recommend a project')" class="tooltip px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm">
+                    <i class="fas fa-lightbulb mr-1"></i>Project Ideas
+                    <span class="tooltiptext">Get personalized project suggestions based on your skill level</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="space-y-6">
+            <!-- Server Setup -->
+            <div class="bg-gray-800/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-server mr-2"></i>Server Setup
+                    <span class="tooltip ml-2">
+                        <i class="fas fa-question-circle text-gray-500 text-sm"></i>
+                        <span class="tooltiptext">
+                            The Python server connects this web interface to the AI brain. You only need to start it once!
+                        </span>
+                    </span>
+                </h3>
+                    <i class="fas fa-server mr-2 text-purple-400"></i>
+                    Server Setup
+                </h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-gray-400 block mb-1">Server Port</label>
+                        <input 
+                            id="serverPort" 
+                            type="number" 
+                            value="5000" 
+                            class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white"
+                        />
+                    </div>
+                    
+                    <button onclick="startServer()" class="w-full glow-button text-white font-bold py-2 px-4 rounded">
+                        <i class="fas fa-play mr-2"></i>Start Cortex Server
+                    </button>
+                    
+                    <div id="serverInstructions" class="text-xs text-gray-400 bg-gray-900 p-3 rounded hidden">
+                        <p class="font-bold text-purple-400 mb-2">Run this in your terminal:</p>
+                        <code class="block bg-black p-2 rounded">python cortex_server.py</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="bg-gray-800/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>
+                    Statistics
+                </h3>
+                
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Conversations</span>
+                        <span id="statConversations" class="font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Projects</span>
+                        <span id="statProjects" class="font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Expertise</span>
+                        <span id="statExpertise" class="font-bold text-purple-400">Beginner</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Provider</span>
+                        <span id="statProvider" class="font-bold text-blue-400">Demo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Features -->
+            <div class="bg-gradient-to-br from-purple-900/30 to-blue-900/30 backdrop-blur rounded-lg p-6 border border-purple-500/30">
+                <div class="text-center">
+                    <i class="fas fa-crown text-yellow-400 text-3xl mb-3"></i>
+                    <h3 class="font-bold mb-2">Cortex Desktop Pro</h3>
+                    <p class="text-xs text-gray-400 mb-4">Unlock desktop-to-web sync, unlimited memory, and advanced learning</p>
+                    <button onclick="upgradeCortex()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded">
+                        Upgrade - $29.99/mo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Connection state
+        let serverConnected = false;
+        let serverUrl = 'http://localhost:5000';
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            addTerminalLine('System', 'PAPI Cortex Desktop Bridge v1.0 initialized', 'text-green-400');
+            addTerminalLine('System', 'Start the Python server to enable AI features', 'text-yellow-400');
+            addTerminalLine('System', 'Or use demo mode with quick commands above', 'text-gray-400');
+            checkLicense();
+        });
+        
+        function addTerminalLine(role, message, colorClass = 'text-blue-400') {
+            const output = document.getElementById('terminalOutput');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            
+            const time = new Date().toLocaleTimeString();
+            line.innerHTML = `
+                <span class="text-gray-500">[${time}]</span>
+                <span class="${colorClass} font-bold">${role}:</span>
+                <span class="text-gray-300">${message}</span>
+            `;
+            
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        async function executeCommand() {
+            const input = document.getElementById('commandInput');
+            const command = input.value.trim();
+            
+            if (!command) return;
+            
+            // Display user command
+            addTerminalLine('You', command, 'text-purple-400');
+            input.value = '';
+            
+            // Demo mode responses
+            if (!serverConnected) {
+                const response = await demoModeResponse(command);
+                addTerminalLine('Cortex', response, 'text-blue-400');
+                return;
+            }
+            
+            // Try to call Python server
+            try {
+                const response = await fetch(`${serverUrl}/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: command })
+                });
+                
+                const data = await response.json();
+                addTerminalLine('Cortex', data.response, 'text-blue-400');
+                updateStats(data.stats);
+            } catch (error) {
+                addTerminalLine('Error', 'Server not responding. Using demo mode.', 'text-red-400');
+                const response = await demoModeResponse(command);
+                addTerminalLine('Cortex', response, 'text-blue-400');
+            }
+        }
+        
+        async function demoModeResponse(command) {
+            const cmd = command.toLowerCase();
+            
+            if (cmd === 'stats') {
+                return 'Demo Mode - Start Python server for real stats';
+            }
+            
+            if (cmd.includes('build') || cmd.includes('create') || cmd.includes('generate')) {
+                if (cmd.includes('todo')) {
+                    return '✓ Todo App Template Ready!\n\nI can generate a full todo app for you. Start the Python server to get the complete code, or upgrade to Cortex Desktop Pro for instant web-based code generation!';
+                }
+                return 'I can help you build amazing projects! Start the server or upgrade for full code generation.';
+            }
+            
+            if (cmd.includes('recommend') || cmd.includes('project')) {
+                return '🚀 Project Recommendations:\n1. Personal Portfolio\n2. Todo App\n3. Weather Dashboard\n\nStart the server for personalized recommendations based on your skill level!';
+            }
+            
+            return 'Demo Mode Active. Start the Python server with "python cortex_server.py" to unlock full AI capabilities!';
+        }
+        
+        function startServer() {
+            const instructions = document.getElementById('serverInstructions');
+            instructions.classList.remove('hidden');
+            
+            addTerminalLine('System', 'Server startup instructions displayed', 'text-green-400');
+            addTerminalLine('System', 'Checking for server connection...', 'text-yellow-400');
+            
+            // Try to connect
+            setTimeout(checkServerConnection, 2000);
+        }
+        
+        async function checkServerConnection() {
+            try {
+                const port = document.getElementById('serverPort').value;
+                serverUrl = `http://localhost:${port}`;
+                
+                const response = await fetch(`${serverUrl}/health`);
+                if (response.ok) {
+                    serverConnected = true;
+                    document.getElementById('connectionStatus').className = 'status-badge bg-green-900 text-green-300';
+                    document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-circle mr-2"></i>Connected';
+                    addTerminalLine('System', 'Connected to Cortex Python server!', 'text-green-400');
+                }
+            } catch (error) {
+                addTerminalLine('System', 'Server not found. Run: python cortex_server.py', 'text-red-400');
+            }
+        }
+        
+        function updateStats(stats) {
+            if (!stats) return;
+            
+            document.getElementById('statConversations').textContent = stats.conversations || 0;
+            document.getElementById('statProjects').textContent = stats.projects || 0;
+            document.getElementById('statExpertise').textContent = stats.expertise || 'Beginner';
+            document.getElementById('statProvider').textContent = stats.provider || 'Demo';
+        }
+        
+        function quickCommand(cmd) {
+            document.getElementById('commandInput').value = cmd;
+            executeCommand();
+        }
+        
+        function clearTerminal() {
+            document.getElementById('terminalOutput').innerHTML = '';
+            addTerminalLine('System', 'Terminal cleared', 'text-gray-400');
+        }
+        
+        function checkLicense() {
+            const isAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const adminEmail = localStorage.getItem('current_user_email') === 'mr.troy.walker.62@gmail.com';
+            const isPremium = PAPI.isPremium() || localStorage.getItem('cortex_desktop_license') === 'active' || isAdmin || adminEmail;
+            
+            if (isPremium) {
+                addTerminalLine('System', '✨ Cortex Desktop Pro Active', 'text-yellow-400');
+            }
+        }
+        
+        function upgradeCortex() {
+            window.open('PAPI Central.htm?product=cortex_desktop', '_blank');
+        }
+    </script>
+</body>
+</html>

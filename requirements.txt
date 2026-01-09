@@ -1,0 +1,15 @@
+# PAPI Cortex Desktop - Python Dependencies
+
+# Web Server
+flask==3.0.0
+flask-cors==4.0.0
+
+# API Clients
+requests==2.31.0
+
+# Optional: Enhanced Features
+python-dotenv==1.0.0  # For environment variable management
+
+# Optional: Pro Features (when available)
+# cryptography==41.0.0  # For encrypted cloud backup
+# redis==5.0.0  # For multi-device sync cache

@@ -1,0 +1,8 @@
+{
+  "status": "healthy",
+  "service": "PAPI Central",
+  "version": "5.0",
+  "timestamp": "2026-01-09",
+  "uptime": true,
+  "apps": ["Alien AI", "Cortex Studio", "Aegis Guard", "No Knowledge Kit"]
+}

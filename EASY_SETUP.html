@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cortex Desktop - Super Simple Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .step-card {
+            transition: all 0.3s;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 20px;
+        }
+        
+        .success-checkmark {
+            display: none;
+        }
+        
+        .success-checkmark.show {
+            display: inline-block;
+            animation: pop 0.3s;
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-4">
+                <i class="fas fa-brain mr-3"></i>Cortex Desktop
+            </h1>
+            <p class="text-2xl text-purple-100">Super Simple Setup - No Coding Required!</p>
+            <p class="text-lg text-purple-200 mt-2">Get your AI assistant running in 3 clicks</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-white/20 rounded-full h-4 mb-8">
+            <div id="progressBar" class="bg-white h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <!-- Step 1: Download Python -->
+        <div class="step-card bg-white rounded-2xl p-8 mb-6 shadow-2xl">
+            <div class="step-number">1</div>
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">
+                Install Python (If You Don't Have It)
+            </h2>
+            <p class="text-gray-600 text-center mb-6 text-lg">
+                Python is free software that makes Cortex work. It's like the engine for your AI assistant.
+            </p>
+            
+            <div class="bg-purple-50 rounded-lg p-6 mb-6">
+                <p class="text-gray-700 font-semibold mb-3">📋 Check if you already have Python:</p>
+                <div class="bg-white rounded p-4 mb-4">
+                    <p class="text-sm text-gray-500 mb-2">Open PowerShell and type:</p>
+                    <code class="block bg-gray-900 text-green-400 p-3 rounded font-mono">python --version</code>
+                </div>
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    If you see "Python 3.x.x" - you're good! Skip to Step 2.
+                </p>
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-times-circle text-red-500 mr-2"></i>
+                    If you see an error - click the button below.
+                </p>
+            </div>
+
+            <a href="https://www.python.org/downloads/" target="_blank" 
+               onclick="markStepComplete(1)"
+               class="block w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-center py-4 rounded-lg text-xl font-bold transition-all">
+                <i class="fas fa-download mr-2"></i>Download Python (Free & Safe)
+            </a>
+            
+            <p class="text-center text-sm text-gray-500 mt-4">
+                <i class="fas fa-info-circle mr-1"></i>
+                During install: Check "Add Python to PATH"
+            </p>
+            
+            <span id="check1" class="success-checkmark text-green-500 text-3xl float-right">
+                <i class="fas fa-check-circle"></i>
+            </span>
+        </div>
+
+        <!-- Step 2: One-Click Setup -->
+        <div class="step-card bg-white rounded-2xl p-8 mb-6 shadow-2xl">
+            <div class="step-number">2</div>
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">
+                Run the One-Click Setup
+            </h2>
+            <p class="text-gray-600 text-center mb-6 text-lg">
+                Just double-click this file and everything installs automatically!
+            </p>
+            
+            <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-file-code text-blue-600 text-6xl mb-3"></i>
+                    <p class="text-2xl font-bold text-gray-800">LAUNCH_CORTEX.bat</p>
+                    <p class="text-sm text-gray-600">Located in your PAPI Central folder</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 mb-4">
+                    <p class="font-semibold mb-2">How to find it:</p>
+                    <ol class="text-sm text-gray-700 space-y-2">
+                        <li><i class="fas fa-folder text-yellow-600 mr-2"></i>Go to: Desktop → projects folder → PAPI Central</li>
+                        <li><i class="fas fa-search text-blue-600 mr-2"></i>Look for: LAUNCH_CORTEX.bat</li>
+                        <li><i class="fas fa-mouse-pointer text-purple-600 mr-2"></i>Double-click it!</li>
+                    </ol>
+                </div>
+            </div>
+
+            <button onclick="markStepComplete(2); showSuccessMessage()" 
+                    class="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-4 rounded-lg text-xl font-bold transition-all">
+                <i class="fas fa-check mr-2"></i>I Double-Clicked It!
+            </button>
+            
+            <div id="successMessage" class="hidden mt-4 bg-green-100 border-l-4 border-green-500 p-4 rounded">
+                <p class="text-green-800 font-bold">
+                    <i class="fas fa-rocket mr-2"></i>Great! The setup is installing everything now...
+                </p>
+                <p class="text-green-700 text-sm mt-2">This might take 1-2 minutes. A window will open when ready!</p>
+            </div>
+            
+            <span id="check2" class="success-checkmark text-green-500 text-3xl float-right">
+                <i class="fas fa-check-circle"></i>
+            </span>
+        </div>
+
+        <!-- Step 3: Start Creating -->
+        <div class="step-card bg-white rounded-2xl p-8 mb-6 shadow-2xl">
+            <div class="step-number">3</div>
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">
+                Start Creating with AI!
+            </h2>
+            <p class="text-gray-600 text-center mb-6 text-lg">
+                Your AI assistant is ready. Here's what you can do:
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-purple-50 rounded-lg p-4 text-center">
+                    <i class="fas fa-code text-purple-600 text-3xl mb-2"></i>
+                    <p class="font-bold text-gray-800">Build Apps</p>
+                    <p class="text-sm text-gray-600">Create todo lists, calculators, websites</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <i class="fas fa-lightbulb text-blue-600 text-3xl mb-2"></i>
+                    <p class="font-bold text-gray-800">Get Ideas</p>
+                    <p class="text-sm text-gray-600">AI suggests projects for you</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <i class="fas fa-graduation-cap text-green-600 text-3xl mb-2"></i>
+                    <p class="font-bold text-gray-800">Learn Coding</p>
+                    <p class="text-sm text-gray-600">AI explains everything simply</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-6 mb-6">
+                <p class="font-bold text-gray-800 mb-3 text-lg">
+                    <i class="fas fa-magic mr-2 text-purple-600"></i>Try These First Commands:
+                </p>
+                <div class="space-y-3">
+                    <div class="bg-white rounded p-3">
+                        <code class="text-purple-600 font-mono">ask Build me a todo app</code>
+                        <p class="text-xs text-gray-600 mt-1">Get instant code for a working app!</p>
+                    </div>
+                    <div class="bg-white rounded p-3">
+                        <code class="text-purple-600 font-mono">stats</code>
+                        <p class="text-xs text-gray-600 mt-1">See how much you've used Cortex</p>
+                    </div>
+                    <div class="bg-white rounded p-3">
+                        <code class="text-purple-600 font-mono">ask What project should I build?</code>
+                        <p class="text-xs text-gray-600 mt-1">Get personalized project ideas</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="markStepComplete(3); celebrateLaunch()" 
+                    class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-4 rounded-lg text-xl font-bold transition-all">
+                <i class="fas fa-rocket mr-2"></i>I'm Ready to Create!
+            </button>
+            
+            <span id="check3" class="success-checkmark text-green-500 text-3xl float-right">
+                <i class="fas fa-check-circle"></i>
+            </span>
+        </div>
+
+        <!-- Help Section -->
+        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 text-white">
+            <h3 class="text-2xl font-bold mb-4 text-center">
+                <i class="fas fa-question-circle mr-2"></i>Need Help?
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <a href="CORTEX_SETUP_GUIDE.md" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition-all">
+                    <i class="fas fa-book text-3xl mb-2"></i>
+                    <p class="font-bold">Read Full Guide</p>
+                </a>
+                <a href="https://www.youtube.com/watch?v=demo" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition-all">
+                    <i class="fas fa-video text-3xl mb-2"></i>
+                    <p class="font-bold">Watch Video Tutorial</p>
+                </a>
+            </div>
+            <p class="text-center mt-4 text-sm">
+                <i class="fas fa-envelope mr-2"></i>
+                Email support: troy@papicentral.com
+            </p>
+        </div>
+
+        <!-- Celebration Modal -->
+        <div id="celebrationModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-12 max-w-md text-center">
+                <i class="fas fa-trophy text-yellow-500 text-6xl mb-4"></i>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">You're All Set!</h2>
+                <p class="text-gray-600 mb-6">
+                    Cortex Desktop is running and ready to help you build amazing things!
+                </p>
+                <p class="text-lg font-bold text-purple-600 mb-4">
+                    Built by Troy Walker & Claude Sonnet 4.5
+                </p>
+                <button onclick="closeCelebration()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-bold">
+                    Let's Go! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let completedSteps = 0;
+        const totalSteps = 3;
+
+        function markStepComplete(stepNumber) {
+            const checkmark = document.getElementById(`check${stepNumber}`);
+            if (!checkmark.classList.contains('show')) {
+                checkmark.classList.add('show');
+                completedSteps++;
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (completedSteps / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showSuccessMessage() {
+            document.getElementById('successMessage').classList.remove('hidden');
+        }
+
+        function celebrateLaunch() {
+            document.getElementById('celebrationModal').classList.remove('hidden');
+            
+            // Confetti effect (simple)
+            for (let i = 0; i < 50; i++) {
+                createConfetti();
+            }
+        }
+
+        function closeCelebration() {
+            document.getElementById('celebrationModal').classList.add('hidden');
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = ['#667eea', '#764ba2', '#f093fb', '#4facfe'][Math.floor(Math.random() * 4)];
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.top = '-10px';
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '9999';
+            document.body.appendChild(confetti);
+
+            let pos = -10;
+            const fall = setInterval(() => {
+                if (pos > window.innerHeight) {
+                    clearInterval(fall);
+                    confetti.remove();
+                } else {
+                    pos += 5;
+                    confetti.style.top = pos + 'px';
+                }
+            }, 20);
+        }
+
+        // Auto-scroll to next step when one is completed
+        window.addEventListener('load', () => {
+            const steps = document.querySelectorAll('.step-card');
+            steps.forEach((step, index) => {
+                step.addEventListener('click', () => {
+                    if (index < steps.length - 1) {
+                        setTimeout(() => {
+                            steps[index + 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 500);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
