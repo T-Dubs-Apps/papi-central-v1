@@ -9,6 +9,12 @@
     <!-- PAPI Key Loader - Universal API Key Management -->
     <script src="papi-key-loader.js"></script>
     <script src="trial-system.js"></script>
+    <script>
+        // Enable demo mode by default for instant access
+        if (!localStorage.getItem('demo_mode')) {
+            localStorage.setItem('demo_mode', 'true');
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono:wght@400;700&display=swap');
 
@@ -93,6 +99,33 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--fresh-mint); }
 
         .text-glow { text-shadow: 0 0 15px rgba(0, 242, 234, 0.3); }
+
+        .unlock-ai-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00f2ea 0%, #0080ff 100%);
+            color: #000;
+            font-weight: 700;
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 10px 30px rgba(0, 242, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 9999;
+            animation: pulse 2s infinite;
+        }
+        .unlock-ai-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 242, 234, 0.6);
+        }
+        .unlock-ai-btn.hidden { display: none; }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(0, 242, 234, 0.4); }
+            50% { box-shadow: 0 10px 40px rgba(0, 242, 234, 0.7), 0 0 20px rgba(0, 242, 234, 0.5); }
+        }
 
         .bubble-ai { 
             background: rgba(0, 128, 255, 0.2); 
@@ -4793,6 +4826,48 @@
                 toggleBtn.title = 'Show chat';
             }
         }, 100);
+
+        // Add Unlock Real AI Button
+        function createUnlockAIButton() {
+            // Check if real API keys are configured
+            const hasRealKeys = localStorage.getItem('openai_api_key1') || 
+                               localStorage.getItem('claude_api_key') || 
+                               localStorage.getItem('gemini_api_key');
+            
+            // Only show button if in demo mode
+            if (localStorage.getItem('demo_mode') === 'true' && !hasRealKeys) {
+                const btn = document.createElement('button');
+                btn.className = 'unlock-ai-btn';
+                btn.innerHTML = '<i class="fas fa-rocket mr-2"></i>Unlock Real AI';
+                btn.onclick = function() {
+                    window.open('key-controller.html', '_blank');
+                };
+                document.body.appendChild(btn);
+            }
+        }
+        
+        // Check every 5 seconds if keys were added
+        setInterval(() => {
+            const hasRealKeys = localStorage.getItem('openai_api_key1') || 
+                               localStorage.getItem('claude_api_key') || 
+                               localStorage.getItem('gemini_api_key');
+            
+            const unlockBtn = document.querySelector('.unlock-ai-btn');
+            
+            if (hasRealKeys && localStorage.getItem('demo_mode') === 'true') {
+                localStorage.removeItem('demo_mode');
+                if (unlockBtn) unlockBtn.classList.add('hidden');
+                console.log('🚀 Real API keys detected! Demo mode disabled. Reload page to activate.');
+                
+                // Show success message
+                if (typeof addChat === 'function') {
+                    addChat('ai', '🎉 Real AI keys detected! Reload the page to activate full AI capabilities.');
+                }
+            }
+        }, 5000);
+        
+        // Create button after page loads
+        setTimeout(createUnlockAIButton, 2000);
 
     </script>
 </body>
