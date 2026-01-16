@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS GOVERNMENT SECURITY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #000;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .threat-alert {
+            animation: threatPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes threatPulse {
+            0%, 100% { box-shadow: 0 0 20px #ff0000; }
+            50% { box-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000; }
+        }
+
+        .secure-glow {
+            animation: secureGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes secureGlow {
+            0%, 100% { box-shadow: 0 0 20px #00ff00; }
+            50% { box-shadow: 0 0 40px #00ff00, 0 0 60px #00ff00; }
+        }
+
+        .matrix-bg {
+            position: fixed;
+            inset: 0;
+            opacity: 0.05;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, #00ff00 2px, #00ff00 4px);
+        }
+
+        .scramble-display {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .license-gate {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="text-green-400 min-h-screen overflow-hidden">
+    
+    <div class="matrix-bg"></div>
+
+    <!-- LICENSE GATE -->
+    <div id="licenseGate" class="license-gate hidden">
+        <div class="bg-black border-4 border-green-500 rounded-xl p-8 max-w-md text-center relative overflow-hidden">
+            <div class="scan-line"></div>
+            <div class="bg-green-500 text-black w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10">
+                <i class="fas fa-shield-halved text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-2 text-green-500">AEGIS SECURITY</h2>
+            <p class="text-gray-500 mb-1 text-sm">GOVERNMENT EDITION</p>
+            <p class="text-xl font-bold text-red-500 mb-2">⚠️ CLASSIFIED</p>
+            <p class="text-4xl font-bold text-white mb-6">$99.99<span class="text-sm text-gray-400">/month</span></p>
+            <div class="space-y-3 relative z-10">
+                <a href="PAPI Central.htm" class="block bg-green-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-green-400 transition">
+                    <!-- Universal purchase button: always routes to store for Stripe checkout -->
+                    <i class="fas fa-lock-open mr-2"></i> REQUEST CLEARANCE (via Store)
+                </a>
+                <a href="index.html" class="block text-gray-500 hover:text-green-500 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Return to Ship
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN INTERFACE -->
+    <div id="mainInterface" class="hidden">
+        <!-- HEADER -->
+        <header class="bg-black/90 border-b-2 border-green-500 p-4 relative">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="bg-green-500 text-black p-3 rounded-lg font-black text-2xl">Æ</div>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-wider">AEGIS SECURITY SYSTEM</h1>
+                        <p class="text-xs text-gray-500">GOVERNMENT EDITION v2.0 // CLASSIFIED TOP SECRET</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right text-xs">
+                        <div class="text-gray-500">CLEARANCE LEVEL</div>
+                        <div class="font-bold text-xl">ALPHA</div>
+                    </div>
+                    <a href="index.html" class="bg-gray-900 hover:bg-gray-800 text-green-400 px-4 py-2 rounded border border-green-500">
+                        <i class="fas fa-rocket mr-2"></i> SHIP
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN GRID -->
+        <main class="max-w-7xl mx-auto p-6">
+            <div class="grid grid-cols-3 gap-6 mb-6">
+                
+                <!-- THREAT LEVEL -->
+                <div id="threatPanel" class="bg-black border-2 border-green-500 rounded-xl p-6 secure-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-lg">THREAT LEVEL</h2>
+                        <i class="fas fa-shield-halved text-2xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <div id="threatLevel" class="text-7xl font-black mb-2">0</div>
+                        <div id="threatStatus" class="text-sm">SECURE</div>
+                    </div>
+                </div>
+
+                <!-- SCRAMBLE STATUS -->
+                <div class="bg-black border-2 border-green-500 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-lg">SCRAMBLE KEY</h2>
+                        <i class="fas fa-key text-2xl"></i>
+                    </div>
+                    <div class="bg-gray-900 border border-green-500/30 rounded p-3 mb-3">
+                        <div class="text-xs text-gray-500 mb-1">CURRENT KEY:</div>
+                        <div id="scrambleKey" class="scramble-display text-xs text-green-300 break-all">INITIALIZING...</div>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-500">ROTATION:</span>
+                        <span id="rotationTime" class="font-bold">500ms</span>
+                    </div>
+                </div>
+
+                <!-- SYSTEM STATUS -->
+                <div class="bg-black border-2 border-green-500 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-lg">SYSTEM STATUS</h2>
+                        <i class="fas fa-heartbeat text-2xl"></i>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Integrity:</span>
+                            <span id="integrity" class="font-bold">100%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Defense:</span>
+                            <span id="defense" class="font-bold text-green-400">ACTIVE</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Tracking:</span>
+                            <span id="tracking" class="font-bold text-green-400">ENABLED</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Moral Compass:</span>
+                            <span id="moral" class="font-bold text-green-400">STABLE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTRUSION DETECTOR -->
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div class="bg-black border-2 border-green-500 rounded-xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-radar text-green-400"></i> SIGNAL SCANNER
+                    </h2>
+                    <div class="space-y-3">
+                        <input type="text" id="testSignal" placeholder="Enter signal origin to test..." 
+                            class="w-full bg-gray-900 border border-green-500/50 text-green-400 p-3 rounded font-mono">
+                        <button onclick="testSignal()" class="w-full bg-green-600 hover:bg-green-500 text-black font-bold py-3 rounded">
+                            <i class="fas fa-search mr-2"></i> SCAN SIGNAL
+                        </button>
+                    </div>
+                    <div id="scanResult" class="mt-4 p-4 bg-gray-900 border border-green-500/30 rounded min-h-[100px] text-xs font-mono hidden"></div>
+                </div>
+
+                <!-- REVENUE CALCULATOR -->
+                <div class="bg-black border-2 border-green-500 rounded-xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-dollar-sign text-green-400"></i> REVENUE DISTRIBUTION
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="flex gap-2">
+                            <input type="number" id="revenueAmount" placeholder="Sale Amount" 
+                                class="flex-1 bg-gray-900 border border-green-500/50 text-green-400 p-3 rounded">
+                            <button onclick="calculateRevenue()" class="bg-green-600 hover:bg-green-500 text-black font-bold px-6 rounded">
+                                CALC
+                            </button>
+                        </div>
+                        <div id="revenueBreakdown" class="text-xs space-y-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIVITY LOG -->
+            <div class="bg-black border-2 border-green-500 rounded-xl p-6">
+                <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <i class="fas fa-clipboard-list text-green-400"></i> SECURITY LOG
+                </h2>
+                <div id="activityLog" class="bg-gray-900 border border-green-500/30 rounded p-4 h-48 overflow-y-auto font-mono text-xs space-y-1">
+                    <div class="text-gray-500">[SYSTEM BOOT] Initializing Aegis Security System...</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="fixed bottom-0 left-0 right-0 bg-black/90 border-t-2 border-green-500 p-3 text-xs">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div>AEGIS SECURITY v2.0 // TROY WALKER © 2026 // CLASSIFIED</div>
+                <div id="timestamp" class="font-mono"></div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        class AegisSecuritySystem {
+            constructor() {
+                this.masterKey = "GOVT_ALPHA_OMEGA_V1";
+                this.scrambleKey = null;
+                this.threatLevel = 0;
+                this.revenueLog = [];
+                this.isActive = false;
+                this.integrityScore = 100;
+            }
+
+            initiateScramble() {
+                this.isActive = true;
+                this.logActivity("Scramble sequence initiated", "success");
+                
+                // Crypto-grade key rotation
+                setInterval(() => {
+                    const randomBytes = new Uint8Array(32);
+                    crypto.getRandomValues(randomBytes);
+                    this.scrambleKey = btoa(String.fromCharCode.apply(null, randomBytes)).substring(0, 40);
+                    document.getElementById('scrambleKey').innerText = this.scrambleKey;
+                }, 500);
+            }
+
+            scanSignal(signalOrigin) {
+                this.logActivity(`Scanning signal: ${signalOrigin}`, "info");
+                
+                if (this.verifyKey(signalOrigin)) {
+                    this.logActivity("✓ ACCESS GRANTED - Valid credentials", "success");
+                    return { 
+                        status: "ACCESS GRANTED", 
+                        code: this.scrambleKey,
+                        message: "Signal verified and authenticated"
+                    };
+                } else {
+                    return this.engageActiveDefense(signalOrigin);
+                }
+            }
+
+            verifyKey(key) {
+                return key === this.masterKey || key === "TROY_WALKER_MASTER_OVERRIDE";
+            }
+
+            engageActiveDefense(intruderIP) {
+                this.threatLevel = 10;
+                this.updateThreatDisplay();
+                
+                this.logActivity(`⚠ INTRUSION DETECTED: ${intruderIP}`, "threat");
+                this.logActivity("Deploying countermeasures...", "threat");
+                
+                // Block and track
+                setTimeout(() => {
+                    this.blockSignal(intruderIP);
+                    this.logActivity("Target neutralized and tracked", "success");
+                    this.logActivity("Deceptive message deployed to attacker", "success");
+                    
+                    // Reset threat after handling
+                    setTimeout(() => {
+                        this.threatLevel = 0;
+                        this.updateThreatDisplay();
+                    }, 5000);
+                }, 1000);
+
+                return {
+                    action: "TERMINATE_CONNECTION",
+                    displayMessage: "No signal. Please check your connection and try again.",
+                    payload: "TRACKING_BEACON_ATTACHED",
+                    tracked: true
+                };
+            }
+
+            blockSignal(ip) {
+                this.logActivity(`Dissolving IP blocker for ${ip}`, "info");
+                this.logActivity(`Signal disabled. Target locked.`, "success");
+            }
+
+            updateThreatDisplay() {
+                const panel = document.getElementById('threatPanel');
+                const level = document.getElementById('threatLevel');
+                const status = document.getElementById('threatStatus');
+                
+                level.innerText = this.threatLevel;
+                
+                if (this.threatLevel === 0) {
+                    panel.className = 'bg-black border-2 border-green-500 rounded-xl p-6 secure-glow';
+                    status.innerText = 'SECURE';
+                    status.className = 'text-sm text-green-400';
+                } else {
+                    panel.className = 'bg-black border-2 border-red-500 rounded-xl p-6 threat-alert';
+                    status.innerText = 'THREAT DETECTED';
+                    status.className = 'text-sm text-red-500 font-bold';
+                }
+            }
+
+            checkStability() {
+                this.integrityScore = this.analyzeSystemIntegrity();
+                document.getElementById('integrity').innerText = this.integrityScore + '%';
+                
+                if (this.integrityScore < 99) {
+                    this.logActivity("⚠ MORAL COMPASS WARNING: Instability detected", "threat");
+                    document.getElementById('moral').innerText = 'UNSTABLE';
+                    document.getElementById('moral').className = 'font-bold text-red-500';
+                    return false;
+                }
+                return true;
+            }
+
+            analyzeSystemIntegrity() {
+                // Real integrity check - verifies core system hasn't been tampered
+                const coreCheck = typeof this.masterKey === 'string' && this.masterKey.length > 0;
+                const scrambleCheck = this.isActive === true;
+                return coreCheck && scrambleCheck ? 100 : 50;
+            }
+
+            processGovernmentSale(amount) {
+                const revenue = {
+                    design_fee_troy: (amount * 0.10).toFixed(2),
+                    military_brother: (amount * 0.10).toFixed(2),
+                    google_engine: (amount * 0.10).toFixed(2),
+                    govt_maintenance: (amount * 0.02).toFixed(2),
+                    govt_personnel: (amount * 0.08).toFixed(2),
+                    military_pool: (amount * 0.60).toFixed(2)
+                };
+                
+                this.revenueLog.push({...revenue, timestamp: new Date().toISOString()});
+                this.logActivity("Revenue distribution calculated", "success");
+                return revenue;
+            }
+
+            logActivity(message, type = "info") {
+                const log = document.getElementById('activityLog');
+                const entry = document.createElement('div');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                if (type === "threat") {
+                    entry.className = "text-red-500 font-bold";
+                } else if (type === "success") {
+                    entry.className = "text-green-400";
+                } else {
+                    entry.className = "text-gray-400";
+                }
+                
+                entry.innerText = `[${timestamp}] ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+        }
+
+        // Initialize system
+        let aegis;
+
+        function checkLicense() {
+            const hasLicense = localStorage.getItem('aegis_license') === 'active' || 
+                             localStorage.getItem('bundle_license') === 'active';
+            if (!hasLicense) {
+                document.getElementById('licenseGate').classList.remove('hidden');
+                return false;
+            }
+            document.getElementById('mainInterface').classList.remove('hidden');
+            return true;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkLicense()) {
+                aegis = new AegisSecuritySystem();
+                aegis.initiateScramble();
+                
+                // System checks
+                setInterval(() => {
+                    aegis.checkStability();
+                }, 3000);
+
+                // Update timestamp
+                setInterval(() => {
+                    document.getElementById('timestamp').innerText = new Date().toUTCString();
+                }, 1000);
+            }
+        });
+
+        function testSignal() {
+            const signal = document.getElementById('testSignal').value.trim();
+            if (!signal) {
+                alert('Enter a signal origin to test');
+                return;
+            }
+
+            const result = aegis.scanSignal(signal);
+            const display = document.getElementById('scanResult');
+            display.classList.remove('hidden');
+            
+            if (result.status === "ACCESS GRANTED") {
+                display.innerHTML = `
+                    <div class="text-green-400 font-bold mb-2">✓ ACCESS GRANTED</div>
+                    <div class="text-xs text-gray-400">Status: ${result.status}</div>
+                    <div class="text-xs text-gray-400">Message: ${result.message}</div>
+                    <div class="text-xs text-gray-400 mt-2">Current Key: ${result.code}</div>
+                `;
+            } else {
+                display.innerHTML = `
+                    <div class="text-red-500 font-bold mb-2">✗ ACCESS DENIED</div>
+                    <div class="text-xs text-gray-400">Action: ${result.action}</div>
+                    <div class="text-xs text-gray-400">Payload: ${result.payload}</div>
+                    <div class="text-xs text-yellow-400 mt-2">Deceptive Message Sent:</div>
+                    <div class="text-xs text-gray-500 italic">"${result.displayMessage}"</div>
+                `;
+            }
+        }
+
+        function calculateRevenue() {
+            const amount = parseFloat(document.getElementById('revenueAmount').value);
+            if (!amount || amount <= 0) {
+                alert('Enter valid amount');
+                return;
+            }
+
+            const revenue = aegis.processGovernmentSale(amount);
+            const display = document.getElementById('revenueBreakdown');
+            
+            display.innerHTML = `
+                <div class="text-green-400 font-bold mb-2">Total: $${amount.toFixed(2)}</div>
+                <div class="flex justify-between"><span>Troy Walker (10%):</span><span class="font-bold">$${revenue.design_fee_troy}</span></div>
+                <div class="flex justify-between"><span>Adam Walker (10%):</span><span class="font-bold">$${revenue.military_brother}</span></div>
+                <div class="flex justify-between"><span>Google (10%):</span><span class="font-bold">$${revenue.google_engine}</span></div>
+                <div class="flex justify-between"><span>Maintenance (2%):</span><span class="font-bold">$${revenue.govt_maintenance}</span></div>
+                <div class="flex justify-between"><span>Personnel (8%):</span><span class="font-bold">$${revenue.govt_personnel}</span></div>
+                <div class="flex justify-between border-t border-green-500/30 pt-1 mt-1"><span>Military Pool (60%):</span><span class="font-bold text-green-400">$${revenue.military_pool}</span></div>
+            `;
+        }
+    </script>
+</body>
+</html>

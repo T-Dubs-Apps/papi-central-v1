@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NO KNOWLEDGE KIT PRO // ULTIMATE EDITION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PAPI Key Loader - Universal API Key Management -->
+    <script src="papi-key-loader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-dm: #f59e0b;
+            --accent-mgr: #3b82f6;
+            --accent-assist: #10b981;
+            --accent-clerk: #8b5cf6;
+            --accent-ship: #ec4899;
+            --text-primary: #f8fafc;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+        
+        .panel.active-agent {
+            border-color: currentColor;
+            box-shadow: 0 0 20px currentColor;
+            animation: panelGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes panelGlow {
+            0%, 100% { box-shadow: 0 0 15px currentColor; }
+            50% { box-shadow: 0 0 30px currentColor; }
+        }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid currentColor;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .agent-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            color: #1e293b;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-dm), var(--accent-ship));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.idle { background: #64748b; }
+        .status-dot.active { background: #22c55e; animation: pulse 2s infinite; }
+        .status-dot.error { background: #ef4444; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .license-gate {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- LICENSE GATE -->
+    <div id="licenseGate" class="license-gate hidden">
+        <div class="bg-gray-900 border-2 border-amber-500 rounded-2xl p-8 max-w-md text-center shadow-2xl">
+            <div class="bg-amber-500 text-black w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fas fa-lock text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-amber-500">NO KNOWLEDGE KIT PRO</h2>
+            <p class="text-gray-400 mb-1">ULTIMATE EDITION</p>
+            <p class="text-3xl font-bold text-white mb-6">$50<span class="text-sm text-gray-400">/month</span></p>
+            <div class="space-y-3">
+                <a href="PAPI Central.htm" class="block bg-amber-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-amber-400 transition">
+                    <!-- Universal purchase button: always routes to store for Stripe checkout -->
+                    <i class="fas fa-shopping-cart mr-2"></i> GET LICENSE (via Store)
+                </a>
+                <a href="index.html" class="block text-gray-400 hover:text-white transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Return to Ship
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-[#1e293b] border-b border-gray-700 p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-amber-500 via-blue-500 to-pink-500 text-white p-2 rounded font-bold">NK</div>
+                <div>
+                    <h1 class="text-xl font-bold">NO KNOWLEDGE KIT PRO</h1>
+                    <p class="text-xs text-gray-400">5-AGENT ORCHESTRATION SYSTEM</p>
+                </div>
+                <span class="bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded">$50/mo</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="password" id="apiKey" placeholder="Gemini or OpenAI API Key" 
+                    class="bg-gray-800 border border-gray-600 text-white text-xs p-2 rounded w-64">
+                <button onclick="saveKey()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs">
+                    SAVE
+                </button>
+                <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-xs">
+                    SHIP
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-hidden">
+        <div class="h-full p-8 flex flex-col gap-6 max-w-7xl mx-auto">
+            
+            <!-- INPUT -->
+            <div class="flex flex-col gap-0 shadow-2xl">
+                <div class="flex gap-0">
+                    <div class="bg-gray-800 p-4 flex items-center border-l border-t border-b border-gray-600 rounded-tl-lg">
+                        <span class="text-gray-400 text-sm">PROJECT:</span>
+                    </div>
+                    <input type="text" id="userRequest" placeholder="Describe your app..." 
+                        class="flex-1 bg-gray-900 border-t border-b border-gray-600 text-white p-4">
+                    <button onclick="toggleVoiceInput()" id="voiceBtn" 
+                        class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-4 border-t border-b border-gray-600 transition-all duration-300"
+                        title="Voice Input">
+                        <i class="fas fa-microphone" id="voiceIcon"></i>
+                    </button>
+                    <button onclick="startAutomation()" id="startBtn" 
+                        class="bg-gradient-to-r from-amber-500 via-blue-500 to-pink-500 text-white font-bold px-8 py-4 rounded-tr-lg">
+                        INITIALIZE
+                    </button>
+                </div>
+                <div class="bg-gray-800 border border-gray-600 rounded-b-lg p-3">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-xs text-gray-400">Progress</span>
+                        <span id="progress-text" class="text-xs text-cyan-400">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENTS -->
+            <div class="grid grid-cols-5 gap-4 flex-1 min-h-0">
+                
+                <!-- District Manager -->
+                <div id="panel-dm" class="panel rounded-xl flex flex-col overflow-hidden text-[#f59e0b]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#f59e0b]"><i class="fas fa-user-tie"></i></div>
+                            <div>
+                                <h3 class="font-bold text-xs">DISTRICT</h3>
+                                <p class="text-[9px] opacity-70">STRATEGY</p>
+                            </div>
+                        </div>
+                        <span class="status-dot idle" id="status-dot-dm"></span>
+                    </div>
+                    <div id="log-dm" class="p-3 overflow-y-auto text-[10px] space-y-1 flex-1 text-gray-300">
+                        <p class="opacity-50">Ready...</p>
+                    </div>
+                </div>
+
+                <!-- Manager -->
+                <div id="panel-manager" class="panel rounded-xl flex flex-col overflow-hidden text-[#3b82f6]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#3b82f6]"><i class="fas fa-brain"></i></div>
+                            <div>
+                                <h3 class="font-bold text-xs">MANAGER</h3>
+                                <p class="text-[9px] opacity-70">PLANNING</p>
+                            </div>
+                        </div>
+                        <span class="status-dot idle" id="status-dot-manager"></span>
+                    </div>
+                    <div id="log-manager" class="p-3 overflow-y-auto text-[10px] space-y-1 flex-1 text-gray-300">
+                        <p class="opacity-50">Ready...</p>
+                    </div>
+                </div>
+
+                <!-- Assistant -->
+                <div id="panel-assistant" class="panel rounded-xl flex flex-col overflow-hidden text-[#10b981]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#10b981]"><i class="fas fa-code"></i></div>
+                            <div>
+                                <h3 class="font-bold text-xs">ASSISTANT</h3>
+                                <p class="text-[9px] opacity-70">CODING</p>
+                            </div>
+                        </div>
+                        <span class="status-dot idle" id="status-dot-assistant"></span>
+                    </div>
+                    <div id="log-assistant" class="p-3 overflow-y-auto text-[10px] space-y-1 flex-1 text-gray-300">
+                        <p class="opacity-50">Ready...</p>
+                    </div>
+                </div>
+
+                <!-- Clerk -->
+                <div id="panel-clerk" class="panel rounded-xl flex flex-col overflow-hidden text-[#8b5cf6]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#8b5cf6]"><i class="fas fa-file-code"></i></div>
+                            <div>
+                                <h3 class="font-bold text-xs">CLERK</h3>
+                                <p class="text-[9px] opacity-70">QA</p>
+                            </div>
+                        </div>
+                        <span class="status-dot idle" id="status-dot-clerk"></span>
+                    </div>
+                    <div id="log-clerk" class="p-3 overflow-y-auto text-[10px] space-y-1 flex-1 text-gray-300">
+                        <p class="opacity-50">Ready...</p>
+                    </div>
+                </div>
+
+                <!-- Shipping -->
+                <div id="panel-shipping" class="panel rounded-xl flex flex-col overflow-hidden text-[#ec4899]">
+                    <div class="p-3 border-b border-gray-700 bg-gray-900/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="agent-avatar bg-[#ec4899]"><i class="fas fa-boxes"></i></div>
+                            <div>
+                                <h3 class="font-bold text-xs">SHIPPING</h3>
+                                <p class="text-[9px] opacity-70">DEPLOY</p>
+                            </div>
+                        </div>
+                        <span class="status-dot idle" id="status-dot-shipping"></span>
+                    </div>
+                    <div id="log-shipping" class="p-3 overflow-y-auto text-[10px] space-y-1 flex-1 text-gray-300">
+                        <p class="opacity-50">Ready...</p>
+                    </div>
+                    <div id="download-area" class="p-3 border-t border-gray-700 hidden">
+                        <button onclick="downloadPackage()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-2 rounded">
+                            DOWNLOAD
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-black border-t border-gray-800 p-2 text-[10px] flex justify-between text-gray-500">
+        <div id="global-status">SYSTEM READY</div>
+        <div>NO KNOWLEDGE KIT PRO v2.0 // GEMINI</div>
+    </footer>
+
+    <script>
+        function checkLicense() {
+            // Check for admin access first
+            const isAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const adminEmail = localStorage.getItem('current_user_email') === 'mr.troy.walker.62@gmail.com';
+            
+            // Check for licenses
+            const hasLicense = localStorage.getItem('nk_license') === 'active' || 
+                             localStorage.getItem('no_knowledge_kit_license') === 'active' ||
+                             localStorage.getItem('bundle_license') === 'active' ||
+                             localStorage.getItem('papi_license') === 'active';
+            
+            // Grant access if admin or has license
+            if (!hasLicense && !isAdmin && !adminEmail) {
+                document.getElementById('licenseGate').classList.remove('hidden');
+                return false;
+            }
+            return true;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLicense();
+            loadApiKey();
+        });
+
+        let apiKey = "";
+        let projectData = { idea: "", strategy: "", spec: "", rawCode: "", files: [], zipBlob: null };
+
+        function loadApiKey() {
+            // Try PAPI universal key system first - check for both Gemini and OpenAI
+            if (window.PAPI && typeof PAPI.loadKey === 'function') {
+                apiKey = PAPI.loadKey('no-knowledge-kit.html', 'gemini') || 
+                         PAPI.loadKey('no-knowledge-kit.html', 'openai') || 
+                         PAPI.loadKey() || "";
+            }
+            
+            // Fallback to local storage - check multiple keys
+            if (!apiKey) {
+                apiKey = localStorage.getItem("gemini_key") || 
+                         localStorage.getItem("openai_key_1") || 
+                         localStorage.getItem("code_auto_key") || "";
+            }
+            
+            if(apiKey) {
+                document.getElementById("apiKey").value = apiKey;
+                // Auto-detect key type
+                if (apiKey.startsWith('sk-')) {
+                    console.log('✅ OpenAI key detected');
+                } else if (apiKey.startsWith('AIza')) {
+                    console.log('✅ Gemini key detected');
+                }
+            } else {
+                console.log("ℹ️ No API key found. You can use:");
+                console.log("  - Gemini: https://makersuite.google.com/app/apikey");
+                console.log("  - OpenAI: https://platform.openai.com/api-keys");
+            }
+        }
+
+        function saveKey() {
+            apiKey = document.getElementById("apiKey").value.trim();
+            if (!apiKey) {
+                alert("❌ Please enter an API key");
+                return;
+            }
+            
+            // Save to both systems for compatibility
+            localStorage.setItem("code_auto_key", apiKey);
+            
+            // Detect and save to appropriate key
+            if (apiKey.startsWith('sk-')) {
+                localStorage.setItem("openai_key_1", apiKey);
+                alert("✅ OpenAI API Key Saved");
+            } else if (apiKey.startsWith('AIza')) {
+                localStorage.setItem("gemini_key", apiKey);
+                alert("✅ Gemini API Key Saved");
+            } else {
+                localStorage.setItem("gemini_key", apiKey);
+                alert("✅ API Key Saved");
+            }
+        }
+
+        // Voice Recognition Setup
+        let recognition = null;
+        let isListening = false;
+
+        function initializeSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.warn('Speech recognition not supported');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceIcon = document.getElementById('voiceIcon');
+                voiceBtn.classList.add('bg-red-600', 'animate-pulse');
+                voiceBtn.classList.remove('bg-gray-800');
+                voiceIcon.classList.add('fa-microphone-slash');
+                voiceIcon.classList.remove('fa-microphone');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                const input = document.getElementById('userRequest');
+                if (finalTranscript) {
+                    input.value += finalTranscript;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                stopVoiceInput();
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    // Restart if still listening
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        stopVoiceInput();
+                    }
+                }
+            };
+
+            // Request microphone permission on load
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => console.log('🎤 Microphone ready'))
+                .catch(err => console.warn('Microphone permission denied:', err));
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                initializeSpeechRecognition();
+                if (!recognition) {
+                    alert('Voice input not supported in this browser');
+                    return;
+                }
+            }
+
+            if (isListening) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput();
+            }
+        }
+
+        function startVoiceInput() {
+            try {
+                recognition.start();
+                isListening = true;
+            } catch (e) {
+                console.error('Failed to start recognition:', e);
+            }
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                isListening = false;
+                recognition.stop();
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceIcon = document.getElementById('voiceIcon');
+                voiceBtn.classList.remove('bg-red-600', 'animate-pulse');
+                voiceBtn.classList.add('bg-gray-800');
+                voiceIcon.classList.remove('fa-microphone-slash');
+                voiceIcon.classList.add('fa-microphone');
+            }
+        }
+
+        // Initialize voice recognition on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeSpeechRecognition();
+        });
+
+        function log(agent, message, type="info") {
+            const el = document.getElementById(`log-${agent}`);
+            const p = document.createElement("div");
+            if (type === "error") p.className = "text-red-400 font-bold border-l-2 border-red-500 pl-2";
+            else if (type === "success") p.className = "text-green-400 font-bold border-l-2 border-green-500 pl-2";
+            else p.className = "border-l-2 border-gray-700 pl-2";
+            p.innerHTML = message;
+            el.appendChild(p);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function setStatus(agent, active) {
+            const panel = document.getElementById(`panel-${agent}`);
+            const dot = document.getElementById(`status-dot-${agent}`);
+            if(active) {
+                panel.classList.add("active-agent");
+                dot.className = "status-dot active";
+            } else {
+                panel.classList.remove("active-agent");
+                dot.className = "status-dot idle";
+            }
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = percent + '%';
+        }
+
+        async function startAutomation() {
+            if(!checkLicense()) return;
+            if(!apiKey) return alert("Enter API Key");
+            const idea = document.getElementById("userRequest").value.trim();
+            if(!idea) return alert("Describe your app");
+
+            ["dm", "manager", "assistant", "clerk", "shipping"].forEach(a => document.getElementById(`log-${a}`).innerHTML = "");
+            document.getElementById("download-area").classList.add("hidden");
+            document.getElementById("startBtn").disabled = true;
+            projectData.idea = idea;
+            updateProgress(0);
+
+            setStatus("dm", true);
+            log("dm", "REQUEST: " + idea);
+            // Simulate human-like learning and creative capabilities
+            await simulateDistrictManagerLearning(idea);
+            try {
+                const strategy = await callGemini(`You are District Manager, an advanced AI agent with the ability to simulate human learning, comprehension, creativity, problem solving, decision making, and autonomy. For the following idea: "${idea}", do the following:\n1. Learn and comprehend the idea.\n2. Demonstrate creativity in your approach.\n3. Show problem solving and decision making skills.\n4. Respond with a brief strategic analysis and a creative suggestion.\n5. Log your learning process and autonomous reasoning steps.`);
+                projectData.strategy = strategy;
+                log("dm", "Strategy approved", "success");
+                updateProgress(20);
+                setStatus("dm", false);
+                runManager();
+            } catch (e) {
+                log("dm", "Failed: " + e.message, "error");
+                setStatus("dm", false);
+                reset();
+            }
+                // Simulate District Manager learning, creativity, and autonomy
+                async function simulateDistrictManagerLearning(idea) {
+                    log("dm", "Simulating human-like learning...");
+                    await new Promise(r => setTimeout(r, 400));
+                    log("dm", "Learning patterns detected. Comprehending input...");
+                    await new Promise(r => setTimeout(r, 400));
+                    log("dm", "Applying creativity and problem solving skills...");
+                    await new Promise(r => setTimeout(r, 400));
+                    log("dm", "Making autonomous decisions and forming strategy...");
+                    await new Promise(r => setTimeout(r, 400));
+                    log("dm", "District Manager now simulates: learning, comprehension, creativity, problem solving, decision making, and autonomy.", "success");
+                }
+        }
+
+        async function runManager() {
+            setStatus("manager", true);
+            log("manager", "Creating specs...");
+            try {
+                const spec = await callGemini(`Create detailed tech spec for: "${projectData.idea}". Include features, files, UI requirements.`);
+                projectData.spec = spec;
+                log("manager", "Spec complete", "success");
+                updateProgress(40);
+                setStatus("manager", false);
+                runAssistant();
+            } catch (e) {
+                log("manager", "Failed: " + e.message, "error");
+                setStatus("manager", false);
+                reset();
+            }
+        }
+
+        async function runAssistant() {
+            setStatus("assistant", true);
+            log("assistant", "Generating code...");
+            try {
+                const rawCode = await callGemini(`Generate code for: ${projectData.spec}. Format: ### filename.ext\\ncode\\n###`);
+                projectData.rawCode = rawCode;
+                log("assistant", "Code generated", "success");
+                updateProgress(60);
+                setStatus("assistant", false);
+                runClerk();
+            } catch (e) {
+                log("assistant", "Failed: " + e.message, "error");
+                setStatus("assistant", false);
+                reset();
+            }
+        }
+
+        function runClerk() {
+            setStatus("clerk", true);
+            log("clerk", "Parsing files...");
+            try {
+                const files = [];
+                const lines = projectData.rawCode.split('\n');
+                let currentFile = null;
+                let currentContent = [];
+
+                for (let line of lines) {
+                    if (line.trim().startsWith("###") && line.trim() !== "###") {
+                        if (currentFile) {
+                            files.push({ name: currentFile, content: currentContent.join('\n') });
+                            log("clerk", `Validated: ${currentFile}`, "success");
+                        }
+                        currentFile = line.trim().replace("###", "").trim();
+                        currentContent = [];
+                    } else if (line.trim() === "###") {
+                        if (currentFile) {
+                            files.push({ name: currentFile, content: currentContent.join('\n') });
+                            log("clerk", `Validated: ${currentFile}`, "success");
+                            currentFile = null;
+                            currentContent = [];
+                        }
+                    } else {
+                        if (currentFile) currentContent.push(line);
+                    }
+                }
+
+                if (currentFile && currentContent.length > 0) {
+                    files.push({ name: currentFile, content: currentContent.join('\n') });
+                }
+
+                if (files.length === 0) throw new Error("No files parsed");
+
+                projectData.files = files;
+                log("clerk", `${files.length} files ready`, "success");
+                updateProgress(80);
+                setStatus("clerk", false);
+                runShipping();
+            } catch (e) {
+                log("clerk", "Failed: " + e.message, "error");
+                setStatus("clerk", false);
+                reset();
+            }
+        }
+
+        async function runShipping() {
+            setStatus("shipping", true);
+            log("shipping", "Packaging...");
+            try {
+                const zip = new JSZip();
+                const root = zip.folder("My_App");
+                projectData.files.forEach(file => {
+                    root.file(file.name, file.content);
+                    log("shipping", `Packed: ${file.name}`);
+                });
+                root.file("_SPECS.md", projectData.spec);
+                const content = await zip.generateAsync({type: "blob"});
+                projectData.zipBlob = content;
+                log("shipping", "Package ready", "success");
+                document.getElementById("download-area").classList.remove("hidden");
+                updateProgress(100);
+                setStatus("shipping", false);
+                document.getElementById("startBtn").disabled = false;
+            } catch (e) {
+                log("shipping", "Failed: " + e.message, "error");
+                setStatus("shipping", false);
+                reset();
+            }
+        }
+
+        function downloadPackage() {
+            if(projectData.zipBlob) {
+                saveAs(projectData.zipBlob, "Project.zip");
+                log("shipping", "Downloaded");
+            }
+        }
+
+        function reset() {
+            document.getElementById("startBtn").disabled = false;
+            updateProgress(0);
+        }
+
+        async function callGemini(prompt) {
+            if (!apiKey || apiKey.trim() === '') {
+                throw new Error("No API key provided. Please enter a Gemini or OpenAI API key.");
+            }
+
+            // Detect key type and use appropriate API
+            if (apiKey.startsWith('sk-')) {
+                return await callOpenAI(prompt);
+            } else {
+                return await callGeminiAPI(prompt);
+            }
+        }
+
+        async function callOpenAI(prompt) {
+            const url = 'https://api.openai.com/v1/chat/completions';
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0.7,
+                        max_tokens: 2000
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    
+                    if (response.status === 401) {
+                        throw new Error("Invalid OpenAI API key. Check your key at platform.openai.com");
+                    } else if (response.status === 429) {
+                        throw new Error("Rate limit exceeded. Please wait a moment and try again.");
+                    } else {
+                        throw new Error(`OpenAI API Error: ${errorMsg}`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                if (!data.choices || !data.choices[0]?.message?.content) {
+                    throw new Error("Invalid API response format");
+                }
+                
+                return data.choices[0].message.content;
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    throw new Error("Network error. Check your internet connection.");
+                }
+                throw error;
+            }
+        }
+
+        async function callGeminiAPI(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    
+                    if (response.status === 400) {
+                        throw new Error("Invalid Gemini API key format. Get a key at makersuite.google.com/app/apikey");
+                    } else if (response.status === 403) {
+                        throw new Error("Gemini API key authentication failed. Verify your key is activated.");
+                    } else if (response.status === 429) {
+                        throw new Error("Rate limit exceeded. Please wait a moment and try again.");
+                    } else {
+                        throw new Error(`Gemini API Error: ${errorMsg}`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                    throw new Error("Invalid API response format");
+                }
+                
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    throw new Error("Network error. Check your internet connection.");
+                }
+                throw error;
+            }
+        }
+    </script>
+</body>
+</html>

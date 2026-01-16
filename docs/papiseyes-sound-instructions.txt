@@ -1,0 +1,4 @@
+// Place these sound files in the same directory as papiseyes-landing.html
+// crack.mp3: short electric crack sound
+// thunder.mp3: rolling thunder sound
+// thunder_rumble.mp3: after-rumble thunder sound

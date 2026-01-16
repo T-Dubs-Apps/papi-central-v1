@@ -1,0 +1,266 @@
+<!-- papiseyes-landing.html: Interactive customizable eyes landing page for PAPISeyes browser -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPISeyes Landing</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .eye {
+      width: 60px;
+      height: 40px;
+      background: #fff;
+      border-radius: 50% 50% 60% 60% / 60% 60% 50% 50%;
+      position: relative;
+      margin: 0 10px;
+      display: inline-block;
+      transition: box-shadow 0.2s, background 0.2s;
+    }
+    .pupil {
+      width: 18px;
+      height: 18px;
+      background: #222;
+      border-radius: 50%;
+      position: absolute;
+      top: 12px;
+      left: 21px;
+      transition: left 0.2s, top 0.2s, background 0.2s;
+    }
+    .blink {
+      animation: blink 0.2s linear 1;
+    }
+    @keyframes blink {
+      0% { height: 40px; }
+      50% { height: 8px; }
+      100% { height: 40px; }
+    }
+    .eye.alien { background: #a0ffef; }
+    .eye.dog { background: #f5e6c8; }
+    .eye.cat { background: #e0e0e0; }
+    .eye.horse { background: #c2b280; }
+    .eye.pig { background: #ffd1dc; }
+    .pupil.alien { background: #0ff; }
+    .pupil.dog { background: #6b4f1d; }
+    .pupil.cat { background: #222; }
+    .pupil.horse { background: #5a3c0a; }
+    .pupil.pig { background: #ff69b4; }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center relative">
+    <div class="flex items-center mb-4">
+      <div id="eye-left" class="eye alien"><div class="pupil alien"></div></div>
+      <div id="eye-right" class="eye alien"><div class="pupil alien"></div></div>
+    </div>
+    <div class="flex gap-2 mb-4">
+      <button class="bg-cyan-700 px-2 py-1 rounded text-xs" onclick="setEyes('alien')">Alien</button>
+      <button class="bg-yellow-700 px-2 py-1 rounded text-xs" onclick="setEyes('dog')">Dog</button>
+      <button class="bg-gray-400 text-black px-2 py-1 rounded text-xs" onclick="setEyes('cat')">Cat</button>
+      <button class="bg-yellow-900 px-2 py-1 rounded text-xs" onclick="setEyes('horse')">Horse</button>
+      <button class="bg-pink-400 text-black px-2 py-1 rounded text-xs" onclick="setEyes('pig')">Pig</button>
+      <button class="bg-blue-800 px-2 py-1 rounded text-xs" onclick="customEyes()">Custom</button>
+    </div>
+    <input id="searchbar" class="w-2/3 p-2 rounded bg-gray-700 text-white mb-2" placeholder="Search the web..." oninput="suggest()" />
+    <div id="suggestions" class="text-xs text-blue-300 mb-2"></div>
+    <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" onclick="search()">Search</button>
+    <!-- Lightning SVG container -->
+    <svg id="lightning-svg" style="position:absolute;left:0;top:0;pointer-events:none;z-index:10;" width="100%" height="100%"></svg>
+    <!-- Audio elements for sound effects -->
+    <audio id="crack-audio" src="crack.mp3" preload="auto"></audio>
+    <audio id="thunder-audio" src="thunder.mp3" preload="auto"></audio>
+    <audio id="thunder-rumble-audio" src="thunder_rumble.mp3" preload="auto"></audio>
+    <!-- Dynamic Spaceship -->
+    <div class="mt-8 flex flex-col items-center">
+      <svg id="spaceship-svg" width="140" height="70" viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ship shadow -->
+        <ellipse cx="70" cy="60" rx="48" ry="10" fill="#000" opacity="0.18"/>
+        <!-- Ship body (dynamic) -->
+        <ellipse id="ship-body" cx="70" cy="38" rx="48" ry="18" fill="url(#shipGradientAlien)"/>
+        <!-- Cockpit -->
+        <ellipse id="ship-cockpit" cx="70" cy="28" rx="18" ry="8" fill="#e0f7fa" stroke="#3b82f6" stroke-width="2"/>
+        <!-- Lights (dynamic) -->
+        <ellipse id="ship-light" cx="70" cy="56" rx="12" ry="4" fill="#0ff" opacity="0.7"/>
+        <defs>
+          <linearGradient id="shipGradientAlien" x1="22" y1="38" x2="118" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#b6faff"/>
+            <stop offset="1" stop-color="#3b82f6"/>
+          </linearGradient>
+          <linearGradient id="shipGradientDog" x1="22" y1="38" x2="118" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#f5e6c8"/>
+            <stop offset="1" stop-color="#6b4f1d"/>
+          </linearGradient>
+          <linearGradient id="shipGradientCat" x1="22" y1="38" x2="118" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#e0e0e0"/>
+            <stop offset="1" stop-color="#222"/>
+          </linearGradient>
+          <linearGradient id="shipGradientHorse" x1="22" y1="38" x2="118" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#c2b280"/>
+            <stop offset="1" stop-color="#5a3c0a"/>
+          </linearGradient>
+          <linearGradient id="shipGradientPig" x1="22" y1="38" x2="118" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#ffd1dc"/>
+            <stop offset="1" stop-color="#ff69b4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+  <script>
+    const eyeTypes = ['alien','dog','cat','horse','pig'];
+    let currentType = 'alien';
+    let customColor = '#fff';
+    let customPupil = '#222';
+    let blinkTimeout;
+    function setEyes(type) {
+      currentType = type;
+      document.querySelectorAll('.eye').forEach(e => {
+        eyeTypes.forEach(t => e.classList.remove(t));
+        e.classList.add(type);
+        if(type==='custom') e.style.background = customColor;
+        else e.style.background = '';
+      });
+      document.querySelectorAll('.pupil').forEach(p => {
+        eyeTypes.forEach(t => p.classList.remove(t));
+        p.classList.add(type);
+        if(type==='custom') p.style.background = customPupil;
+        else p.style.background = '';
+      });
+      // Change spaceship style
+      const shipBody = document.getElementById('ship-body');
+      const shipCockpit = document.getElementById('ship-cockpit');
+      const shipLight = document.getElementById('ship-light');
+      if(type==='alien') {
+        shipBody.setAttribute('fill', 'url(#shipGradientAlien)');
+        shipCockpit.setAttribute('fill', '#e0f7fa');
+        shipCockpit.setAttribute('stroke', '#3b82f6');
+        shipLight.setAttribute('fill', '#0ff');
+      } else if(type==='dog') {
+        shipBody.setAttribute('fill', 'url(#shipGradientDog)');
+        shipCockpit.setAttribute('fill', '#f5e6c8');
+        shipCockpit.setAttribute('stroke', '#6b4f1d');
+        shipLight.setAttribute('fill', '#f5e6c8');
+      } else if(type==='cat') {
+        shipBody.setAttribute('fill', 'url(#shipGradientCat)');
+        shipCockpit.setAttribute('fill', '#e0e0e0');
+        shipCockpit.setAttribute('stroke', '#222');
+        shipLight.setAttribute('fill', '#e0e0e0');
+      } else if(type==='horse') {
+        shipBody.setAttribute('fill', 'url(#shipGradientHorse)');
+        shipCockpit.setAttribute('fill', '#c2b280');
+        shipCockpit.setAttribute('stroke', '#5a3c0a');
+        shipLight.setAttribute('fill', '#c2b280');
+      } else if(type==='pig') {
+        shipBody.setAttribute('fill', 'url(#shipGradientPig)');
+        shipCockpit.setAttribute('fill', '#ffd1dc');
+        shipCockpit.setAttribute('stroke', '#ff69b4');
+        shipLight.setAttribute('fill', '#ffd1dc');
+      } else if(type==='custom') {
+        shipBody.setAttribute('fill', customColor);
+        shipCockpit.setAttribute('fill', customPupil);
+        shipCockpit.setAttribute('stroke', '#fff');
+        shipLight.setAttribute('fill', customColor);
+      }
+      blink();
+    }
+    function customEyes() {
+      currentType = 'custom';
+      customColor = prompt('Eye color (CSS or hex):', customColor) || customColor;
+      customPupil = prompt('Pupil color (CSS or hex):', customPupil) || customPupil;
+      setEyes('custom');
+    }
+    function blink() {
+      document.getElementById('eye-left').classList.add('blink');
+      document.getElementById('eye-right').classList.add('blink');
+      clearTimeout(blinkTimeout);
+      blinkTimeout = setTimeout(() => {
+        document.getElementById('eye-left').classList.remove('blink');
+        document.getElementById('eye-right').classList.remove('blink');
+      }, 200);
+    }
+    setInterval(blink, 4000);
+    // Suggestion logic (demo)
+    function suggest() {
+      const val = document.getElementById('searchbar').value.toLowerCase();
+      let suggestions = [];
+      if(val.startsWith('cat')) suggestions.push('cat videos', 'cat breeds', 'cat care');
+      if(val.startsWith('dog')) suggestions.push('dog training', 'dog breeds', 'dog food');
+      if(val.startsWith('alien')) suggestions.push('alien sightings', 'alien movies', 'alien news');
+      if(val.startsWith('horse')) suggestions.push('horse riding', 'horse care', 'horse breeds');
+      if(val.startsWith('pig')) suggestions.push('pig facts', 'pig farming', 'pig as pets');
+      if(val.length > 2 && suggestions.length === 0) suggestions.push(val + ' facts', val + ' images');
+      document.getElementById('suggestions').innerHTML = suggestions.map(s => `<span class='mr-2 cursor-pointer underline' onclick='setSuggestion("${s}")'>${s}</span>`).join('');
+    }
+    function setSuggestion(s) {
+      document.getElementById('searchbar').value = s;
+      suggest();
+    }
+    function search() {
+      // Play crack sound
+      document.getElementById('crack-audio').currentTime = 0;
+      document.getElementById('crack-audio').play();
+      // Animate lightning
+      animateLightning();
+      // After lightning, play thunder
+      setTimeout(() => {
+        document.getElementById('thunder-audio').currentTime = 0;
+        document.getElementById('thunder-audio').play();
+      }, 500);
+      // After thunder, play rumble
+      setTimeout(() => {
+        document.getElementById('thunder-rumble-audio').currentTime = 0;
+        document.getElementById('thunder-rumble-audio').play();
+      }, 1800);
+      // Integrate with PAPISeyes search logic or redirect
+      // alert('Searching for: ' + document.getElementById('searchbar').value);
+    }
+
+    // Lightning animation
+    function animateLightning() {
+      const svg = document.getElementById('lightning-svg');
+      svg.innerHTML = '';
+      // Get spaceship and results box positions
+      const ship = document.getElementById('spaceship-svg');
+      const resultsBox = document.getElementById('suggestions');
+      if (!ship || !resultsBox) return;
+      const shipRect = ship.getBoundingClientRect();
+      const resRect = resultsBox.getBoundingClientRect();
+      // Generate 3-5 small lightning bolts
+      for (let i = 0; i < 4; i++) {
+        const startX = shipRect.left + shipRect.width/2 + (Math.random()-0.5)*30;
+        const startY = shipRect.bottom - 10 + (Math.random()-0.5)*10;
+        const endX = resRect.left + resRect.width/2 + (Math.random()-0.5)*resRect.width*0.4;
+        const endY = resRect.top + 10 + Math.random()*resRect.height*0.7;
+        const points = [
+          [startX, startY],
+          [startX + (endX-startX)*0.3 + (Math.random()-0.5)*20, startY + (endY-startY)*0.3 + (Math.random()-0.5)*20],
+          [startX + (endX-startX)*0.6 + (Math.random()-0.5)*20, startY + (endY-startY)*0.6 + (Math.random()-0.5)*20],
+          [endX, endY]
+        ];
+        let d = `M${points[0][0]},${points[0][1]}`;
+        for (let j=1;j<points.length;j++) d += ` L${points[j][0]},${points[j][1]}`;
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', d);
+        path.setAttribute('stroke', '#fff');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('filter', 'drop-shadow(0 0 6px #0ff)');
+        path.setAttribute('opacity', '0.95');
+        svg.appendChild(path);
+      }
+      // Fade out lightning
+      setTimeout(() => {
+        svg.style.transition = 'opacity 0.3s';
+        svg.style.opacity = 0;
+        setTimeout(() => {
+          svg.innerHTML = '';
+          svg.style.opacity = 1;
+          svg.style.transition = '';
+        }, 350);
+      }, 400);
+    }
+    setEyes('alien');
+  </script>
+</body>
+</html>

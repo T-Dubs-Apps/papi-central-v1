@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Deploy Auth Flow</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg mt-10">
+    <h1 class="text-2xl font-bold mb-4 text-center">Secure Deploy Auth Flow</h1>
+    <p class="mb-4 text-center">Sign in with Google, then GitHub, then connect to Render for push-to-deploy.</p>
+    <div class="flex flex-col gap-4 items-center">
+      <button id="googleLogin" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Sign in with Google</button>
+      <button id="githubLogin" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded" disabled>Sign in with GitHub</button>
+      <button id="renderLogin" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" disabled>Connect to Render</button>
+      <div id="authStatus" class="mt-4 text-green-400"></div>
+    </div>
+  </div>
+  <script src="secure-deploy-auth.js"></script>
+</body>
+</html>

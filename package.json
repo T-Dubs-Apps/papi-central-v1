@@ -17,5 +17,9 @@
     "flask": "3.0.0",
     "flask-cors": "4.0.0",
     "requests": "2.31.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4"
   }
 }

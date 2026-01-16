@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PAPI Tester Full Access Activation</title>
+    <style>
+        body { font-family: 'Outfit', sans-serif; background: #0a0e27; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        button { background: #00f2ea; color: #222; font-size: 1.2rem; padding: 16px 32px; border: none; border-radius: 12px; cursor: pointer; margin-top: 24px; transition: background 0.2s; }
+        button:hover { background: #0080ff; color: #fff; }
+        .msg { margin-top: 32px; font-size: 1.1rem; color: #a8ffde; }
+    </style>
+</head>
+<body>
+    <h1>PAPI Tester Full Access</h1>
+    <p>Click the button below to activate 1 month of full access for all PAPI apps in this browser.</p>
+    <button id="activate">Activate Full Access</button>
+    <div class="msg" id="msg"></div>
+    <script>
+        document.getElementById('activate').onclick = function() {
+            // Set master admin and licenses
+            localStorage.setItem('master_admin', 'TROY_WALKER_2026');
+            localStorage.setItem('papi_license', 'active');
+            localStorage.setItem('beta_license', 'active');
+            // Set a 1-month expiration
+            const now = Date.now();
+            const oneMonth = 30 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('papi_license_expiry', (now + oneMonth).toString());
+            // Activate all app licenses
+            Object.keys(localStorage).forEach(k => {
+                if (k.endsWith('_license')) localStorage.setItem(k, 'active');
+            });
+            // Remove demo mode
+            localStorage.removeItem('demo_mode');
+            document.getElementById('msg').textContent = '✅ Full access activated for 1 month! You may now use all PAPI apps.';
+        };
+        // Optional: Check and show if already active
+        const expiry = localStorage.getItem('papi_license_expiry');
+        if (expiry && parseInt(expiry) > Date.now()) {
+            document.getElementById('msg').textContent = 'Full access is already active until ' + new Date(parseInt(expiry)).toLocaleString();
+        }
+    </script>
+</body>
+</html>

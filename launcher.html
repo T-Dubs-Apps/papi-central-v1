@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PAPI Central App Launcher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #181c24; color: #fff; margin: 0; padding: 2em; }
+    h1 { color: #7fffd4; }
+    .app-list { display: flex; flex-wrap: wrap; gap: 1.5em; }
+    .app-card { background: #232a36; border-radius: 10px; padding: 1em 2em; box-shadow: 0 2px 8px #0004; min-width: 200px; text-align: center; transition: transform 0.2s; }
+    .app-card:hover { transform: scale(1.05); background: #2e3747; }
+    .app-icon { font-size: 2em; margin-bottom: 0.5em; }
+    a { color: #7fffd4; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>PAPI Central App Launcher</h1>
+  <div class="app-list" id="appList"></div>
+  <script>
+    // List your apps here (add more as needed)
+    const apps = [
+      { name: "AI Assistant Pro", icon: "🤖", file: "apps/ai-assistant-pro.html" },
+      { name: "Cortex App Studio", icon: "🧠", file: "apps/cortex-app-studio.html" },
+      { name: "File Arranger Pro", icon: "🗂️", file: "apps/file-arranger-pro.html" },
+      { name: "Intent Learner", icon: "📚", file: "apps/intent-learner.html" },
+      { name: "Key Controller", icon: "🔑", file: "apps/key-controller.html" },
+      { name: "App Upgrader Pro", icon: "🚀", file: "apps/app-upgrader-pro.html" },
+      // Add more apps here
+    ];
+    const appList = document.getElementById('appList');
+    apps.forEach(app => {
+      const card = document.createElement('div');
+      card.className = 'app-card';
+      card.innerHTML = `<div class="app-icon">${app.icon}</div><a href="${app.file}" target="_blank">${app.name}</a>`;
+      appList.appendChild(card);
+    });
+  </script>
+</body>
+</html>

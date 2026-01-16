@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Arranger Pro Drag & Drop</title>
+  <script src="papi-key-loader.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-xl p-6 bg-gray-800 rounded-lg shadow-lg mt-10">
+    <h1 class="text-2xl font-bold mb-4 text-center">File Arranger Pro (Drag & Drop)</h1>
+    <p class="mb-4 text-center">Drag files here to arrange and separate them. You can pause/unpause deployed app files for safe replacement.</p>
+    <div id="dropZone" class="border-4 border-dashed border-blue-400 rounded-lg h-40 flex items-center justify-center mb-4 cursor-pointer bg-gray-700">
+      <span id="dropText">Drop files here</span>
+    </div>
+    <button id="pauseBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2">Pause Deployed App</button>
+    <button id="unpauseBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-2">Unpause Deployed App</button>
+    <div id="status" class="mt-4 text-green-400"></div>
+  </div>
+  <script src="file-arranger-dragdrop.js"></script>
+</body>
+</html>

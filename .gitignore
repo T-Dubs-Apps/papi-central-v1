@@ -1,7 +1,23 @@
+
+# .gitignore for PAPI Central
 node_modules/
 .env
+.env.*
 *.log
 .DS_Store
 *.pyc
 __pycache__/
 cortex_memory.json
+_papi_backup/
+assets/optimized/
+# Ignore OS and editor files
+Thumbs.db
+.vscode/
+.idea/
+# Ignore test and coverage files
+coverage/
+*.test.js
+*.spec.js
+# Ignore build outputs
+dist/
+build/

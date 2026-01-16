@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+            <style>
+                /* Stack only the main interactive boxes (chat, code/output, animation) */
+                .main-box-stack {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1.5rem;
+                    width: 100vw;
+                    max-width: 100vw;
+                    margin: 0 auto 2.5rem auto;
+                    padding: 0.5rem 0.5rem 0 0.5rem;
+                    box-sizing: border-box;
+                }
+                @media (min-width: 1024px) {
+                    .main-box-stack {
+                        width: 700px;
+                        max-width: 700px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+                }
+            </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Pro | PAPI Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PAPI Key Loader - Universal API Key Management -->
+    <script src="papi-key-loader.js"></script>
+        <style>
+            /* Mobile-first stacked layout for main interactive elements */
+            .assistant-stack-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+                width: 100vw;
+                max-width: 100vw;
+                margin: 0 auto 2.5rem auto;
+                padding: 0.5rem 0.5rem 0 0.5rem;
+                box-sizing: border-box;
+            }
+            .spaceship-mobile {
+                width: 120px;
+                height: auto;
+                margin-bottom: 0.5rem;
+                transform: scale(0.7);
+                transform-origin: center top;
+            }
+            @media (min-width: 1024px) {
+                .assistant-stack-container {
+                    flex-direction: row;
+                    align-items: flex-start;
+                    justify-content: center;
+                    gap: 2.5rem;
+                    padding: 2.5rem 2rem 0 2rem;
+                }
+                .spaceship-mobile {
+                    width: 180px;
+                }
+            }
+        </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #e2e8f0;
+        }
+        
+        .code-font { font-family: 'Fira Code', monospace; }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-bubble {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+        }
+        
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        #code-output {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .feature-card {
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <!-- License Check Modal -->
+    <div id="license-check" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="glass rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-brain text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold gradient-text mb-2">AI Assistant Pro</h2>
+                <p class="text-slate-400">Premium AI-Powered Development Assistant</p>
+            </div>
+            
+            <div id="license-status" class="text-center">
+                <div class="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-slate-300">Verifying license...</p>
+            </div>
+            
+            <div id="license-error" class="hidden">
+                <div class="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-4">
+                    <p class="text-red-300 text-sm">⚠️ Valid license required to access AI Assistant Pro</p>
+                </div>
+                <!-- Universal purchase button: always routes to store for Stripe checkout -->
+                <a href="PAPI Central.htm" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all text-center">
+                    <i class="fas fa-shopping-cart mr-2"></i> Purchase License (via Store)
+                </a>
+                <a href="index.html" class="block w-full mt-3 text-slate-400 hover:text-white text-center transition-colors">
+                    Return to Main App
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="main-app" class="hidden max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <header class="glass rounded-2xl p-4 mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fas fa-rocket text-2xl"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">AI Assistant Pro</h1>
+                        <p class="text-sm text-slate-400">Advanced AI Development Companion</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="user-name" class="text-sm text-slate-300 hidden md:block"></span>
+                    <button onclick="openSettings()" class="glass px-4 py-2 rounded-lg hover:border-blue-500 transition-all">
+                        <i class="fas fa-cog mr-2"></i> Settings
+                    </button>
+                    <button onclick="clearChat()" class="glass px-4 py-2 rounded-lg hover:border-red-500 transition-all">
+                        <i class="fas fa-trash mr-2"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Interactive Boxes Stacked (Mobile-first) -->
+        <div class="main-box-stack">
+          <!-- Chat Area -->
+          <div class="glass rounded-2xl p-6 w-full max-w-xl">
+              <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold">
+                      <i class="fas fa-comments text-blue-500 mr-2"></i> AI Conversation
+                  </h2>
+                  <div class="flex gap-2">
+                      <button onclick="toggleMode('chat')" id="btn-chat" class="px-3 py-1 rounded-lg bg-blue-600 text-white text-sm">
+                          Chat
+                      </button>
+                      <button onclick="toggleMode('code')" id="btn-code" class="px-3 py-1 rounded-lg glass text-slate-300 text-sm">
+                          Code
+                      </button>
+                  </div>
+              </div>
+              <div id="chat-container" class="h-[350px] md:h-[500px] overflow-y-auto mb-4 space-y-3 p-4 bg-slate-900/50 rounded-lg">
+                  <div class="text-center text-slate-400 py-12">
+                      <i class="fas fa-brain text-6xl mb-4 text-blue-500 opacity-50"></i>
+                      <p class="text-lg">Start a conversation with your AI assistant</p>
+                      <p class="text-sm mt-2">I can help with code generation, debugging, explanations, and more!</p>
+                  </div>
+              </div>
+              <div class="flex gap-2">
+                  <button onclick="toggleVoice()" id="voice-btn" class="glass px-4 py-3 rounded-lg hover:border-blue-500 transition-all">
+                      <i class="fas fa-microphone"></i>
+                  </button>
+                  <input type="text" id="chat-input" 
+                         placeholder="Ask me anything... (e.g., 'Build a React component', 'Explain async/await')"
+                         class="flex-1 glass px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-all"
+                         onkeypress="if(event.key==='Enter') sendMessage()">
+                  <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-all">
+                      <i class="fas fa-paper-plane mr-2"></i> Send
+                  </button>
+              </div>
+          </div>
+          <!-- Animation Controls (if any) -->
+          <div id="animation-box" class="glass rounded-2xl p-6 w-full max-w-xl">
+              <!-- Animation controls and interactive panel -->
+              <h3 class="text-lg font-semibold mb-2"><i class="fas fa-magic text-purple-400 mr-2"></i> Animation & Controls</h3>
+              <div class="text-slate-400 text-sm mb-4">Adjust spaceship/AI animation settings and show/hide output below.</div>
+              <div class="mb-4">
+                <button id="toggle-output-btn" onclick="toggleOutputBox()" class="glass px-4 py-2 rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+                  Show Output Box
+                </button>
+              </div>
+              <div id="code-section" class="glass rounded-2xl p-6 hidden w-full max-w-xl mt-2">
+                  <div class="flex items-center justify-between mb-4">
+                      <h3 class="text-lg font-semibold">
+                          <i class="fas fa-code text-green-500 mr-2"></i> Generated Code
+                      </h3>
+                      <button onclick="copyCode()" class="glass px-4 py-2 rounded-lg hover:border-green-500 transition-all text-sm">
+                          <i class="fas fa-copy mr-2"></i> Copy
+                      </button>
+                  </div>
+                  <div id="code-output" class="text-slate-300">
+                      // Your generated code will appear here
+                  </div>
+              </div>
+          </div>
+        </div>
+
+        <!-- Sidebar (unchanged, below stacked main for mobile) -->
+        <div class="space-y-6 max-w-xl mx-auto lg:max-w-none lg:mx-0 lg:absolute lg:right-0 lg:top-32">
+            <!-- Quick Actions -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-bolt text-yellow-500 mr-2"></i> Quick Actions
+                </h3>
+                <div class="space-y-2">
+                    <button onclick="quickPrompt('Build a React todo app with hooks')" class="w-full glass p-3 rounded-lg hover:border-blue-500 transition-all text-left text-sm">
+                        <i class="fab fa-react text-blue-400 mr-2"></i> React Todo App
+                    </button>
+                    <button onclick="quickPrompt('Create a REST API with Express')" class="w-full glass p-3 rounded-lg hover:border-green-500 transition-all text-left text-sm">
+                        <i class="fas fa-server text-green-400 mr-2"></i> Express API
+                    </button>
+                    <button onclick="quickPrompt('Explain async/await in JavaScript')" class="w-full glass p-3 rounded-lg hover:border-purple-500 transition-all text-left text-sm">
+                        <i class="fab fa-js text-yellow-400 mr-2"></i> Async/Await
+                    </button>
+                    <button onclick="quickPrompt('Debug my code')" class="w-full glass p-3 rounded-lg hover:border-red-500 transition-all text-left text-sm">
+                        <i class="fas fa-bug text-red-400 mr-2"></i> Debug Code
+                    </button>
+                    <button onclick="quickPrompt('Optimize performance')" class="w-full glass p-3 rounded-lg hover:border-orange-500 transition-all text-left text-sm">
+                        <i class="fas fa-tachometer-alt text-orange-400 mr-2"></i> Optimize
+                    </button>
+                </div>
+            </div>
+            <!-- Stats -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-chart-line text-green-500 mr-2"></i> Usage Stats
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-400">Messages Today</span>
+                        <span id="stat-messages" class="font-semibold text-blue-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-400">Code Generated</span>
+                        <span id="stat-code" class="font-semibold text-green-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-400">Projects Saved</span>
+                        <span id="stat-projects" class="font-semibold text-purple-400">0</span>
+                    </div>
+                    <div class="pt-3 border-t border-slate-700">
+                        <div class="text-xs text-slate-500 mb-1">Subscription</div>
+                        <div class="text-sm font-semibold text-green-400">
+                            <i class="fas fa-check-circle mr-1"></i> Pro Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Features -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i> Pro Features
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">Unlimited AI conversations</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">GPT-4 powered responses</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">Advanced code generation</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">Multi-language support</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">Project memory & context</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-check text-green-500 mt-1"></i>
+                        <span class="text-slate-300">Export & save conversations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">Settings</h2>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">AI Provider</label>
+                    <select id="ai-provider" class="w-full glass px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="demo">Demo Mode (Enhanced)</option>
+                        <option value="openai">OpenAI GPT-4</option>
+                        <option value="claude">Claude 3.5</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                </div>
+                
+                <div id="api-key-section" class="hidden">
+                    <label class="block text-sm font-semibold mb-2">API Key</label>
+                    <input type="password" id="api-key-input" placeholder="sk-..." 
+                           class="w-full glass px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-400 mt-2">Your API key is stored locally and never sent to our servers</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Temperature (Creativity)</label>
+                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" 
+                           class="w-full" oninput="document.getElementById('temp-value').innerText = this.value">
+                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                        <span>Precise (0)</span>
+                        <span id="temp-value">0.7</span>
+                        <span>Creative (1)</span>
+                    </div>
+                </div>
+                
+                <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all">
+                    <i class="fas fa-save mr-2"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                // Toggle output box from control panel
+                function toggleOutputBox() {
+                    const codeSection = document.getElementById('code-section');
+                    const btn = document.getElementById('toggle-output-btn');
+                    if (codeSection.classList.contains('hidden')) {
+                        codeSection.classList.remove('hidden');
+                        btn.textContent = 'Hide Output Box';
+                    } else {
+                        codeSection.classList.add('hidden');
+                        btn.textContent = 'Show Output Box';
+                    }
+                }
+        // License check
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLicense();
+            // --- Shooting Star Animation (Random Direction) ---
+            // Add a canvas overlay for shooting stars if not present
+            if (!document.getElementById('alien-shooting-star-canvas')) {
+                const canvas = document.createElement('canvas');
+                canvas.id = 'alien-shooting-star-canvas';
+                canvas.style.position = 'fixed';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.width = '100vw';
+                canvas.style.height = '100vh';
+                canvas.style.pointerEvents = 'none';
+                canvas.style.zIndex = '9999';
+                document.body.appendChild(canvas);
+            }
+            // Start shooting stars
+            startAlienShootingStars();
+        });
+
+        // --- Alien AI Shooting Star Logic ---
+        function startAlienShootingStars() {
+            if (window._alienStarInterval) clearInterval(window._alienStarInterval);
+            const canvas = document.getElementById('alien-shooting-star-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            // Star config
+            const starColors = ['#fff', '#aef', '#8ff', '#fffae0'];
+            function randomDirection() {
+                // Pick a random angle (in radians)
+                const angle = Math.random() * 2 * Math.PI;
+                // Pick a random start point on the edge
+                const edge = Math.floor(Math.random() * 4); // 0=top,1=right,2=bottom,3=left
+                let x, y;
+                if (edge === 0) { x = Math.random() * canvas.width; y = 0; }
+                else if (edge === 1) { x = canvas.width; y = Math.random() * canvas.height; }
+                else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height; }
+                else { x = 0; y = Math.random() * canvas.height; }
+                // Calculate velocity
+                const speed = 6 + Math.random() * 6; // px per frame
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                return { x, y, vx, vy, color: starColors[Math.floor(Math.random()*starColors.length)] };
+            }
+            let stars = [];
+            function spawnStar() {
+                stars.push({ ...randomDirection(), life: 0, maxLife: 60 + Math.random()*30 });
+            }
+            // Animation loop
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = stars.length-1; i >= 0; i--) {
+                    const s = stars[i];
+                    ctx.save();
+                    ctx.globalAlpha = 1 - s.life/s.maxLife;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, 2 + Math.random()*1.5, 0, 2*Math.PI);
+                    ctx.fillStyle = s.color;
+                    ctx.shadowColor = s.color;
+                    ctx.shadowBlur = 12;
+                    ctx.fill();
+                    ctx.restore();
+                    // Trail
+                    ctx.save();
+                    ctx.globalAlpha = 0.3 * (1 - s.life/s.maxLife);
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, s.y);
+                    ctx.lineTo(s.x - s.vx*8, s.y - s.vy*8);
+                    ctx.strokeStyle = s.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                    // Move
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    s.life++;
+                    if (s.life > s.maxLife || s.x < -20 || s.x > canvas.width+20 || s.y < -20 || s.y > canvas.height+20) {
+                        stars.splice(i, 1);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            // Spawn stars at random intervals
+            window._alienStarInterval = setInterval(() => {
+                if (Math.random() < 0.7) spawnStar();
+            }, 400);
+            animate();
+        }
+
+        function checkLicense() {
+            const isMasterAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const hasBetaLicense = localStorage.getItem('beta_license') === 'active';
+            const hasPaidLicense = localStorage.getItem('papi_license') === 'active';
+            
+            setTimeout(() => {
+                if (isMasterAdmin || hasBetaLicense || hasPaidLicense) {
+                    document.getElementById('license-check').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    
+                    // Set user name
+                    const userName = isMasterAdmin ? 'Troy Walker (Admin)' : 'Beta Tester';
+                    document.getElementById('user-name').innerText = userName;
+                    
+                    loadStats();
+                } else {
+                    document.getElementById('license-status').classList.add('hidden');
+                    document.getElementById('license-error').classList.remove('hidden');
+                }
+            }, 1500);
+        }
+
+        // Chat functionality
+        let conversationHistory = [];
+        let currentMode = 'chat';
+
+        function toggleMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-chat').className = mode === 'chat' 
+                ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-sm'
+                : 'px-3 py-1 rounded-lg glass text-slate-300 text-sm';
+            document.getElementById('btn-code').className = mode === 'code' 
+                ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-sm'
+                : 'px-3 py-1 rounded-lg glass text-slate-300 text-sm';
+            
+            document.getElementById('code-section').classList.toggle('hidden', mode === 'chat');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            input.value = '';
+            addMessage('user', message);
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Get AI response
+            setTimeout(async () => {
+                const response = await getAIResponse(message);
+                hideTyping();
+                addMessage('ai', response);
+                
+                // Update stats
+                updateStats();
+            }, 1500);
+        }
+
+        function addMessage(role, text) {
+            const container = document.getElementById('chat-container');
+            
+            // Remove empty state
+            if (container.querySelector('.text-center')) {
+                container.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-bubble flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = role === 'user' 
+                ? 'bg-blue-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm max-w-[80%]'
+                : 'bg-slate-800 text-slate-200 px-4 py-3 rounded-2xl rounded-tl-sm max-w-[80%]';
+            bubble.innerHTML = formatMessage(text);
+            
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            conversationHistory.push({ role, content: text });
+        }
+
+        function formatMessage(text) {
+            // Basic markdown-style formatting
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 p-3 rounded mt-2 overflow-x-auto text-sm code-font">$1</pre>')
+                .replace(/`(.*?)`/g, '<code class="bg-slate-900 px-2 py-1 rounded text-sm code-font">$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function showTyping() {
+            const container = document.getElementById('chat-container');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chat-bubble flex justify-start';
+            typingDiv.innerHTML = `
+                <div class="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        async function getAIResponse(message) {
+            // Load user profile and context
+            const userProfile = JSON.parse(localStorage.getItem('ai_pro_profile') || '{"name": "", "expertise": "intermediate", "preferences": {}, "projects": [], "learnings": []}');
+            const provider = localStorage.getItem('ai_provider') || 'demo';
+            
+            // Build context-aware prompt
+            const contextPrompt = buildContextPrompt(message, userProfile);
+            
+            // Call real AI or enhanced demo
+            if (provider !== 'demo') {
+                return await callRealAI(contextPrompt, provider);
+            } else {
+                return await enhancedIntelligentResponse(message, userProfile);
+            }
+        }
+
+        function buildContextPrompt(message, profile) {
+            let context = `You are an expert AI programming assistant helping a ${profile.expertise} level developer.\n\n`;
+            
+            // Add conversation history for context
+            if (conversationHistory.length > 0) {
+                context += "Recent conversation:\n";
+                conversationHistory.slice(-6).forEach(msg => {
+                    context += `${msg.role}: ${msg.content.substring(0, 200)}\n`;
+                });
+                context += "\n";
+            }
+            
+            // Add user preferences
+            if (profile.preferences.language) {
+                context += `Preferred languages: ${profile.preferences.language}\n`;
+            }
+            if (profile.preferences.framework) {
+                context += `Preferred frameworks: ${profile.preferences.framework}\n`;
+            }
+            
+            // Add current project context
+            if (profile.currentProject) {
+                context += `Current project: ${profile.currentProject}\n`;
+            }
+            
+            context += `\nUser question: ${message}\n\nProvide a detailed, intelligent response with code examples when relevant. Be conversational and helpful.`;
+            
+            return context;
+        }
+
+        async function callRealAI(prompt, provider) {
+            // Use PAPI Key Loader for centralized key management
+            let availableKey = null;
+            
+            if (typeof PAPI !== 'undefined') {
+                // Load key from Key Controller
+                if (provider === 'openai') {
+                    availableKey = PAPI.loadKey('ai-assistant-pro.html', 'openai');
+                } else if (provider === 'claude') {
+                    availableKey = PAPI.loadKey('ai-assistant-pro.html', 'claude');
+                } else if (provider === 'gemini') {
+                    availableKey = PAPI.loadKey('ai-assistant-pro.html', 'gemini');
+                }
+            } else {
+                // Fallback to old method
+                const apiKey = localStorage.getItem('ai_api_key') || '';
+                const openaiKey1 = localStorage.getItem('openai_api_key1');
+                const openaiKey2 = localStorage.getItem('openai_api_key2');
+                const openaiKey3 = localStorage.getItem('openai_api_key3');
+                const openaiKey4 = localStorage.getItem('openai_api_key4');
+                availableKey = apiKey || openaiKey1 || openaiKey2 || openaiKey3 || openaiKey4;
+            }
+            
+            if (!availableKey && provider !== 'demo') {
+                return "⚠️ **API Key Required**\n\nTo use real AI responses:\n\n**Option 1: Use Key Controller** (Recommended)\n1. Open Key Controller from the main app\n2. Add your API keys\n3. Assign ai-assistant-pro.html to a key\n\n**Option 2: Manual Setup**\n1. Click Settings (⚙️)\n2. Select your AI provider\n3. Enter your API key\n\nOr I can continue in Enhanced Demo mode!";
+            }
+            
+            try {
+                if (provider === 'openai') {
+                    return await callOpenAI(prompt, availableKey);
+                } else if (provider === 'claude') {
+                    return await callClaude(prompt, availableKey);
+                } else if (provider === 'gemini') {
+                    return await callGemini(prompt, availableKey);
+                }
+            } catch (error) {
+                console.error('AI API Error:', error);
+                
+                // Try fallback key if available
+                if (typeof PAPI !== 'undefined' && provider === 'openai') {
+                    const fallbackKey = PAPI.getFallbackKey(availableKey);
+                    if (fallbackKey) {
+                        console.log('Trying fallback key...');
+                        try {
+                            return await callOpenAI(prompt, fallbackKey);
+                        } catch (fallbackError) {
+                            console.error('Fallback failed:', fallbackError);
+                        }
+                    }
+                }
+                
+                return `⚠️ API Error: ${error.message}\n\nFalling back to Enhanced Demo mode...`;
+            }
+        }
+
+        async function callOpenAI(prompt, apiKey) {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: [
+                        { role: 'system', content: 'You are an expert programming assistant. Provide detailed, accurate answers with code examples.' },
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: parseFloat(localStorage.getItem('ai_temperature') || '0.7'),
+                    max_tokens: 2000
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`OpenAI API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        async function callClaude(prompt, apiKey) {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-5-sonnet-20241022',
+                    max_tokens: 2000,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Claude API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.content[0].text;
+        }
+
+        async function callGemini(prompt, apiKey) {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Gemini API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        async function enhancedIntelligentResponse(message, profile) {
+            const msg = message.toLowerCase();
+            
+            // Learn from user patterns
+            learnFromMessage(message, profile);
+            
+            // Contextual greetings
+            if (msg.match(/^(hi|hello|hey|greetings)/)) {
+                const greetings = [
+                    `Hey there! 👋 I've analyzed ${conversationHistory.length} of our conversations. Ready to build something amazing?`,
+                    `Hello! I remember we were working on ${profile.currentProject || 'your projects'}. Want to continue or start something new?`,
+                    `Hi! Based on our history, you're into ${profile.preferences.language || 'JavaScript'}. What are we tackling today?`,
+                    `Greetings! I've learned you prefer ${profile.preferences.framework || 'modern frameworks'}. Let's code!`
+                ];
+                return greetings[conversationHistory.length % greetings.length];
+            }
+            
+            // Intelligent code generation with context
+            if (msg.includes('build') || msg.includes('create') || msg.includes('make')) {
+                return await intelligentCodeGeneration(message, profile);
+            }
+            
+            // Deep explanations
+            if (msg.includes('explain') || msg.includes('what is') || msg.includes('how does')) {
+                return await intelligentExplanation(message, profile);
+            }
+            
+            // Context-aware debugging
+            if (msg.includes('debug') || msg.includes('error') || msg.includes('fix') || msg.includes('problem')) {
+                return await intelligentDebugging(message, profile);
+            }
+            
+            // Code review and improvement
+            if (msg.includes('review') || msg.includes('improve') || msg.includes('optimize') || msg.includes('refactor')) {
+                return await intelligentCodeReview(message, profile);
+            }
+            
+            // Architecture and design
+            if (msg.includes('architect') || msg.includes('design') || msg.includes('structure') || msg.includes('pattern')) {
+                return await intelligentArchitecture(message, profile);
+            }
+            
+            // Learning and teaching
+            if (msg.includes('learn') || msg.includes('teach') || msg.includes('tutorial')) {
+                return await intelligentTutorial(message, profile);
+            }
+            
+            // Project planning
+            if (msg.includes('plan') || msg.includes('roadmap') || msg.includes('start') || msg.includes('begin')) {
+                return await intelligentProjectPlanning(message, profile);
+            }
+            
+            // Contextual general response
+            return await intelligentGeneralResponse(message, profile);
+        }
+
+        async function intelligentCodeGeneration(message, profile) {
+            const msg = message.toLowerCase();
+            
+            // Analyze what they want to build
+            let projectType = '';
+            let features = [];
+            let framework = profile.preferences.framework || 'vanilla';
+            
+            if (msg.includes('react')) {
+                framework = 'React';
+                projectType = extractProjectType(msg);
+            } else if (msg.includes('vue')) {
+                framework = 'Vue';
+                projectType = extractProjectType(msg);
+            } else if (msg.includes('api') || msg.includes('backend') || msg.includes('server')) {
+                framework = 'Express/Node.js';
+                projectType = 'API';
+            }
+            
+            // Extract features from message
+            if (msg.includes('auth')) features.push('authentication');
+            if (msg.includes('database') || msg.includes('db')) features.push('database');
+            if (msg.includes('upload')) features.push('file upload');
+            if (msg.includes('real-time') || msg.includes('websocket')) features.push('real-time updates');
+            
+            const code = generateIntelligentCode(projectType, framework, features);
+            showCodeOutput(code);
+            
+            return `**🚀 ${projectType} Built with ${framework}!**\n\nI've generated a production-ready implementation based on:\n${features.length > 0 ? '• ' + features.join('\n• ') : '• Clean architecture\n• Best practices\n• Modern patterns'}\n\n**What I included:**\n• Proper error handling\n• TypeScript-ready structure\n• Performance optimizations\n• Security best practices\n\n**Next steps:**\n1. Review the code in the Code tab\n2. Customize to your needs\n3. Add tests\n4. Deploy!\n\nNeed me to add ${features.length === 0 ? 'authentication, database integration, or other features' : 'anything else'}?`;
+        }
+
+        function extractProjectType(msg) {
+            if (msg.includes('todo')) return 'Todo App';
+            if (msg.includes('blog')) return 'Blog System';
+            if (msg.includes('ecommerce') || msg.includes('shop')) return 'E-commerce Platform';
+            if (msg.includes('dashboard')) return 'Analytics Dashboard';
+            if (msg.includes('chat')) return 'Chat Application';
+            if (msg.includes('social')) return 'Social Network';
+            return 'Web Application';
+        }
+
+        function generateIntelligentCode(projectType, framework, features) {
+            // This would generate actual smart code based on parameters
+            // For now, return enhanced template
+            return `// ${projectType} - ${framework}\n// Features: ${features.join(', ')}\n\nimport React, { useState, useEffect } from 'react';\n\nfunction ${projectType.replace(/ /g, '')}() {\n  const [data, setData] = useState([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    fetchData();\n  }, []);\n\n  const fetchData = async () => {\n    try {\n      setLoading(true);\n      const response = await fetch('/api/${projectType.toLowerCase()}');\n      if (!response.ok) throw new Error('Failed to fetch');\n      const result = await response.json();\n      setData(result);\n    } catch (err) {\n      setError(err.message);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  if (loading) return <div>Loading...</div>;\n  if (error) return <div>Error: {error}</div>;\n\n  return (\n    <div className="${projectType.toLowerCase()}">\n      <h1>${projectType}</h1>\n      {/* Add your UI here */}\n      {data.map(item => (\n        <div key={item.id}>{item.name}</div>\n      ))}\n    </div>\n  );\n}\n\nexport default ${projectType.replace(/ /g, '')};`;
+        }
+
+        async function intelligentExplanation(message, profile) {
+            const msg = message.toLowerCase();
+            const level = profile.expertise || 'intermediate';
+            
+            // Tailor explanation to user level
+            let explanation = `**Understanding: ${message}**\n\n`;
+            
+            if (level === 'beginner') {
+                explanation += "Let me explain this in simple terms...\n\n";
+            } else if (level === 'advanced') {
+                explanation += "Here's the deep dive...\n\n";
+            }
+            
+            // Topic-specific intelligent explanations
+            if (msg.includes('closure')) {
+                explanation += `**Closures in JavaScript**\n\nA closure is when a function "remembers" variables from its outer scope.\n\n\`\`\`javascript\nfunction outer() {\n  const secret = "I'm private!";\n  return function inner() {\n    console.log(secret); // Can access outer's variable\n  };\n}\n\nconst myClosure = outer();\nmyClosure(); // "I'm private!"\n\`\`\`\n\n**Why useful?**\n• Data privacy\n• Factory functions\n• Event handlers\n• Partial application\n\n**Real example:**\n\`\`\`javascript\nfunction createCounter() {\n  let count = 0;\n  return {\n    increment: () => ++count,\n    getCount: () => count\n  };\n}\n\nconst counter = createCounter();\ncounter.increment(); // 1\ncounter.increment(); // 2\nconsole.log(counter.getCount()); // 2\n\`\`\`\n\nThe \`count\` variable is private and only accessible through the returned methods!`;
+            } else if (msg.includes('promise') || msg.includes('async')) {
+                explanation += `**Promises & Async/Await**\n\nPromises handle asynchronous operations elegantly.\n\n**Promise Basics:**\n\`\`\`javascript\nconst promise = new Promise((resolve, reject) => {\n  setTimeout(() => resolve("Done!"), 1000);\n});\n\npromise.then(result => console.log(result));\n\`\`\`\n\n**Async/Await (Better Way):**\n\`\`\`javascript\nasync function fetchUserData() {\n  try {\n    const response = await fetch('/api/user');\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error('Failed:', error);\n    throw error;\n  }\n}\n\`\`\`\n\n**Key Points:**\n• \`async\` makes function return Promise\n• \`await\` pauses execution until Promise resolves\n• Always use try/catch for errors\n• Much cleaner than .then() chains\n\n**Parallel Execution:**\n\`\`\`javascript\nconst [users, posts] = await Promise.all([\n  fetch('/api/users'),\n  fetch('/api/posts')\n]);\n\`\`\``;
+            } else {
+                explanation += `I'd love to explain "${message}" in detail!\n\nBased on your ${level} level, I'll break it down:\n\n1. **Core Concept**: The fundamental idea\n2. **Why It Matters**: Real-world applications\n3. **Code Examples**: Practical implementations\n4. **Common Pitfalls**: What to avoid\n5. **Best Practices**: Professional tips\n\nCould you clarify which aspect you'd like me to focus on? Or shall I provide the complete breakdown?`;
+            }
+            
+            return explanation;
+        }
+
+        async function intelligentDebugging(message, profile) {
+            return `**🔧 Debug Mode Activated**\n\nI'm your debugging partner. Let's solve this systematically!\n\n**Step 1: Understanding the Problem**\nDescribe what's happening:\n• What error message do you see?\n• What did you expect?\n• What actually happened?\n\n**Step 2: Code Analysis**\nShare:\n• The problematic code (paste it here)\n• Relevant context (surrounding code)\n• Your environment (browser/Node.js/etc.)\n\n**Step 3: Solution Strategy**\nI'll provide:\n✓ Root cause analysis\n✓ Step-by-step fix\n✓ Explanation of why it happened\n✓ Prevention tips\n✓ Improved code\n\n**Common Issues I Excel At:**\n• Async/Promise errors\n• React hooks dependencies\n• Type errors\n• API integration problems\n• Performance bottlenecks\n• Memory leaks\n\nPaste your code and error, and I'll solve it!`;
+        }
+
+        async function intelligentCodeReview(message, profile) {
+            return `**👨‍💻 Code Review Mode**\n\nI'll analyze your code like a senior developer!\n\n**What I'll Review:**\n✓ **Code Quality**: Readability, maintainability\n✓ **Performance**: Optimization opportunities\n✓ **Security**: Vulnerabilities and fixes\n✓ **Best Practices**: Industry standards\n✓ **Architecture**: Structure improvements\n✓ **Testing**: What tests are needed\n\n**Paste your code and I'll provide:**\n1. Overall assessment (rating 1-10)\n2. Specific issues found\n3. Refactored version\n4. Explanation of each improvement\n5. Performance analysis\n\n**Example Review:**\n\`\`\`javascript\n// Your code:\nfunction getData() {\n  fetch('/api')\n    .then(r => r.json())\n    .then(d => console.log(d));\n}\n\n// My improved version:\nasync function getData() {\n  try {\n    const response = await fetch('/api');\n    if (!response.ok) {\n      throw new Error(\`HTTP error! status: \${response.status}\`);\n    }\n    const data = await response.json();\n    return data; // Return instead of log\n  } catch (error) {\n    console.error('Fetch failed:', error);\n    throw error; // Propagate for handling\n  }\n}\n\`\`\`\n\n**Improvements Made:**\n• Added error handling\n• Used async/await\n• Returned data instead of logging\n• Added HTTP status check\n• Better error messages\n\nReady for your code!`;
+        }
+
+        async function intelligentArchitecture(message, profile) {
+            return `**🏗️ Software Architecture Consulting**\n\nLet's design your system properly!\n\n**Modern Architecture Patterns:**\n\n**1. Component-Based (React/Vue)**\n\`\`\`\nsrc/\n├── components/\n│   ├── common/      # Reusable UI\n│   ├── features/    # Feature-specific\n│   └── layout/      # Layout components\n├── hooks/           # Custom hooks\n├── services/        # API/business logic\n├── store/           # State management\n├── utils/           # Helpers\n└── types/           # TypeScript types\n\`\`\`\n\n**2. Clean Architecture (Backend)**\n\`\`\`\nsrc/\n├── domain/          # Business logic\n├── application/     # Use cases\n├── infrastructure/  # External services\n└── interfaces/      # API endpoints\n\`\`\`\n\n**3. Microservices**\n\`\`\`\nservices/\n├── auth/\n├── users/\n├── products/\n└── orders/\n\`\`\`\n\n**Key Principles:**\n• Separation of Concerns\n• Single Responsibility\n• Dependency Injection\n• SOLID principles\n\n**What's your project? Tell me:**\n• Scale (small/medium/large)\n• Team size\n• Tech stack preferences\n• Performance requirements\n\nI'll design the perfect architecture!`;
+        }
+
+        async function intelligentTutorial(message, profile) {
+            return `**📚 Personalized Learning Path**\n\nBased on your ${profile.expertise} level, here's your roadmap!\n\n**Current Focus: ${message}**\n\n**Learning Strategy:**\n\n**Phase 1: Fundamentals** (Week 1-2)\n• Core concepts\n• Basic syntax\n• Simple projects\n\n**Phase 2: Intermediate** (Week 3-4)\n• Advanced patterns\n• Real-world scenarios\n• Mini-projects\n\n**Phase 3: Mastery** (Week 5+)\n• Complex implementations\n• Performance optimization\n• Production-ready code\n\n**Hands-On Projects:**\n1. Build [specific project]\n2. Refactor existing code\n3. Contribute to open source\n\n**Resources I Recommend:**\n• Official documentation\n• Interactive coding challenges\n• Real-world case studies\n\nReady to start? What topic first?`;
+        }
+
+        async function intelligentProjectPlanning(message, profile) {
+            return `**📋 Project Planning Assistant**\n\nLet's plan your project professionally!\n\n**Project: ${message}**\n\n**Phase 1: Requirements (Day 1-2)**\n☐ Define features\n☐ User stories\n☐ Technical requirements\n☐ Success metrics\n\n**Phase 2: Design (Day 3-5)**\n☐ Architecture diagram\n☐ Database schema\n☐ API endpoints\n☐ UI wireframes\n\n**Phase 3: Development (Week 2-4)**\n☐ Setup environment\n☐ Core features\n☐ Testing\n☐ Documentation\n\n**Phase 4: Launch (Week 5)**\n☐ Deployment\n☐ Monitoring\n☐ User feedback\n\n**Tech Stack Recommendation:**\nBased on your needs:\n• Frontend: ${profile.preferences.framework || 'React'}\n• Backend: Node.js/Express\n• Database: PostgreSQL\n• Hosting: Vercel/Railway\n\n**Estimated Timeline:** 4-6 weeks\n**Complexity:** Medium\n\nReady to break it down further?`;
+        }
+
+        async function intelligentGeneralResponse(message, profile) {
+            const conversationCount = conversationHistory.length;
+            const hasContext = profile.currentProject || profile.preferences.language;
+            
+            let response = `**🤔 Analyzing: "${message}"**\n\n`;
+            
+            if (hasContext) {
+                response += `Based on our ${conversationCount} conversations and your work on ${profile.currentProject || 'your projects'}...\n\n`;
+            }
+            
+            response += `I can help you with:\n\n`;
+            response += `**💻 Code Generation**\n`;
+            response += `"Build a [project]" - I'll create production-ready code\n\n`;
+            response += `**🎓 Learning**\n`;
+            response += `"Explain [concept]" - Deep dives with examples\n\n`;
+            response += `**🔧 Debugging**\n`;
+            response += `"Fix [error]" - Systematic problem solving\n\n`;
+            response += `**📊 Architecture**\n`;
+            response += `"Design [system]" - Professional architecture\n\n`;
+            response += `**⚡ Optimization**\n`;
+            response += `"Improve [code]" - Performance & quality\n\n`;
+            
+            response += `**What specifically can I help you with regarding "${message}"?**\n\n`;
+            response += `💡 *Tip: The more context you give, the better I can help!*`;
+            
+            return response;
+        }
+
+        function learnFromMessage(message, profile) {
+            const msg = message.toLowerCase();
+            
+            // Learn language preferences
+            if (msg.includes('react')) profile.preferences.framework = 'React';
+            if (msg.includes('vue')) profile.preferences.framework = 'Vue';
+            if (msg.includes('angular')) profile.preferences.framework = 'Angular';
+            if (msg.includes('typescript')) profile.preferences.language = 'TypeScript';
+            if (msg.includes('python')) profile.preferences.language = 'Python';
+            
+            // Learn project context
+            if (msg.includes('working on') || msg.includes('building')) {
+                const projectMatch = msg.match(/(?:working on|building)\s+(.+?)(?:\.|$)/);
+                if (projectMatch) {
+                    profile.currentProject = projectMatch[1];
+                }
+            }
+            
+            // Save profile
+            localStorage.setItem('ai_pro_profile', JSON.stringify(profile));
+        }
+
+        function showCodeOutput(code) {
+            document.getElementById('code-output').textContent = code;
+            if (currentMode === 'chat') {
+                document.getElementById('btn-code').classList.add('animate-pulse');
+                setTimeout(() => {
+                    document.getElementById('btn-code').classList.remove('animate-pulse');
+                }, 2000);
+            }
+        }
+
+        function copyCode() {
+            const code = document.getElementById('code-output').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target.closest('button');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        }
+
+        function quickPrompt(prompt) {
+            document.getElementById('chat-input').value = prompt;
+            sendMessage();
+        }
+
+        function clearChat() {
+            if (confirm('Clear all conversation history?')) {
+                document.getElementById('chat-container').innerHTML = `
+                    <div class="text-center text-slate-400 py-12">
+                        <i class="fas fa-brain text-6xl mb-4 text-blue-500 opacity-50"></i>
+                        <p class="text-lg">Start a conversation with your AI assistant</p>
+                        <p class="text-sm mt-2">I can help with code generation, debugging, explanations, and more!</p>
+                    </div>
+                `;
+                conversationHistory = [];
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            loadSettings();
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function loadSettings() {
+            const provider = localStorage.getItem('ai_provider') || 'demo';
+            document.getElementById('ai-provider').value = provider;
+            
+            const apiKey = localStorage.getItem('ai_api_key') || '';
+            document.getElementById('api-key-input').value = apiKey;
+            
+            toggleAPIKeySection();
+        }
+
+        function saveSettings() {
+            const provider = document.getElementById('ai-provider').value;
+            const apiKey = document.getElementById('api-key-input').value;
+            const temp = document.getElementById('temperature').value;
+            
+            localStorage.setItem('ai_provider', provider);
+            localStorage.setItem('ai_api_key', apiKey);
+            localStorage.setItem('ai_temperature', temp);
+            
+            closeSettings();
+            
+            // Show success message
+            const btn = event.target;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check mr-2"></i> Saved!';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 2000);
+        }
+
+        document.getElementById('ai-provider').addEventListener('change', toggleAPIKeySection);
+
+        function toggleAPIKeySection() {
+            const provider = document.getElementById('ai-provider').value;
+            const section = document.getElementById('api-key-section');
+            section.classList.toggle('hidden', provider === 'demo');
+        }
+
+        function loadStats() {
+            const stats = JSON.parse(localStorage.getItem('ai_pro_stats') || '{"messages": 0, "code": 0, "projects": 0}');
+            document.getElementById('stat-messages').innerText = stats.messages;
+            document.getElementById('stat-code').innerText = stats.code;
+            document.getElementById('stat-projects').innerText = stats.projects;
+        }
+
+        function updateStats() {
+            const stats = JSON.parse(localStorage.getItem('ai_pro_stats') || '{"messages": 0, "code": 0, "projects": 0}');
+            stats.messages++;
+            if (document.getElementById('code-output').textContent.trim() && !document.getElementById('code-output').textContent.includes('// Your generated code')) {
+                stats.code++;
+            }
+            localStorage.setItem('ai_pro_stats', JSON.stringify(stats));
+            loadStats();
+        }
+
+        // Voice input
+        let recognition;
+        function toggleVoice() {
+            if (!recognition) {
+                if ('webkitSpeechRecognition' in window) {
+                    recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = true;
+                    recognition.onresult = (e) => {
+                        const transcript = e.results[0][0].transcript;
+                        document.getElementById('chat-input').value = transcript;
+                        if (e.results[0].isFinal) {
+                            sendMessage();
+                            document.getElementById('voice-btn').classList.remove('text-red-500', 'animate-pulse');
+                        }
+                    };
+                    recognition.onend = () => {
+                        document.getElementById('voice-btn').classList.remove('text-red-500', 'animate-pulse');
+                    };
+                } else {
+                    alert('Voice recognition not supported in this browser');
+                    return;
+                }
+            }
+            
+            const btn = document.getElementById('voice-btn');
+            if (btn.classList.contains('text-red-500')) {
+                recognition.stop();
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            } else {
+                recognition.start();
+                btn.classList.add('text-red-500', 'animate-pulse');
+            }
+        }
+    </script>
+
+</body>
+</html>

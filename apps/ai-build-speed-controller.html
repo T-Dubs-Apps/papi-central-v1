@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Build Speed Controller</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="papi-key-loader.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-xl p-6 bg-gray-800 rounded-lg shadow-lg mt-10">
+    <h1 class="text-2xl font-bold mb-4 text-center">AI Build Speed Controller</h1>
+    <p class="mb-4 text-center">Control and optimize the speed of AI-powered build, code generation, and automation tasks.</p>
+    <div class="mb-4">
+      <label class="block mb-2">Speed Multiplier:</label>
+      <input id="speedSlider" type="range" min="0.5" max="3" step="0.1" value="1" class="w-full">
+      <div class="text-center mt-2">Current: <span id="speedValue">1.0x</span></div>
+    </div>
+    <div class="mb-4">
+      <button id="applyBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Apply Speed</button>
+    </div>
+    <div id="status" class="mt-4 text-green-400"></div>
+    <div class="mt-8 text-sm text-gray-400 text-center">Note: Actual speedup depends on hardware, network, and AI provider limits. This tool optimizes what is possible within policy and system constraints.</div>
+  </div>
+  <script src="ai-build-speed-controller.js"></script>
+</body>
+</html>
