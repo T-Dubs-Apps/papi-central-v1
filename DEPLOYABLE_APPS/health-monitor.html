@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI Health Monitor | System Status</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="papi-failover.js"></script>
+    <script src="papi-sync.js"></script>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --panel-bg: #0f172a;
+            --border: #1e293b;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #38bdf8;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--bg-dark);
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.danger { color: var(--danger); }
+        .stat-value.info { color: var(--info); }
+        
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .server-card {
+            background: var(--panel-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .server-card.online {
+            border-color: var(--success);
+        }
+        
+        .server-card.offline {
+            border-color: var(--danger);
+            opacity: 0.7;
+        }
+        
+        .server-card.active {
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+            border-color: var(--info);
+        }
+        
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .server-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.online {
+            background: var(--success);
+            color: #000;
+        }
+        
+        .status-badge.offline {
+            background: var(--danger);
+            color: #fff;
+        }
+        
+        .status-badge.active {
+            background: var(--info);
+            color: #000;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .server-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .server-stat {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .server-stat-label {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+        
+        .server-stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .response-bar {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .response-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .response-fill.fast { background: var(--success); }
+        .response-fill.medium { background: var(--warning); }
+        .response-fill.slow { background: var(--danger); }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background: var(--border);
+            color: #fff;
+        }
+        
+        .btn-secondary:hover {
+            background: #334155;
+        }
+        
+        .sync-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .sync-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .failover-history {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .timestamp {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+        
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #38bdf8;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>PAPI HEALTH MONITOR</h1>
+            <p style="color: #94a3b8;">Real-time server status & failover management</p>
+        </div>
+        
+        <!-- Status Overview -->
+        <div class="status-overview">
+            <div class="stat-card">
+                <div class="stat-label">Active Server</div>
+                <div class="stat-value info" id="activeServer">Loading...</div>
+                <div style="color: #64748b; font-size: 0.85rem;" id="activeUrl">—</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Online Servers</div>
+                <div class="stat-value success" id="onlineCount">—</div>
+                <div style="color: #64748b; font-size: 0.85rem;">of <span id="totalServers">—</span> total</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Last Health Check</div>
+                <div class="stat-value" style="font-size: 1.2rem; color: #94a3b8;" id="lastCheck">—</div>
+                <div style="color: #64748b; font-size: 0.85rem;">Auto-refresh: 30s</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Failover Events</div>
+                <div class="stat-value warning" id="failoverCount">0</div>
+                <div style="color: #64748b; font-size: 0.85rem;">Last 24 hours</div>
+            </div>
+        </div>
+        
+        <!-- Servers Grid -->
+        <h2 style="margin-bottom: 20px; color: #38bdf8;">Server Status</h2>
+        <div class="servers-grid" id="serversGrid">
+            <div class="loader"></div>
+        </div>
+        
+        <!-- Sync Panel -->
+        <h2 style="margin-bottom: 20px; color: #38bdf8;">Data Sync</h2>
+        <div class="sync-panel">
+            <div class="sync-status">
+                <div>
+                    <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 10px;">
+                        <i class="fas fa-cloud-upload-alt" style="color: #38bdf8;"></i>
+                        Cloud Backup Status
+                    </div>
+                    <div style="color: #94a3b8;" id="syncStatus">Not configured</div>
+                </div>
+                <div>
+                    <div class="action-buttons" style="flex-direction: column;">
+                        <button class="btn btn-primary" onclick="syncNow()">
+                            <i class="fas fa-sync"></i> Sync Now
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportBackup()">
+                            <i class="fas fa-download"></i> Export Backup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Failover History -->
+        <h2 style="margin-bottom: 20px; color: #38bdf8;">Failover History</h2>
+        <div class="failover-history">
+            <div id="failoverHistory">
+                <p style="color: #64748b; text-align: center;">No failover events recorded</p>
+            </div>
+        </div>
+    </div>
+    
+    <button class="refresh-btn" onclick="refreshAll()" title="Refresh All">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+    
+    <script>
+        let refreshInterval;
+        
+        async function updateDashboard() {
+            // Get failover status
+            const status = window.PAPIFailover.getServerStatus();
+            
+            // Update overview stats
+            document.getElementById('activeServer').textContent = status.currentServerName;
+            document.getElementById('activeUrl').textContent = status.currentServerUrl || 'No server available';
+            document.getElementById('onlineCount').textContent = status.onlineCount;
+            document.getElementById('totalServers').textContent = status.totalServers;
+            document.getElementById('failoverCount').textContent = status.failoverHistory.length;
+            
+            // Update last check time
+            if (status.lastCheck) {
+                const timeSince = Math.floor((Date.now() - status.lastCheck) / 1000);
+                document.getElementById('lastCheck').textContent = timeSince < 60 
+                    ? `${timeSince}s ago` 
+                    : `${Math.floor(timeSince / 60)}m ago`;
+            }
+            
+            // Update servers grid
+            updateServersGrid(status.allServers, status.currentServer);
+            
+            // Update sync status
+            updateSyncStatus();
+            
+            // Update failover history
+            updateFailoverHistory(status.failoverHistory);
+        }
+        
+        function updateServersGrid(servers, activeServer) {
+            const grid = document.getElementById('serversGrid');
+            grid.innerHTML = '';
+            
+            Object.keys(PAPI_SERVERS).forEach(key => {
+                const server = PAPI_SERVERS[key];
+                const status = servers[key];
+                const isActive = key === activeServer;
+                const isOnline = status?.online || false;
+                
+                const card = document.createElement('div');
+                card.className = `server-card ${isOnline ? 'online' : 'offline'} ${isActive ? 'active' : ''}`;
+                
+                let responseTime = status?.responseTime || 0;
+                let responseClass = 'fast';
+                let responsePercent = Math.min((responseTime / 1000) * 100, 100);
+                
+                if (responseTime > 1000) {
+                    responseClass = 'slow';
+                } else if (responseTime > 500) {
+                    responseClass = 'medium';
+                }
+                
+                card.innerHTML = `
+                    <div class="server-header">
+                        <div class="server-name">${server.name}</div>
+                        <div class="status-badge ${isOnline ? 'online' : 'offline'} ${isActive ? 'active' : ''}">
+                            ${isActive ? 'ACTIVE' : (isOnline ? 'ONLINE' : 'OFFLINE')}
+                        </div>
+                    </div>
+                    <div style="color: #64748b; font-size: 0.85rem; margin-bottom: 15px;">${server.url}</div>
+                    <div class="server-stats">
+                        <div class="server-stat">
+                            <div class="server-stat-label">Response Time</div>
+                            <div class="server-stat-value">${isOnline ? responseTime + 'ms' : '—'}</div>
+                            ${isOnline ? `<div class="response-bar"><div class="response-fill ${responseClass}" style="width: ${responsePercent}%"></div></div>` : ''}
+                        </div>
+                        <div class="server-stat">
+                            <div class="server-stat-label">Priority</div>
+                            <div class="server-stat-value">#${server.priority}</div>
+                        </div>
+                    </div>
+                    ${isOnline && !isActive ? `
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="switchTo('${key}')">
+                                <i class="fas fa-exchange-alt"></i> Switch Here
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${status?.error ? `<div style="color: var(--danger); font-size: 0.85rem; margin-top: 10px;"><i class="fas fa-exclamation-triangle"></i> ${status.error}</div>` : ''}
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        function updateSyncStatus() {
+            const syncStatus = window.PAPISync.getSyncStatus();
+            const statusEl = document.getElementById('syncStatus');
+            
+            if (syncStatus.configured) {
+                const lastSync = syncStatus.lastSync 
+                    ? new Date(syncStatus.lastSync).toLocaleString()
+                    : 'Never';
+                
+                statusEl.innerHTML = `
+                    <div style="color: var(--success);"><i class="fas fa-check-circle"></i> Configured</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px;">Last sync: ${lastSync}</div>
+                    <div style="font-size: 0.85rem;">Items: ${syncStatus.itemCount}</div>
+                    ${syncStatus.pendingChanges ? '<div style="color: var(--warning);"><i class="fas fa-clock"></i> Pending changes</div>' : ''}
+                `;
+            } else {
+                statusEl.innerHTML = `
+                    <div style="color: #94a3b8;">Cloud sync not configured</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px;">Local storage only</div>
+                `;
+            }
+        }
+        
+        function updateFailoverHistory(history) {
+            const historyEl = document.getElementById('failoverHistory');
+            
+            if (history.length === 0) {
+                historyEl.innerHTML = '<p style="color: #64748b; text-align: center;">No failover events recorded</p>';
+                return;
+            }
+            
+            historyEl.innerHTML = history.slice(0, 10).map(event => `
+                <div class="history-item">
+                    <div>
+                        <div style="font-weight: bold;">
+                            ${event.fromName} <i class="fas fa-arrow-right" style="color: #38bdf8;"></i> ${event.toName}
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">
+                            Reason: ${event.reason}
+                        </div>
+                    </div>
+                    <div class="timestamp">${new Date(event.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function refreshAll() {
+            const btn = document.querySelector('.refresh-btn i');
+            btn.style.animation = 'spin 1s linear infinite';
+            
+            await window.PAPIFailover.manualHealthCheck();
+            await updateDashboard();
+            
+            setTimeout(() => {
+                btn.style.animation = '';
+            }, 1000);
+        }
+        
+        function switchTo(serverKey) {
+            if (window.PAPIFailover.forceServerSwitch(serverKey)) {
+                updateDashboard();
+            }
+        }
+        
+        async function syncNow() {
+            const result = await window.PAPISync.syncToCloud();
+            if (result) {
+                alert('✅ Data synced successfully!');
+                updateDashboard();
+            } else {
+                alert('❌ Sync failed. Check console for details.');
+            }
+        }
+        
+        function exportBackup() {
+            window.PAPISync.exportBackup();
+        }
+        
+        // Initialize dashboard
+        setTimeout(() => {
+            updateDashboard();
+            
+            // Auto-refresh every 30 seconds
+            refreshInterval = setInterval(updateDashboard, 30000);
+        }, 1000);
+    </script>
+</body>
+</html>
