@@ -7,9 +7,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- PAPI Key Loader - Universal API Key Management -->
-    <script src="papi-key-loader.js"></script>
-    <script src="trial-system.js"></script>
-    <script>
+        <script src="papi-key-loader.js"></script>
+        <script src="trial-system.js"></script>
+        <style>
+            .onboarding-modal-bg {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center;
+            }
+            .onboarding-modal {
+                background: #181f2a; color: #e2e8f0; border-radius: 1.5rem; max-width: 95vw; width: 420px; box-shadow: 0 8px 40px #000a; padding: 2.5rem 2rem 2rem 2rem; text-align: center; position: relative;
+            }
+            .onboarding-modal h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+            .onboarding-modal ul { text-align: left; margin: 1.5rem 0 1rem 0; padding-left: 1.2rem; }
+            .onboarding-modal li { margin-bottom: 0.7rem; font-size: 1rem; }
+            .onboarding-modal button { background: linear-gradient(90deg,#38bdf8,#d946ef); color: #fff; border: none; border-radius: 0.75rem; padding: 0.75rem 2rem; font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem; cursor: pointer; transition: background 0.2s; }
+            .onboarding-modal button:hover { background: linear-gradient(90deg,#d946ef,#38bdf8); }
+            .onboarding-modal .close-x { position: absolute; top: 1.1rem; right: 1.3rem; font-size: 1.5rem; color: #94a3b8; cursor: pointer; }
+        </style>
+        <script>
+            // Onboarding Quick Start Modal
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!localStorage.getItem('papi_onboarding_done')) {
+                    const modalBg = document.createElement('div');
+                    modalBg.className = 'onboarding-modal-bg';
+                    modalBg.innerHTML = `
+                        <div class="onboarding-modal">
+                            <span class="close-x" title="Close">&times;</span>
+                            <h2>👽 Welcome to PAPI Central!</h2>
+                            <div style="font-size:1.1rem;">Your AI-powered spaceship OS and app suite.</div>
+                            <ul>
+                                <li>🛸 <b>Alien AI Assistant:</b> Click the spaceship to chat, code, or ask for help.</li>
+                                <li>🧠 <b>App Marketplace:</b> Browse and launch apps from the dropdown or dashboard.</li>
+                                <li>🔑 <b>Key Controller:</b> Manage API keys for OpenAI, Claude, Gemini, and more.</li>
+                                <li>🎨 <b>Customize:</b> Use the appearance panel to change themes and spaceship style.</li>
+                                <li>💾 <b>Memory:</b> Your AI learns as you use it—context and preferences are saved.</li>
+                                <li>❓ <b>Need help?</b> Type 'help' or click the '?' icon for tips and commands.</li>
+                            </ul>
+                            <button id="onboarding-close">Get Started</button>
+                        </div>
+                    `;
+                    document.body.appendChild(modalBg);
+                    function closeOnboarding() {
+                        modalBg.remove();
+                        localStorage.setItem('papi_onboarding_done', '1');
+                    }
+                    modalBg.querySelector('#onboarding-close').onclick = closeOnboarding;
+                    modalBg.querySelector('.close-x').onclick = closeOnboarding;
+                }
+            });
                 // Spaceship size slider logic
                 document.addEventListener('DOMContentLoaded', function() {
                     const ship = document.getElementById('the-ship');

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPI Central Tester Bundle</title>
+  <script>
+    // Unlock tester bundle for 1 month
+    localStorage.setItem('papi_license', 'active');
+    localStorage.setItem('aegis_license', 'active');
+    localStorage.setItem('cortex_desktop_license', 'active');
+    localStorage.setItem('beta_license', 'active');
+    localStorage.setItem('tester_bundle_unlocked', 'true');
+    localStorage.setItem('tester_bundle_expiry', new Date(Date.now() + 30*24*60*60*1000).toISOString());
+    alert('✅ Tester: Full bundle unlocked for 1 month!');
+    window.location.href = 'index.html';
+  </script>
+</head>
+<body></body>
+</html>

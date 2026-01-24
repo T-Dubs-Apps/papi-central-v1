@@ -360,11 +360,38 @@
 
         .hidden { display: none; }
     </style>
+<head>
+        <title>Cortex App Studio</title>
+        <link rel="stylesheet" href="../assets/papi-responsive-template.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            // Asset preloading
+            window.addEventListener('DOMContentLoaded', function() {
+                const preloadAssets = [
+                    '../assets/alien-font.woff2',
+                    '../assets/spaceship.png',
+                ];
+                preloadAssets.forEach(src => {
+                    const link = document.createElement('link');
+                    link.rel = 'preload';
+                    link.href = src;
+                    link.as = src.endsWith('.woff2') ? 'font' : 'image';
+                    document.head.appendChild(link);
+                });
+            });
+        </script>
+        <style>
+            .dark-mode { background: #181a1b; color: #e0e0e0; }
+            .light-mode { background: #fff; color: #222; }
+            .onboarding-modal { position: fixed; z-index: 1000; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; }
+            .onboarding-content { background: #222; color: #fff; padding: 2rem; border-radius: 1rem; max-width: 90vw; max-height: 90vh; overflow: auto; }
+            .feedback-modal { position: fixed; z-index: 1001; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; }
+            .feedback-content { background: #fff; color: #222; padding: 2rem; border-radius: 1rem; max-width: 90vw; max-height: 90vh; overflow: auto; }
+            .ai-feedback { display: flex; align-items: center; gap: 0.5rem; }
+            .ai-spinner { width: 1.5em; height: 1.5em; border: 3px solid #ccc; border-top: 3px solid #09f; border-radius: 50%; animation: spin 1s linear infinite; }
+            @keyframes spin { 100% { transform: rotate(360deg); } }
+        </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
             <a href="index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back to PAPI
             </a>
@@ -1299,5 +1326,66 @@ function reset(){stop();time=parseInt(document.getElementById('input').value)||6
             return getSmartDefaultApp(request);
         }
     </script>
+<body>
+        <div id="main-app" aria-label="Cortex App Studio App" tabindex="0">
+                <!-- ...existing code... -->
+        </div>
+        <!-- Onboarding Modal -->
+        <div id="onboardingModal" class="onboarding-modal" style="display:none;">
+            <div class="onboarding-content" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+                <h2 id="onboardingTitle">Welcome to Cortex App Studio</h2>
+                <p>This app lets you build and manage Cortex apps. Use the controls to create, edit, or deploy apps. For help, click the help icon or open this guide anytime from the menu.</p>
+                <button onclick="closeOnboarding()" aria-label="Close onboarding">Get Started</button>
+            </div>
+        </div>
+        <!-- Feedback Modal -->
+        <div id="feedbackModal" class="feedback-modal" style="display:none;">
+            <div class="feedback-content" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+                <h2 id="feedbackTitle">Send Feedback or Report a Problem</h2>
+                <textarea id="feedbackText" rows="5" style="width:100%" aria-label="Feedback"></textarea>
+                <button onclick="submitFeedback()">Submit</button>
+                <button onclick="closeFeedback()">Cancel</button>
+            </div>
+        </div>
+        <button id="darkModeToggle" aria-label="Toggle dark mode" style="position:fixed;top:1rem;right:1rem;z-index:1100;">🌙</button>
+        <button id="feedbackBtn" aria-label="Open feedback modal" style="position:fixed;top:1rem;right:4rem;z-index:1100;">💬</button>
+        <script>
+            // Onboarding
+            function showOnboarding() {
+                document.getElementById('onboardingModal').style.display = 'flex';
+            }
+            function closeOnboarding() {
+                document.getElementById('onboardingModal').style.display = 'none';
+                localStorage.setItem('cortex_app_studio_onboarded', '1');
+            }
+            if (!localStorage.getItem('cortex_app_studio_onboarded')) showOnboarding();
+            // Dark/Light Mode
+            const root = document.documentElement;
+            function setMode(mode) {
+                root.classList.remove('dark-mode', 'light-mode');
+                root.classList.add(mode+'-mode');
+                localStorage.setItem('cortex_app_studio_mode', mode);
+            }
+            document.getElementById('darkModeToggle').onclick = function() {
+                const mode = root.classList.contains('dark-mode') ? 'light' : 'dark';
+                setMode(mode);
+            };
+            setMode(localStorage.getItem('cortex_app_studio_mode')||'dark');
+            // Feedback Modal
+            document.getElementById('feedbackBtn').onclick = function() {
+                document.getElementById('feedbackModal').style.display = 'flex';
+            };
+            function closeFeedback() {
+                document.getElementById('feedbackModal').style.display = 'none';
+            }
+            function submitFeedback() {
+                const text = document.getElementById('feedbackText').value;
+                if (text.length < 5) { alert('Please enter more details.'); return; }
+                navigator.clipboard.writeText(text);
+                alert('Feedback copied! Please email or paste in support chat.');
+                closeFeedback();
+            }
+            // Accessibility: focus main app
+            window.onload = () => { document.getElementById('main-app').focus(); };
+        </script>
 </body>
-</html>

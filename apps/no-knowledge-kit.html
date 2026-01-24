@@ -737,43 +737,52 @@
         }
 
         async function callGeminiAPI(prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-                    
-                    if (response.status === 400) {
-                        throw new Error("Invalid Gemini API key format. Get a key at makersuite.google.com/app/apikey");
-                    } else if (response.status === 403) {
-                        throw new Error("Gemini API key authentication failed. Verify your key is activated.");
-                    } else if (response.status === 429) {
-                        throw new Error("Rate limit exceeded. Please wait a moment and try again.");
-                    } else {
-                        throw new Error(`Gemini API Error: ${errorMsg}`);
+            // Try supported models in order of preference
+            const models = [
+                "gemini-1.5-pro-latest", // Most capable, if available
+                "gemini-1.0-pro",        // Stable, widely available
+                "gemini-pro"             // Legacy fallback
+            ];
+            let lastError = null;
+            for (const model of models) {
+                const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                        // If model not found, try next
+                        if (errorMsg.includes('not found') || errorMsg.includes('not supported')) {
+                            lastError = errorMsg;
+                            continue;
+                        }
+                        if (response.status === 400) {
+                            throw new Error("Invalid Gemini API key format. Get a key at makersuite.google.com/app/apikey");
+                        } else if (response.status === 403) {
+                            throw new Error("Gemini API key authentication failed. Verify your key is activated.");
+                        } else if (response.status === 429) {
+                            throw new Error("Rate limit exceeded. Please wait a moment and try again.");
+                        } else {
+                            throw new Error(`Gemini API Error: ${errorMsg}`);
+                        }
                     }
+                    const data = await response.json();
+                    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                        throw new Error("Invalid API response format");
+                    }
+                    return data.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    if (error.message.includes('fetch')) {
+                        throw new Error("Network error. Check your internet connection.");
+                    }
+                    lastError = error.message;
                 }
-                
-                const data = await response.json();
-                
-                if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-                    throw new Error("Invalid API response format");
-                }
-                
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                if (error.message.includes('fetch')) {
-                    throw new Error("Network error. Check your internet connection.");
-                }
-                throw error;
             }
+            throw new Error("Gemini API Error: " + (lastError || "No supported models available. Please check your API key and model availability."));
         }
     </script>
 </body>

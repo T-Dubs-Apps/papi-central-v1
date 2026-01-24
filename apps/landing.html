@@ -5,263 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAPI Central | AI Suite</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --papi-blue: #38bdf8;
-            --papi-cyan: #00f2ea;
-            --papi-purple: #d946ef;
-            --papi-bg: #020617;
-            --papi-card: #0f172a;
-            --papi-border: #1e293b;
-            --papi-success: #22c55e;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            background: var(--papi-bg);
-            color: #f8fafc;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(217, 70, 239, 0.15) 0%, transparent 50%);
-        }
-        
-        .header {
-            text-align: center;
-            padding: 60px 20px 40px;
-            border-bottom: 1px solid var(--papi-border);
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, transparent 100%);
-        }
-        
-        .logo {
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: 8px;
-            background: linear-gradient(135deg, var(--papi-cyan), var(--papi-blue), var(--papi-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            animation: glow 3s ease-in-out infinite;
-        }
-        
-        @keyframes glow {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5)); }
-            50% { filter: drop-shadow(0 0 40px rgba(217, 70, 239, 0.8)); }
-        }
-        
-        .tagline {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            font-style: italic;
-            margin-bottom: 15px;
-        }
-        
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            background: var(--papi-card);
-            border: 1px solid var(--papi-success);
-            border-radius: 50px;
-            font-size: 0.9rem;
-            margin-top: 20px;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--papi-success);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .section-title {
-            font-size: 2rem;
-            color: var(--papi-blue);
-            margin-bottom: 30px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .section-title::before,
-        .section-title::after {
-            content: '';
-            height: 2px;
-            width: 60px;
-            background: linear-gradient(90deg, transparent, var(--papi-blue), transparent);
-        }
-        
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-            margin-bottom: 60px;
-        }
-        
-        .app-card {
-            background: var(--papi-card);
-            border: 1px solid var(--papi-border);
-            border-radius: 16px;
-            padding: 30px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--papi-cyan), var(--papi-blue), var(--papi-purple));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .app-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--papi-blue);
-            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.3);
-        }
-        
-        .app-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-        .app-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, var(--papi-cyan), var(--papi-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .app-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-        
-        .app-desc {
-            color: #94a3b8;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-        
-        .app-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--papi-blue), var(--papi-purple));
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .app-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.5);
-        }
-        
-        .premium-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #000;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .beta-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--papi-purple), #ec4899);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .admin-section {
-            background: var(--papi-card);
-            border: 2px solid var(--papi-success);
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            margin-top: 40px;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid var(--papi-border);
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-top: 60px;
-        }
-        
-        @media (max-width: 768px) {
-            .logo { font-size: 2.5rem; letter-spacing: 4px; }
-            .section-title { font-size: 1.5rem; }
-            .apps-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/papi-responsive-template.css">
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">PAPI CENTRAL</div>
-        <div class="tagline">"One of the most important things that a human can have is self control."</div>
-        <div class="status">
-            <div class="status-dot"></div>
+    <div class="header responsive-container" style="text-align:center; padding: 3rem 1rem 2rem; border-bottom: 1px solid #1e293b; background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, transparent 100%);">
+        <div class="logo" style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,#00f2ea,#38bdf8,#d946ef);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;animation:glow 3s ease-in-out infinite;">PAPI CENTRAL</div>
+        <div class="tagline" style="font-size:1.2rem;color:#94a3b8;font-style:italic;margin-bottom:15px;">"One of the most important things that a human can have is self control."</div>
+        <div class="status" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background:#0f172a;border:1px solid #22c55e;border-radius:50px;font-size:0.9rem;margin-top:20px;">
+            <div class="status-dot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s ease-in-out infinite;"></div>
             <span>All Systems Online</span>
         </div>
     </div>
 
-    <div class="container">
+    <div class="responsive-container" style="max-width:1200px;">
         
         <!-- Main Apps Section -->
         <h2 class="section-title">Core Applications</h2>
-        <div class="apps-grid">
+        <div class="apps-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:25px;margin-bottom:60px;">
             
             <!-- Alien AI Assistant -->
-            <div class="app-card">
-                <div class="app-icon">🛸</div>
-                <h3 class="app-name">Alien AI Assistant</h3>
-                <p class="app-desc">3D spaceship interface with intelligent AI pilot. Voice commands, conversation memory, and animated interactions.</p>
-                <a href="index.html" class="app-link">
+            <div class="app-card" style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:30px;transition:all 0.3s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;">
+                <div class="app-icon" style="font-size:3.5rem;margin-bottom:15px;background:linear-gradient(135deg,#00f2ea,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🛸</div>
+                <h3 class="app-name" style="font-size:1.7rem;font-weight:700;color:#fff;margin-bottom:10px;">Alien AI Assistant</h3>
+                <div style="width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:18px;">
+                  <img src="../assets/spaceship.png" alt="Spaceship" style="max-width:120px;width:30vw;height:auto;margin:0 1rem 0 0;" />
+                  <img src="../assets/alien.png" alt="Alien" style="max-width:80px;width:20vw;height:auto;" />
+                </div>
+                <p class="app-desc" style="color:#94a3b8;line-height:1.6;margin-bottom:20px;font-size:1rem;text-align:center;">3D spaceship interface with intelligent AI pilot. Voice commands, conversation memory, and animated interactions.</p>
+                <a href="index.html" class="app-link" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:linear-gradient(135deg,#38bdf8,#d946ef);color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;">
                     Launch Interface <i class="fas fa-arrow-right"></i>
                 </a>
             </div>

@@ -16,10 +16,71 @@
                 }
                 @media (min-width: 1024px) {
                     .main-box-stack {
-                        width: 700px;
-                        max-width: 700px;
+                        width: min(100vw, 700px);
+                        max-width: 100vw;
                         margin-left: auto;
                         margin-right: auto;
+                    }
+                }
+                .responsive-chat-box {
+                    width: 100%;
+                    max-width: 700px;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: clamp(350px, 40vh, 60vh);
+                    background: rgba(15, 23, 42, 0.8);
+                    border-radius: 1.5rem;
+                    box-sizing: border-box;
+                }
+                #chat-container {
+                    flex: 1 1 auto;
+                    min-height: 120px;
+                    max-height: 50vh;
+                    overflow-y: auto;
+                    margin-bottom: 1rem;
+                    padding: 1rem;
+                    background: rgba(30, 41, 59, 0.5);
+                    border-radius: 1rem;
+                    transition: max-height 0.2s;
+                }
+                .chat-input-row {
+                    display: flex;
+                    gap: 0.5rem;
+                    width: 100%;
+                    align-items: flex-end;
+                }
+                #chat-input {
+                    flex: 1 1 auto;
+                    min-width: 0;
+                    font-size: 1rem;
+                    padding: 0.75rem 1rem;
+                    border-radius: 0.75rem;
+                    background: rgba(15, 23, 42, 0.8);
+                    color: #e2e8f0;
+                    border: 1px solid rgba(59, 130, 246, 0.2);
+                }
+                @media (max-width: 600px) {
+                    .responsive-chat-box {
+                        max-width: 100vw;
+                        min-height: 200px;
+                        padding: 0.25rem;
+                        border-radius: 1rem;
+                    }
+                    #chat-container {
+                        max-height: 30vh;
+                        padding: 0.25rem;
+                        font-size: 0.98rem;
+                    }
+                    .chat-input-row {
+                        flex-direction: column;
+                        gap: 0.25rem;
+                    }
+                    .chat-input-row button, .chat-input-row input {
+                        width: 100%;
+                        min-width: 0;
+                        font-size: 1.05rem;
+                        min-height: 48px;
                     }
                 }
             </style>
@@ -27,6 +88,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Assistant Pro | PAPI Central</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="../assets/spaceship.png" as="image">
+    <link rel="preload" href="../assets/alien.png" as="image">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- PAPI Key Loader - Universal API Key Management -->
     <script src="papi-key-loader.js"></script>
@@ -205,17 +269,35 @@
                     <button onclick="openSettings()" class="glass px-4 py-2 rounded-lg hover:border-blue-500 transition-all">
                         <i class="fas fa-cog mr-2"></i> Settings
                     </button>
+                    <button onclick="openFeedbackModal()" class="glass px-4 py-2 rounded-lg hover:border-yellow-500 transition-all" aria-label="Send feedback">
+                        <i class="fas fa-comment-dots mr-2"></i> Feedback
+                    </button>
+                    <button onclick="exportChat()" class="glass px-4 py-2 rounded-lg hover:border-green-500 transition-all" aria-label="Export chat history">
+                        <i class="fas fa-download mr-2"></i> Export
+                    </button>
                     <button onclick="clearChat()" class="glass px-4 py-2 rounded-lg hover:border-red-500 transition-all">
                         <i class="fas fa-trash mr-2"></i> Clear
                     </button>
                 </div>
+                    <div class="flex items-center gap-3">
+                        <span id="user-name" class="text-sm text-slate-300 hidden md:block"></span>
+                        <button onclick="toggleDarkMode()" id="darkmode-btn" class="glass px-4 py-2 rounded-lg hover:border-purple-500 transition-all" aria-label="Toggle dark/light mode">
+                            <i class="fas fa-moon mr-2"></i> <span id="darkmode-label">Dark</span> Mode
+                        </button>
+                        <button onclick="openSettings()" class="glass px-4 py-2 rounded-lg hover:border-blue-500 transition-all">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </button>
+                        <button onclick="clearChat()" class="glass px-4 py-2 rounded-lg hover:border-red-500 transition-all">
+                            <i class="fas fa-trash mr-2"></i> Clear
+                        </button>
+                    </div>
             </div>
         </header>
 
         <!-- Main Interactive Boxes Stacked (Mobile-first) -->
         <div class="main-box-stack">
           <!-- Chat Area -->
-          <div class="glass rounded-2xl p-6 w-full max-w-xl">
+          <div class="responsive-chat-box glass p-4">
               <div class="flex items-center justify-between mb-4">
                   <h2 class="text-lg font-semibold">
                       <i class="fas fa-comments text-blue-500 mr-2"></i> AI Conversation
@@ -229,25 +311,41 @@
                       </button>
                   </div>
               </div>
-              <div id="chat-container" class="h-[350px] md:h-[500px] overflow-y-auto mb-4 space-y-3 p-4 bg-slate-900/50 rounded-lg">
+              <div id="chat-container" class="space-y-3">
                   <div class="text-center text-slate-400 py-12">
                       <i class="fas fa-brain text-6xl mb-4 text-blue-500 opacity-50"></i>
                       <p class="text-lg">Start a conversation with your AI assistant</p>
                       <p class="text-sm mt-2">I can help with code generation, debugging, explanations, and more!</p>
                   </div>
               </div>
-              <div class="flex gap-2">
-                  <button onclick="toggleVoice()" id="voice-btn" class="glass px-4 py-3 rounded-lg hover:border-blue-500 transition-all">
-                      <i class="fas fa-microphone"></i>
+              <div class="chat-input-row">
+                  <button onclick="toggleVoice()" id="voice-btn" class="glass px-4 py-3 rounded-lg hover:border-blue-500 transition-all" aria-label="Voice input" tabindex="0">
+                      <i class="fas fa-microphone" aria-hidden="true"></i>
                   </button>
+                  <label for="chat-input" class="visually-hidden">Chat message</label>
                   <input type="text" id="chat-input" 
                          placeholder="Ask me anything... (e.g., 'Build a React component', 'Explain async/await')"
-                         class="flex-1 glass px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-all"
+                         class="glass focus:outline-none focus:border-blue-500 transition-all"
+                         aria-label="Chat message input"
+                         autocomplete="off"
+                         tabindex="0"
                          onkeypress="if(event.key==='Enter') sendMessage()">
-                  <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-all">
-                      <i class="fas fa-paper-plane mr-2"></i> Send
+                  <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-all" aria-label="Send message" tabindex="0">
+                      <i class="fas fa-paper-plane mr-2" aria-hidden="true"></i> Send
                   </button>
               </div>
+              <style>
+                .visually-hidden {
+                  position: absolute;
+                  width: 1px;
+                  height: 1px;
+                  padding: 0;
+                  margin: -1px;
+                  overflow: hidden;
+                  clip: rect(0,0,0,0);
+                  border: 0;
+                }
+              </style>
           </div>
           <!-- Animation Controls (if any) -->
           <div id="animation-box" class="glass rounded-2xl p-6 w-full max-w-xl">
@@ -408,6 +506,142 @@
     </div>
 
     <script>
+        // Feedback/Report Problem Modal
+        function openFeedbackModal() {
+            if (document.getElementById('feedback-modal-bg')) return;
+            const modalBg = document.createElement('div');
+            modalBg.id = 'feedback-modal-bg';
+            modalBg.style = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;';
+            modalBg.innerHTML = `
+              <div style="background:#181f2a;color:#e2e8f0;border-radius:1.5rem;max-width:95vw;width:400px;box-shadow:0 8px 40px #000a;padding:2rem 1.5rem 1.5rem 1.5rem;text-align:center;position:relative;">
+                <span style="position:absolute;top:1rem;right:1.3rem;font-size:1.5rem;color:#94a3b8;cursor:pointer;" onclick="document.getElementById('feedback-modal-bg').remove()">&times;</span>
+                <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;">Send Feedback or Report a Problem</h2>
+                <textarea id="feedback-text" rows="5" style="width:100%;border-radius:0.75rem;padding:0.75rem;margin-bottom:1rem;background:#222;color:#e2e8f0;border:1px solid #333;resize:vertical;" placeholder="Describe your feedback or issue..."></textarea>
+                <button onclick="copyFeedback()" style="background:linear-gradient(90deg,#38bdf8,#d946ef);color:#fff;border:none;border-radius:0.75rem;padding:0.75rem 2rem;font-size:1.1rem;font-weight:600;cursor:pointer;">Copy & Email</button>
+                <div id="feedback-copied" style="margin-top:1rem;color:#22c55e;display:none;">Copied! Paste into your email client.</div>
+                <div style="margin-top:1rem;font-size:0.95rem;color:#94a3b8;">Send to: <b>mr.troy.walker.62@gmail.com</b></div>
+              </div>
+            `;
+            document.body.appendChild(modalBg);
+        }
+        function copyFeedback() {
+            const text = document.getElementById('feedback-text').value;
+            navigator.clipboard.writeText(text).then(() => {
+                document.getElementById('feedback-copied').style.display = 'block';
+            });
+        }
+        // Export chat/session as .txt
+        function exportChat() {
+            let text = '';
+            for (const msg of conversationHistory) {
+                text += `[${msg.role.toUpperCase()}] ${msg.content.replace(/<[^>]+>/g, '')}\n`;
+            }
+            const blob = new Blob([text], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai-assistant-chat.txt';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        }
+                    <script>
+                        // Dark/Light Mode Toggle
+                        function setDarkMode(enabled) {
+                            if (enabled) {
+                                document.body.classList.add('dark-mode');
+                                document.body.classList.remove('light-mode');
+                                localStorage.setItem('ai_dark_mode', '1');
+                                document.getElementById('darkmode-label').textContent = 'Dark';
+                            } else {
+                                document.body.classList.remove('dark-mode');
+                                document.body.classList.add('light-mode');
+                                localStorage.setItem('ai_dark_mode', '0');
+                                document.getElementById('darkmode-label').textContent = 'Light';
+                            }
+                        }
+                        function toggleDarkMode() {
+                            const isDark = document.body.classList.contains('dark-mode');
+                            setDarkMode(!isDark);
+                        }
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const darkPref = localStorage.getItem('ai_dark_mode');
+                            setDarkMode(darkPref === null ? true : darkPref === '1');
+                        });
+                    <style>
+                        body.light-mode {
+                            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 50%, #f8fafc 100%) !important;
+                            color: #222 !important;
+                        }
+                        body.light-mode .glass, body.light-mode .responsive-chat-box {
+                            background: rgba(255,255,255,0.85) !important;
+                            color: #222 !important;
+                        }
+                        body.light-mode .gradient-text {
+                            background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%) !important;
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                        }
+                        body.light-mode .bg-slate-900\/50, body.light-mode .bg-slate-800, body.light-mode .bg-slate-900, body.light-mode .bg-slate-700 {
+                            background: #e0e7ef !important;
+                            color: #222 !important;
+                        }
+                        body.light-mode .text-slate-400, body.light-mode .text-slate-300 {
+                            color: #555 !important;
+                        }
+                        body.light-mode .bg-blue-600, body.light-mode .hover\:bg-blue-700:hover {
+                            background: #2563eb !important;
+                        }
+                        body.light-mode .bg-green-600, body.light-mode .hover\:bg-green-500:hover {
+                            background: #22c55e !important;
+                        }
+                        body.light-mode .bg-purple-400 {
+                            background: #a78bfa !important;
+                        }
+                        body.light-mode .bg-red-500\/20 {
+                            background: #fee2e2 !important;
+                        }
+                        body.light-mode .border-blue-500 {
+                            border-color: #2563eb !important;
+                        }
+                        body.light-mode .border-red-500 {
+                            border-color: #ef4444 !important;
+                        }
+                        body.light-mode .border-green-500 {
+                            border-color: #22c55e !important;
+                        }
+                        body.light-mode .border-purple-500 {
+                            border-color: #a78bfa !important;
+                        }
+                        body.light-mode .border-slate-700 {
+                            border-color: #cbd5e1 !important;
+                        }
+                        body.light-mode .text-blue-400 {
+                            color: #2563eb !important;
+                        }
+                        body.light-mode .text-green-400 {
+                            color: #22c55e !important;
+                        }
+                        body.light-mode .text-purple-400 {
+                            color: #a78bfa !important;
+                        }
+                        body.light-mode .text-red-300 {
+                            color: #ef4444 !important;
+                        }
+                        body.light-mode .text-cyan-400 {
+                            color: #0891b2 !important;
+                        }
+                        body.light-mode .text-orange-400 {
+                            color: #f59e42 !important;
+                        }
+                        body.light-mode .text-yellow-400 {
+                            color: #fbbf24 !important;
+                        }
+                        body.light-mode .text-black {
+                            color: #222 !important;
+                        }
+                    </style>
                 // Toggle output box from control panel
                 function toggleOutputBox() {
                     const codeSection = document.getElementById('code-section');
@@ -558,22 +792,27 @@
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
             if (!message) return;
-            
             input.value = '';
             addMessage('user', message);
-            
-            // Show typing indicator
-            showTyping();
-            
-            // Get AI response
-            setTimeout(async () => {
+            // Show real-time feedback indicator
+            showThinking();
+            try {
                 const response = await getAIResponse(message);
-                hideTyping();
+                hideThinking();
                 addMessage('ai', response);
-                
-                // Update stats
                 updateStats();
-            }, 1500);
+            } catch (e) {
+                hideThinking();
+                let msg = '⚠️ Sorry, there was a problem getting a response.';
+                if (e && e.message) {
+                  if (e.message.includes('API key')) msg = '⚠️ API key missing or invalid. Please check your settings.';
+                  else if (e.message.includes('rate limit')) msg = '⚠️ Rate limit exceeded. Please wait and try again.';
+                  else if (e.message.includes('network')) msg = '⚠️ Network error. Please check your internet connection.';
+                  else if (e.message.includes('authentication')) msg = '⚠️ Authentication failed. Please verify your API key.';
+                  else if (e.message.includes('timeout')) msg = '⚠️ Request timed out. Try again in a moment.';
+                }
+                addMessage('ai', msg);
+            }
         }
 
         function addMessage(role, text) {
@@ -610,25 +849,24 @@
                 .replace(/\n/g, '<br>');
         }
 
-        function showTyping() {
+        function showThinking() {
             const container = document.getElementById('chat-container');
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.className = 'chat-bubble flex justify-start';
-            typingDiv.innerHTML = `
-                <div class="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm">
-                    <div class="typing-indicator">
-                        <span></span><span></span><span></span>
-                    </div>
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.id = 'thinking-indicator';
+            thinkingDiv.className = 'chat-bubble flex justify-start';
+            thinkingDiv.innerHTML = `
+                <div class="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-3">
+                    <span class="animate-spin inline-block w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full"></span>
+                    <span>AI is thinking...</span>
                 </div>
             `;
-            container.appendChild(typingDiv);
+            container.appendChild(thinkingDiv);
             container.scrollTop = container.scrollHeight;
         }
 
-        function hideTyping() {
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
+        function hideThinking() {
+            const thinking = document.getElementById('thinking-indicator');
+            if (thinking) thinking.remove();
         }
 
         async function getAIResponse(message) {

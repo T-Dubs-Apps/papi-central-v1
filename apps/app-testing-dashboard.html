@@ -128,7 +128,7 @@
                             <i class="fa-solid fa-magic"></i>
                         </div>
                         <h3 class="text-lg font-bold text-white mb-1">Cortex App Studio</h3>
-                        <p class="text-gray-400 text-xs mb-2">Build → Preview → Deploy</p>
+                        <p class="text-gray-400 text-xs mb-2">Build  Preview  Deploy</p>
                         <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">$29.99/mo</span>
                         <div class="mt-2">
                             <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded">NEW!</span>
@@ -200,7 +200,7 @@
                             <i class="fa-solid fa-shield"></i>
                         </div>
                         <h3 class="text-lg font-bold text-white mb-1">Aegis Government</h3>
-                        <p class="text-gray-400 text-xs mb-2">🔒 CLASSIFIED</p>
+                        <p class="text-gray-400 text-xs mb-2"> CLASSIFIED</p>
                         <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">$99.99</span>
                     </div>
                 </a>
@@ -297,19 +297,19 @@
             if (hasKeys && (isMasterAdmin || hasPapiLicense)) {
                 banner.classList.add('bg-green-900/30', 'border-green-500', 'text-green-400');
                 statusText.innerHTML = `
-                    <strong>✅ Ready to Test!</strong><br>
-                    <span class="text-sm">API Keys configured • ${isMasterAdmin ? 'Master Admin' : 'Licensed'} access active</span>
+                    <strong> Ready to Test!</strong><br>
+                    <span class="text-sm">API Keys configured  ${isMasterAdmin ? 'Master Admin' : 'Licensed'} access active</span>
                 `;
             } else if (!hasKeys) {
                 banner.classList.add('bg-red-900/30', 'border-red-500', 'text-red-400');
                 statusText.innerHTML = `
-                    <strong>⚠️ Setup Required</strong><br>
+                    <strong> Setup Required</strong><br>
                     <span class="text-sm">Click "Setup Test Keys" to configure API access</span>
                 `;
             } else {
                 banner.classList.add('bg-yellow-900/30', 'border-yellow-500', 'text-yellow-400');
                 statusText.innerHTML = `
-                    <strong>⚠️ Partial Access</strong><br>
+                    <strong> Partial Access</strong><br>
                     <span class="text-sm">API Keys configured but no license. Some features may be limited.</span>
                 `;
             }
