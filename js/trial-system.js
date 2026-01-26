@@ -1,10 +1,9 @@
-// Trial Request Tracking & Survey System
+// Trial Request Tracking & System
 // PAPI Central Tester Management
 
 // Trial Management System
 const TRIAL_CONFIG = {
   ADMIN_EMAIL: 'mr.troy.walker.62@gmail.com',
-  SURVEY_THRESHOLD: 10, // Show survey after 10 chat sessions
   INITIAL_CHATS: 10,
   INITIAL_BUILDS: 3,
   TOTAL_CHATS: 30, // Per app per month
@@ -100,19 +99,14 @@ class TrialManager {
 
     // Update display
     this.updateRequestCounter();
-
-    // Check if survey should be shown (after 10 total chat sessions)
+    
     const totalChatsUsed =
       TRIAL_CONFIG.INITIAL_CHATS +
       20 -
       (this.trialData.chatsRemaining.alien +
         this.trialData.chatsRemaining.cortex +
         this.trialData.chatsRemaining.nokn);
-    if (
-      totalChatsUsed === TRIAL_CONFIG.SURVEY_THRESHOLD &&
-      !this.trialData.surveyCompleted
-    ) {
-      setTimeout(() => this.showSurvey(), 2000);
+    if 
     }
 
     return true;
