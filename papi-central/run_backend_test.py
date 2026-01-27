@@ -11,7 +11,8 @@ if not a:
     sys.exit(1)
 token = a[-1]['token']
 url = 'http://127.0.0.1:10000/chat'
-headers = {'X-Activation-Token': token, 'Content-Type':'application/json'}
+# include force header for local test mode; preserves original activation header
+headers = {'X-Activation-Token': token, 'Content-Type':'application/json', 'X-Force-Test-Mode': '1'}
 body = {'text':'hello from test'}
 try:
     r = requests.post(url, json=body, headers=headers, timeout=10)
