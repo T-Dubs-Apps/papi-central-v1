@@ -1,23 +1,41 @@
-
 # .gitignore for PAPI Central
+# Node / environment
 node_modules/
+**/node_modules/
 .env
 .env.*
+*.env
+*.secret
+
+# Logs, caches, python
 *.log
 .DS_Store
 *.pyc
 __pycache__/
+
+# PAPI-specific
 cortex_memory.json
 _papi_backup/
 assets/optimized/
-# Ignore OS and editor files
+
+# OS and editor
 Thumbs.db
 .vscode/
 .idea/
-# Ignore test and coverage files
+
+# Tests / coverage
 coverage/
 *.test.js
 *.spec.js
-# Ignore build outputs
+
+# Build outputs
 dist/
 build/
+**/.dart_tool/
+**/build/
+**/dist/
+
+# Added by automation
+papi-central/REPO_API_KEY.secret
+papi-central/issued_tokens.json
+*.bak
