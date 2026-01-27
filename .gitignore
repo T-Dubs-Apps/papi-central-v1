@@ -1,0 +1,19 @@
+# Ignore generated secrets and local runtime files
+REPO_API_KEY.secret
+/.vscode/
+/.idea/
+**/node_modules/
+**/.dart_tool/
+**/build/
+**/dist/
+*.log
+*.env
+*.secret
+.DS_Store
+
+# Added by automation
+papi-central/REPO_API_KEY.secret
+papi-central/issued_tokens.json
+*.bak
+__pycache__/
+*.pyc
