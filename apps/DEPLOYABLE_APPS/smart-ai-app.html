@@ -1,0 +1,120 @@
+// smart-ai-app.html
+// Standalone and embeddable Smart AI app UI (PAPI Central compatible)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart AI App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-xl p-6 bg-gray-800 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold mb-4 text-center">Smart AI Assistant</h1>
+    <form id="ai-form" class="flex flex-col gap-4">
+      <textarea id="ai-input" class="w-full p-2 rounded bg-gray-700 text-white" rows="3" placeholder="Type your request..."></textarea>
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Send</button>
+        <button type="button" id="voice-btn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">🎤 Voice</button>
+        <button type="button" id="tts-btn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">🔊 Speak</button>
+      </div>
+    </form>
+    <div id="ai-response" class="mt-6 p-4 bg-gray-700 rounded min-h-[60px]"></div>
+    <div id="ai-suggestion" class="mt-2 text-sm text-blue-300"></div>
+    <div class="mt-4 flex gap-2">
+      <button id="feedback-good" class="bg-green-700 hover:bg-green-800 px-3 py-1 rounded text-xs">👍 Good</button>
+      <button id="feedback-bad" class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-xs">👎 Improve</button>
+      <input id="memory-search" class="ml-4 p-1 rounded bg-gray-700 text-white text-xs" placeholder="Search memory..." style="width: 140px;" />
+      <button id="memory-search-btn" class="bg-blue-700 hover:bg-blue-800 px-2 py-1 rounded text-xs">🔍</button>
+    </div>
+    <div id="memory-results" class="mt-2 text-xs text-gray-300"></div>
+  </div>
+  <script>
+    const apiBase = '/smart_ai_backend'; // Adjust if needed
+    const form = document.getElementById('ai-form');
+    const input = document.getElementById('ai-input');
+    const responseDiv = document.getElementById('ai-response');
+    const suggestionDiv = document.getElementById('ai-suggestion');
+    const voiceBtn = document.getElementById('voice-btn');
+    const ttsBtn = document.getElementById('tts-btn');
+    let lastOutput = '';
+    let lastMemoryId = null;
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      responseDiv.textContent = 'Thinking...';
+      suggestionDiv.textContent = '';
+      const res = await fetch(apiBase + '/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: input.value })
+      });
+      const data = await res.json();
+      responseDiv.textContent = data.output;
+      suggestionDiv.textContent = data.suggestion;
+      lastOutput = data.output;
+      lastMemoryId = data.memory_id;
+    };
+    // Feedback buttons
+    document.getElementById('feedback-good').onclick = async () => {
+      if (!lastMemoryId) return alert('No memory to update.');
+      await fetch(apiBase + '/memory/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memory_id: lastMemoryId, suggestion: '[User marked as good]' })
+      });
+      alert('Thank you for your feedback!');
+    };
+    document.getElementById('feedback-bad').onclick = async () => {
+      if (!lastMemoryId) return alert('No memory to update.');
+      const improve = prompt('How should the AI improve this response?');
+      if (!improve) return;
+      await fetch(apiBase + '/memory/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memory_id: lastMemoryId, suggestion: improve })
+      });
+      alert('Thank you for your feedback!');
+    };
+
+    // Memory search
+    document.getElementById('memory-search-btn').onclick = async () => {
+      const q = document.getElementById('memory-search').value;
+      if (!q) return;
+      const res = await fetch(apiBase + '/memory/search?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      const resultsDiv = document.getElementById('memory-results');
+      if (!data.length) {
+        resultsDiv.textContent = 'No memory found.';
+        return;
+      }
+      resultsDiv.innerHTML = data.map(m => `<div class='mb-1'><b>Input:</b> ${m.input}<br/><b>Output:</b> ${m.output}</div>`).join('');
+    };
+
+    // Voice-to-text (browser API)
+    voiceBtn.onclick = () => {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Speech recognition not supported');
+        return;
+      }
+      const rec = new webkitSpeechRecognition();
+      rec.lang = 'en-US';
+      rec.onresult = (e) => {
+        input.value = e.results[0][0].transcript;
+      };
+      rec.start();
+    };
+
+    // Text-to-voice (browser API)
+    ttsBtn.onclick = () => {
+      if (!window.speechSynthesis) {
+        alert('Speech synthesis not supported');
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(lastOutput || input.value);
+      utter.lang = 'en-US';
+      window.speechSynthesis.speak(utter);
+    };
+  </script>
+</body>
+</html>

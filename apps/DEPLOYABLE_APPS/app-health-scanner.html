@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Health Scanner & Auto-Fixer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="papi-key-loader.js"></script>
+<head>
+    <title>App Health Scanner</title>
+    <link rel="stylesheet" href="../assets/papi-responsive-template.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // Asset preloading
+      window.addEventListener('DOMContentLoaded', function() {
+        const preloadAssets = [
+          '../assets/alien-font.woff2',
+          '../assets/spaceship.png',
+        ];
+        preloadAssets.forEach(src => {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.href = src;
+          link.as = src.endsWith('.woff2') ? 'font' : 'image';
+          document.head.appendChild(link);
+        });
+      });
+    </script>
+    <style>
+      .dark-mode { background: #181a1b; color: #e0e0e0; }
+      .light-mode { background: #fff; color: #222; }
+      .onboarding-modal { position: fixed; z-index: 1000; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; }
+      .onboarding-content { background: #222; color: #fff; padding: 2rem; border-radius: 1rem; max-width: 90vw; max-height: 90vh; overflow: auto; }
+      .feedback-modal { position: fixed; z-index: 1001; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; }
+      .feedback-content { background: #fff; color: #222; padding: 2rem; border-radius: 1rem; max-width: 90vw; max-height: 90vh; overflow: auto; }
+      .ai-feedback { display: flex; align-items: center; gap: 0.5rem; }
+      .ai-spinner { width: 1.5em; height: 1.5em; border: 3px solid #ccc; border-top: 3px solid #09f; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+    <div class="mb-4">
+      <label class="block mb-2">App URL or Endpoint:</label>
+      <input id="appUrl" type="text" class="w-full p-2 rounded bg-gray-700" placeholder="https://your-app.com" />
+    </div>
+    <div class="flex gap-2 mb-4">
+      <button id="scanBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Scan & Diagnose</button>
+      <button id="monitorBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Start Monitoring</button>
+    </div>
+    <div id="scanStatus" class="mt-4 text-yellow-300"></div>
+    <div id="scanResults" class="mt-4 bg-gray-700 p-2 rounded"></div>
+  </div>
+  <script src="app-health-scanner.js"></script>
+<body>
+    <div id="main-app" aria-label="App Health Scanner App" tabindex="0">
+        <!-- ...existing code... -->
+    </div>
+    <!-- Onboarding Modal -->
+    <div id="onboardingModal" class="onboarding-modal" style="display:none;">
+      <div class="onboarding-content" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+        <h2 id="onboardingTitle">Welcome to App Health Scanner</h2>
+        <p>This app scans your apps for health and performance. Use the controls to start a scan. For help, click the help icon or open this guide anytime from the menu.</p>
+        <button onclick="closeOnboarding()" aria-label="Close onboarding">Get Started</button>
+      </div>
+    </div>
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="feedback-modal" style="display:none;">
+      <div class="feedback-content" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+        <h2 id="feedbackTitle">Send Feedback or Report a Problem</h2>
+        <textarea id="feedbackText" rows="5" style="width:100%" aria-label="Feedback"></textarea>
+        <button onclick="submitFeedback()">Submit</button>
+        <button onclick="closeFeedback()">Cancel</button>
+      </div>
+    </div>
+    <button id="darkModeToggle" aria-label="Toggle dark mode" style="position:fixed;top:1rem;right:1rem;z-index:1100;">🌙</button>
+    <button id="feedbackBtn" aria-label="Open feedback modal" style="position:fixed;top:1rem;right:4rem;z-index:1100;">💬</button>
+    <script>
+      // Onboarding
+      function showOnboarding() {
+        document.getElementById('onboardingModal').style.display = 'flex';
+      }
+      function closeOnboarding() {
+        document.getElementById('onboardingModal').style.display = 'none';
+        localStorage.setItem('app_health_scanner_onboarded', '1');
+      }
+      if (!localStorage.getItem('app_health_scanner_onboarded')) showOnboarding();
+      // Dark/Light Mode
+      const root = document.documentElement;
+      function setMode(mode) {
+        root.classList.remove('dark-mode', 'light-mode');
+        root.classList.add(mode+'-mode');
+        localStorage.setItem('app_health_scanner_mode', mode);
+      }
+      document.getElementById('darkModeToggle').onclick = function() {
+        const mode = root.classList.contains('dark-mode') ? 'light' : 'dark';
+        setMode(mode);
+      };
+      setMode(localStorage.getItem('app_health_scanner_mode')||'dark');
+      // Feedback Modal
+      document.getElementById('feedbackBtn').onclick = function() {
+        document.getElementById('feedbackModal').style.display = 'flex';
+      };
+      function closeFeedback() {
+        document.getElementById('feedbackModal').style.display = 'none';
+      }
+      function submitFeedback() {
+        const text = document.getElementById('feedbackText').value;
+        if (text.length < 5) { alert('Please enter more details.'); return; }
+        navigator.clipboard.writeText(text);
+        alert('Feedback copied! Please email or paste in support chat.');
+        closeFeedback();
+      }
+      // Accessibility: focus main app
+      window.onload = () => { document.getElementById('main-app').focus(); };
+    </script>
+</body>

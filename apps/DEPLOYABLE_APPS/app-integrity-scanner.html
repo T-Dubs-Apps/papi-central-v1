@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Integrity & Enhancement Scanner</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="papi-key-loader.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-lg mt-10">
+    <h1 class="text-2xl font-bold mb-4 text-center">App Integrity & Enhancement Scanner</h1>
+    <p class="mb-4 text-center">Scan all your apps for integrity, creativity, usability, power, and more. Automatically repair and enhance as needed.</p>
+    <div class="mb-4">
+      <button id="scanBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Scan All Apps</button>
+    </div>
+    <div id="scanResults" class="mb-4"></div>
+    <div id="repairBox" class="mb-4"></div>
+    <div id="reminder" class="mb-4 text-yellow-300 font-bold"></div>
+    <div id="status" class="mt-4 text-green-400"></div>
+  </div>
+  <script src="app-integrity-scanner.js"></script>
+</body>
+</html>

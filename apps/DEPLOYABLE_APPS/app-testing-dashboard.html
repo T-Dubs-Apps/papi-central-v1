@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPI App Testing Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            min-height: 100vh;
+        }
+        .app-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 242, 234, 0.2);
+            border-color: rgba(0, 242, 234, 0.5);
+        }
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.6); }
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-cyan-400 mb-3 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-rocket"></i>
+                PAPI App Testing Dashboard
+            </h1>
+            <p class="text-gray-300 text-lg">Test all your apps before deployment</p>
+            <div class="mt-4 inline-flex gap-4">
+                <a href="test-setup.html" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-flask-vial mr-2"></i>Setup Test Keys
+                </a>
+                <a href="key-controller.html" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-key mr-2"></i>Key Controller
+                </a>
+                <button onclick="checkStatus()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-circle-check mr-2"></i>Check Status
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        <div id="statusBanner" class="mb-6 p-4 rounded-xl border-2 hidden">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-info-circle text-2xl"></i>
+                <div id="statusText" class="flex-1"></div>
+            </div>
+        </div>
+
+        <!-- Core Apps -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-star text-yellow-400"></i>
+                Core Apps
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Main Hub -->
+                <a href="index.html" target="_blank" class="app-card p-6 rounded-xl hover:cursor-pointer">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-gradient-to-br from-cyan-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-home"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-white mb-1">PAPI Central Hub</h3>
+                            <p class="text-gray-400 text-sm mb-2">Main 3D spaceship interface</p>
+                            <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">FREE</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- AI Assistant Pro -->
+                <a href="ai-assistant-pro.html" target="_blank" class="app-card p-6 rounded-xl hover:cursor-pointer">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-gradient-to-br from-blue-500 to-purple-500 w-16 h-16 rounded-xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-white mb-1">AI Assistant Pro</h3>
+                            <p class="text-gray-400 text-sm mb-2">Advanced AI development</p>
+                            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">$49.99/mo</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Marketplace -->
+                <a href="PAPI Central.htm" target="_blank" class="app-card p-6 rounded-xl hover:cursor-pointer">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-gradient-to-br from-green-500 to-emerald-500 w-16 h-16 rounded-xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-white mb-1">PAPI Marketplace</h3>
+                            <p class="text-gray-400 text-sm mb-2">Purchase & manage licenses</p>
+                            <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">STORE</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Premium Apps -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-crown text-yellow-400"></i>
+                Premium Apps
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cortex App Studio -->
+                <a href="cortex-app-studio.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-purple-500 to-pink-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-magic"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Cortex App Studio</h3>
+                        <p class="text-gray-400 text-xs mb-2">Build  Preview  Deploy</p>
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">$29.99/mo</span>
+                        <div class="mt-2">
+                            <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded">NEW!</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Cortex Desktop Bridge -->
+                <a href="cortex-desktop-bridge.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-indigo-500 to-purple-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-laptop-code"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Cortex Desktop</h3>
+                        <p class="text-gray-400 text-xs mb-2">Desktop-to-web AI bridge</p>
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">$29.99/mo</span>
+                    </div>
+                </a>
+
+                <!-- Automation Hub -->
+                <a href="automation-hub.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-orange-500 to-red-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Automation Hub</h3>
+                        <p class="text-gray-400 text-xs mb-2">Deploy system automation</p>
+                        <span class="text-xs bg-orange-600 text-white px-2 py-1 rounded">$29.99</span>
+                    </div>
+                </a>
+
+                <!-- No Knowledge Kit -->
+                <a href="no-knowledge-kit.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-amber-500 to-orange-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">No Knowledge Kit</h3>
+                        <p class="text-gray-400 text-xs mb-2">Non-tech app builder</p>
+                        <span class="text-xs bg-amber-600 text-white px-2 py-1 rounded">$50</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Security & Utilities -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-green-400"></i>
+                Security & Utilities
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Aegis Guard -->
+                <a href="aegis-guard.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-emerald-500 to-green-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Aegis Guard</h3>
+                        <p class="text-gray-400 text-xs mb-2">Security scanner</p>
+                        <span class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">$9.99</span>
+                    </div>
+                </a>
+
+                <!-- Aegis Government -->
+                <a href="aegis-government.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-green-600 to-emerald-600 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-shield"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Aegis Government</h3>
+                        <p class="text-gray-400 text-xs mb-2"> CLASSIFIED</p>
+                        <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">$99.99</span>
+                    </div>
+                </a>
+
+                <!-- Code Cargo -->
+                <a href="code-cargo.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-purple-500 to-indigo-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Code Cargo</h3>
+                        <p class="text-gray-400 text-xs mb-2">File manager</p>
+                        <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">FREE</span>
+                    </div>
+                </a>
+
+                <!-- Call Sentry -->
+                <a href="call-sentry.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-red-500 to-pink-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-phone-slash"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Call Sentry</h3>
+                        <p class="text-gray-400 text-xs mb-2">AI call blocker</p>
+                        <span class="text-xs bg-red-600 text-white px-2 py-1 rounded">$14.99</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Key Management -->
+        <div>
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-key text-cyan-400"></i>
+                Key Management
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Key Controller -->
+                <a href="key-controller.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-cyan-500 to-blue-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Key Controller</h3>
+                        <p class="text-gray-400 text-xs mb-2">Manage API keys</p>
+                        <span class="text-xs bg-cyan-600 text-white px-2 py-1 rounded">UTILITY</span>
+                    </div>
+                </a>
+
+                <!-- Key Generator Pro -->
+                <a href="key-generator-pro.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-yellow-500 to-amber-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Key Generator Pro</h3>
+                        <p class="text-gray-400 text-xs mb-2">Generate & manage keys</p>
+                        <span class="text-xs bg-amber-600 text-white px-2 py-1 rounded">$99.99</span>
+                    </div>
+                </a>
+
+                <!-- About Troy -->
+                <a href="about-troy.html" target="_blank" class="app-card p-5 rounded-xl hover:cursor-pointer">
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-purple-500 to-pink-500 w-14 h-14 mx-auto rounded-xl flex items-center justify-center text-2xl mb-3">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">About Troy</h3>
+                        <p class="text-gray-400 text-xs mb-2">Creator story</p>
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">INFO</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="papi-key-loader.js"></script>
+    <script>
+        function checkStatus() {
+            const banner = document.getElementById('statusBanner');
+            const statusText = document.getElementById('statusText');
+            
+            const hasKeys = PAPI.getAnyAvailableKey('openai') || 
+                           PAPI.getAnyAvailableKey('claude') || 
+                           PAPI.getAnyAvailableKey('gemini');
+            
+            const isMasterAdmin = localStorage.getItem('master_admin') === 'TROY_WALKER_2026';
+            const hasPapiLicense = localStorage.getItem('papi_license') === 'active';
+            
+            banner.classList.remove('hidden', 'bg-red-900/30', 'border-red-500', 'text-red-400', 
+                                   'bg-green-900/30', 'border-green-500', 'text-green-400',
+                                   'bg-yellow-900/30', 'border-yellow-500', 'text-yellow-400');
+            
+            if (hasKeys && (isMasterAdmin || hasPapiLicense)) {
+                banner.classList.add('bg-green-900/30', 'border-green-500', 'text-green-400');
+                statusText.innerHTML = `
+                    <strong> Ready to Test!</strong><br>
+                    <span class="text-sm">API Keys configured  ${isMasterAdmin ? 'Master Admin' : 'Licensed'} access active</span>
+                `;
+            } else if (!hasKeys) {
+                banner.classList.add('bg-red-900/30', 'border-red-500', 'text-red-400');
+                statusText.innerHTML = `
+                    <strong> Setup Required</strong><br>
+                    <span class="text-sm">Click "Setup Test Keys" to configure API access</span>
+                `;
+            } else {
+                banner.classList.add('bg-yellow-900/30', 'border-yellow-500', 'text-yellow-400');
+                statusText.innerHTML = `
+                    <strong> Partial Access</strong><br>
+                    <span class="text-sm">API Keys configured but no license. Some features may be limited.</span>
+                `;
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', checkStatus);
+    </script>
+</body>
+</html>
