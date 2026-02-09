@@ -11,6 +11,7 @@ const TRIAL_CONFIG = {
   BUILDS_PER_APP: 2,
   TRIAL_DAYS: 30,
   SOCIAL_SHARES_REQUIRED: 5,
+  SURVEY_ENABLED: false,
 };
 
 class TrialManager {
@@ -38,6 +39,15 @@ class TrialManager {
         localStorage.getItem('trial_' + this.currentUser) || '{}'
       );
       this.trialData = trialData;
+
+      if (!TRIAL_CONFIG.SURVEY_ENABLED) {
+        this.trialData.surveyCompleted = true;
+        this.trialData.socialShared = true;
+        localStorage.setItem(
+          'trial_' + this.currentUser,
+          JSON.stringify(this.trialData)
+        );
+      }
 
       // Check if trial expired
       if (trialData.expiresAt && new Date(trialData.expiresAt) < new Date()) {
@@ -106,7 +116,12 @@ class TrialManager {
       (this.trialData.chatsRemaining.alien +
         this.trialData.chatsRemaining.cortex +
         this.trialData.chatsRemaining.nokn);
-    if 
+    if (
+      TRIAL_CONFIG.SURVEY_ENABLED &&
+      !this.trialData.surveyCompleted &&
+      totalChatsUsed >= 10
+    ) {
+      this.showSurvey();
     }
 
     return true;
@@ -140,6 +155,15 @@ class TrialManager {
   }
 
   showSurvey() {
+    if (!TRIAL_CONFIG.SURVEY_ENABLED) {
+      this.trialData.surveyCompleted = true;
+      this.trialData.socialShared = true;
+      localStorage.setItem(
+        'trial_' + this.currentUser,
+        JSON.stringify(this.trialData)
+      );
+      return;
+    }
     const modal = document.createElement('div');
     modal.id = 'trialSurvey';
     modal.style.cssText =
@@ -356,14 +380,18 @@ class TrialManager {
   showUpgradePrompt() {
     const resourceType = this.isBuildAction ? 'builds' : 'chat sessions';
     const message = this.trialData?.active
-      ? `⚠️ No ${resourceType} remaining!\n\nComplete survey & share with friends, or upgrade to unlimited access.`
+      ? `⚠️ No ${resourceType} remaining!\n\nUpgrade to unlimited access.`
       : '⚠️ Tester trial expired!\n\nUpgrade to continue using this app.';
+    const surveyRequired =
+      TRIAL_CONFIG.SURVEY_ENABLED && !this.trialData.surveyCompleted;
+    const shareRequired =
+      TRIAL_CONFIG.SURVEY_ENABLED && !this.trialData.socialShared;
 
-    if (!this.trialData.surveyCompleted) {
+    if (surveyRequired) {
       alert(
         message + '\n\nComplete your feedback survey to unlock more resources!'
       );
-    } else if (!this.trialData.socialShared) {
+    } else if (shareRequired) {
       alert(
         message +
           '\n\nShare with 5 friends on social media to unlock bonus resources!'
