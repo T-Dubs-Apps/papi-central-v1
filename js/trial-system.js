@@ -53,6 +53,8 @@ class TrialManager {
       if (trialData.expiresAt && new Date(trialData.expiresAt) < new Date()) {
         this.showExpiredMessage();
       }
+    } else {
+      this.trialData = null;
     }
   }
 
@@ -155,6 +157,9 @@ class TrialManager {
   }
 
   showSurvey() {
+    if (!this.trialData) {
+      return;
+    }
     if (!TRIAL_CONFIG.SURVEY_ENABLED) {
       this.trialData.surveyCompleted = true;
       this.trialData.socialShared = true;
@@ -383,9 +388,9 @@ class TrialManager {
       ? `⚠️ No ${resourceType} remaining!\n\nUpgrade to unlimited access.`
       : '⚠️ Tester trial expired!\n\nUpgrade to continue using this app.';
     const surveyRequired =
-      TRIAL_CONFIG.SURVEY_ENABLED && !this.trialData.surveyCompleted;
+      TRIAL_CONFIG.SURVEY_ENABLED && this.trialData?.surveyCompleted === false;
     const shareRequired =
-      TRIAL_CONFIG.SURVEY_ENABLED && !this.trialData.socialShared;
+      TRIAL_CONFIG.SURVEY_ENABLED && this.trialData?.socialShared === false;
 
     if (surveyRequired) {
       alert(
