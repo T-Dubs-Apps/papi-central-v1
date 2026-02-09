@@ -36,6 +36,28 @@
         .alien-pilot.visible { opacity: 1; }
         .bubble-ai { background: rgba(0, 128, 255, 0.2); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 16px 16px 16px 4px; backdrop-filter: blur(4px); max-width: 90%; white-space: pre-wrap; }
         .bubble-user { background: rgba(0, 242, 234, 0.2); border: 1px solid rgba(0, 242, 234, 0.3); border-radius: 16px 16px 4px 16px; backdrop-filter: blur(4px); max-width: 90%; white-space: pre-wrap; }
+
+        @media (max-width: 640px) {
+            #chat-container {
+                max-width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+
+            #chat-feed {
+                max-height: 40vh !important;
+                min-height: 120px !important;
+            }
+
+            #cmd-input {
+                font-size: 16px !important;
+                min-height: 44px;
+            }
+
+            .max-w-3xl {
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+            }
+        }
     </style>
 </head>
 <body class="flex h-screen w-full">
