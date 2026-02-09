@@ -2217,31 +2217,14 @@
             dragOffset: { x: 0, y: 0 },
             resizeData: {},
             editMode: false,
+            fixedIds: ['chat-container', 'command-bar-wrapper'],
             
             init: function() {
+                this.purgeFixedLayouts();
                 this.loadLayouts();
                 this.createMasterPanel();
-                this.registerElement('chat-container', 'Chat Feed', {
-                    minWidth: 300,
-                    minHeight: 200,
-                    defaultPos: { top: 'auto', right: 20, bottom: 200, left: 'auto', width: 400, height: 400 }
-                });
                 
                 // Removed spaceship from movable elements
-                
-                // Add command bar as movable element
-                const chatBar = document.getElementById('chat-bar');
-                if (chatBar) {
-                    const wrapper = chatBar.closest('.w-full.max-w-3xl');
-                    if (wrapper && !wrapper.id) {
-                        wrapper.id = 'command-bar-wrapper';
-                        this.registerElement('command-bar-wrapper', 'Command Bar', {
-                            minWidth: 400,
-                            minHeight: 60,
-                            defaultPos: { bottom: 20, left: '50%', transform: 'translateX(-50%)', width: 700, height: 'auto' }
-                        });
-                    }
-                }
                 
                 // Add apps menu as movable element
                 const appsMenu = document.getElementById('appsMenu');
@@ -2258,6 +2241,7 @@
             },
             
             registerElement: function(id, name, options = {}) {
+                if (this.fixedIds && this.fixedIds.includes(id)) return;
                 const element = document.getElementById(id);
                 if (!element) return;
                 
@@ -2456,9 +2440,14 @@
             },
             
             loadLayouts: function() {
+                const fixedIds = this.fixedIds || [];
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('layout_')) {
                         const id = key.replace('layout_', '');
+                        if (fixedIds.includes(id)) {
+                            localStorage.removeItem(key);
+                            return;
+                        }
                         const layoutData = JSON.parse(localStorage.getItem(key));
                         
                         setTimeout(() => {
@@ -2471,6 +2460,24 @@
                                 if (layoutData.locked) this.toggleLock(id);
                             }
                         }, 100);
+                    }
+                });
+            },
+
+            purgeFixedLayouts: function() {
+                const fixedIds = this.fixedIds || [];
+                fixedIds.forEach(id => {
+                    localStorage.removeItem(`layout_${id}`);
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        elem.style.position = '';
+                        elem.style.top = '';
+                        elem.style.left = '';
+                        elem.style.right = '';
+                        elem.style.bottom = '';
+                        elem.style.width = '';
+                        elem.style.height = '';
+                        elem.style.transform = '';
                     }
                 });
             },
