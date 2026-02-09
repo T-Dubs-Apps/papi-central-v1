@@ -135,6 +135,27 @@
             z-index: -1;
         }
 
+        @media (max-width: 640px) {
+            #chat-container {
+                max-width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+
+            #chat-feed {
+                max-height: 40vh !important;
+                min-height: 120px !important;
+            }
+
+            #chat-bar {
+                padding: 0.5rem !important;
+            }
+
+            #cmd-input {
+                font-size: 16px !important;
+            }
+        }
+
         .mono { font-family: 'Space Mono', monospace; }
 
         .glass-panel {
